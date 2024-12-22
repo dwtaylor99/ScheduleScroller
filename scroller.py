@@ -1,10 +1,17 @@
 from datetime import datetime
 
-import pygame
-
 import schedule
 import summaries
+from deathray import DeathRay
+from elsanto import ElSanto
+from gamera import Gamera
+from gradient import rect_gradient_h
+from sandstorm import SandStorm
 from schedule import PAC_TZ
+from starfighter import Starfighter
+from ufo import *
+from util_text import *
+from vampire_woman import VampireWoman
 
 pygame.init()
 
@@ -55,51 +62,132 @@ running = True
 dt = 0
 sched = []
 hdr_y = 0
-timer_tick = 0
+ticker = 0
+timer_tick = 0  # start it at 1 so we don't trigger 'fun' immediately
 is_reloading = False
+is_fun = False
+
+is_ufo = False
+ufo = None
+
+is_starfighter = False
+starfighters = []
+
+is_vampire_woman = False
+elsanto = None
+vampire_woman = None
+
+is_sandstorm = False
+sandstorms = []
+
+is_gamera = False
+gamera = None
+
+is_deathray = False
+deathray = None
+HOLE_IMG = pygame.transform.smoothscale_by(pygame.image.load('images/fun/hole_sm.png').convert_alpha(), 1.0)
 
 
-def rect_gradient_v(window, left_color, right_color, target_rect):
-    """Draw a horizontal-gradient filled rectangle covering <target_rect>"""
-    color_rect = pygame.Surface((2, 2))  # tiny! 2x2 bitmap
-    pygame.draw.line(color_rect, left_color, (0, 0), (0, 1))  # left color line
-    pygame.draw.line(color_rect, right_color, (1, 0), (1, 1))  # right color line
-    color_rect = pygame.transform.smoothscale(color_rect, (target_rect.width, target_rect.height))  # stretch!
-    window.blit(color_rect, target_rect)
+def fun():
+    global is_fun, is_ufo, is_starfighter, is_vampire_woman, is_sandstorm, is_gamera, is_deathray
 
+    if is_deathray:
+        offset = 52
 
-def rect_gradient_h(window, top_color, bottom_color, target_rect):
-    """Draw a horizontal-gradient filled rectangle covering <target_rect>"""
-    color_rect = pygame.Surface((2, 2))  # tiny! 2x2 bitmap
-    pygame.draw.line(color_rect, top_color, (0, 0), (1, 0))  # left color line
-    pygame.draw.line(color_rect, bottom_color, (0, 1), (1, 1))  # right color line
-    color_rect = pygame.transform.smoothscale(color_rect, (target_rect.width, target_rect.height))  # stretch!
-    window.blit(color_rect, target_rect)
+        # Step 0: Raise the Death Ray
+        if deathray.anim_step == 0:
+            screen.blit(deathray.img, (deathray.x, deathray.y))
+            if deathray.y >= HEIGHT_HALF - deathray.img.get_height():
+                deathray.y += deathray.velocity
+            else:
+                deathray.anim_step += 1  # move the next step of animation
 
+        # Step 1: Fire the Death Ray
+        if deathray.anim_step == 1:
+            screen.blit(deathray.img, (deathray.x, deathray.y))
+            if ticker % 3 == 0:
+                for i in range(9):
+                    pygame.draw.aaline(screen, deathray.RAY_COLOR,
+                                       (deathray.x + deathray.img.get_width() - 6, deathray.y + i + offset),
+                                       (deathray.x + deathray.img.get_width() + 650, deathray.y + i + (offset - 28)))
+            if deathray.ticks > 200:
+                deathray.anim_step += 1
 
-def update_title(title, epnum):
-    title_display = title
-    if title.startswith("The Incredibly Strange Creatures"):
-        title_display = "The Incredibly Strange Creatures Who Stopped Living…"
-    if epnum != "":
-        title_display += " (" + epnum + ")"
-    return title_display
+        # Step 2: Explosion and hole
+        if deathray.anim_step == 2:
+            screen.blit(deathray.img, (deathray.x, deathray.y))
+            screen.blit(HOLE_IMG, (1133, 367))
+            if deathray.ticks > 360:
+                deathray.anim_step += 1
 
+        # Step 3: Lower the Death Ray
+        if deathray.anim_step == 3:
+            screen.blit(deathray.img, (deathray.x, deathray.y))
+            screen.blit(HOLE_IMG, (1133, 367))
+            if deathray.y <= HEIGHT_HALF:
+                deathray.y += -deathray.velocity
+            else:
+                deathray.anim_step += 1  # move the next step of animation
 
-def wrap_text(text) -> str:
-    s = ""
-    last_space = 0
-    for i in range(0, len(text)):
-        t = text[i]
+        # Step 4: Fade out the hole
+        if deathray.anim_step == 4:
+            HOLE_IMG.set_alpha(HOLE_IMG.get_alpha() - 2)
+            screen.blit(HOLE_IMG, (1133, 367))
+            if HOLE_IMG.get_alpha() == 0:
+                is_deathray = False
+                is_fun = False
+        deathray.ticks += 1
 
-        if i % 54 == 0:
-            s = s[:last_space + 1] + "\n" + s[last_space + 2:]
+    if is_gamera:
+        screen.blit(gamera.img, (gamera.x, gamera.y))
+        gamera.x += gamera.velocity
+        if gamera.x > WIDTH:
+            is_gamera = False
+            is_fun = False
 
-        if t == " ":
-            last_space = i
+    if is_sandstorm:
+        all_offscreen = True
+        for s in sandstorms:
+            screen.blit(s.img, (s.x, s.y))
+            s.x += s.velocity
+            if s.x < WIDTH:
+                all_offscreen = False
+        if all_offscreen:
+            is_sandstorm = False
+            is_fun = False
+            sandstorms.clear()
 
-        s += t
-    return s
+    if is_starfighter:
+        all_offscreen = True
+        for s in starfighters:
+            screen.blit(s.img, (s.x, s.y))
+            s.x += s.velocity
+            if s.x > -s.img.get_width():
+                all_offscreen = False
+        if all_offscreen:
+            is_starfighter = False
+            is_fun = False
+            starfighters.clear()
+
+    if is_ufo:
+        screen.blit(ufo.img, (ufo.x, ufo.y))
+        ufo.x += ufo.velocity
+        if ufo.x > WIDTH + ufo.img.get_width():
+            is_ufo = False
+            is_fun = False
+
+    if is_vampire_woman:
+        screen.blit(vampire_woman.img, (vampire_woman.x, vampire_woman.y))
+        screen.blit(elsanto.img, (elsanto.x, elsanto.y))
+        vampire_woman.y += vampire_woman.velocity
+        elsanto.y += elsanto.velocity
+        elsanto.x = vampire_woman.x + 25
+        if vampire_woman.y + vampire_woman.img.get_height() < HEIGHT_HALF:
+            vampire_woman.velocity = -vampire_woman.velocity
+            elsanto.velocity = -elsanto.velocity
+        if vampire_woman.y > HEIGHT_HALF and vampire_woman.velocity > 0:
+            is_vampire_woman = False
+            is_fun = False
 
 
 def draw_image():
@@ -128,7 +216,7 @@ def draw_summary():
     bg = pygame.Rect(WIDTH_HALF, 0, WIDTH_HALF, HEIGHT_HALF)
     rect_gradient_h(screen, BLACK, DK_GRAY, bg)
 
-    summary = sched[0]['about'].replace("--", "—")  # (—) (–) (-)
+    summary = prepare_summary(sched[0]['about'])
     summary += " (" + sched[0]['year'] + ")"
     s = wrap_text(summary).strip()
     parts = s.split("\n")
@@ -139,16 +227,14 @@ def draw_summary():
 
 def draw_schedule_header():
     """This is the schedule header that doesn't scroll"""
+
     y = int(HEIGHT / 2)
     bg_border = pygame.Rect(0, y, WIDTH, SCHED_H)
     pygame.draw.rect(screen, WHITE, bg_border)
 
     bg = pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3)
     rect_gradient_h(screen, LTBLUE, BLUE, bg)
-    # pygame.draw.rect(screen, BLUE, bg)
 
-    # screen.blit(FONT.render("Title", True, BLACK), (SCHED_COL3_X + 2, y + 2 + FONT_PAD))
-    # screen.blit(FONT.render("Title", True, YELLOW), (SCHED_COL3_X, y + FONT_PAD))
     screen.blit(FONT.render("Playing:", True, BLACK), (SCHED_COL3_X + 2, y + 2 + FONT_PAD))
     screen.blit(FONT.render("Playing:", True, YELLOW), (SCHED_COL3_X, y + FONT_PAD))
 
@@ -156,15 +242,10 @@ def draw_schedule_header():
     screen.blit(FONT.render(title, True, BLACK), (SCHED_COL3_X + 126, y + 2 + FONT_PAD))
     screen.blit(FONT.render(title, True, WHITE), (SCHED_COL3_X + 128, y + FONT_PAD))
 
-    # screen.blit(FONT.render("Next:", True, BLACK), (SCHED_COL3_X + 1002, y + 2 + FONT_PAD))
-    # screen.blit(FONT.render("Next:", True, YELLOW), (SCHED_COL3_X + 1000, y + FONT_PAD))
-    #
-    # next_time = sched[1]['time']
-    # screen.blit(FONT.render(next_time, True, BLACK), (SCHED_COL3_X + 1092, y + 2 + FONT_PAD))
-    # screen.blit(FONT.render(next_time, True, WHITE), (SCHED_COL3_X + 1090, y + FONT_PAD))
-
 
 def draw_scrolling_header():
+    """The scrolling header is part of the scrolling list of titles"""
+
     global hdr_y
     hdr_y -= 1
     if hdr_y < HEIGHT_HALF:
@@ -176,7 +257,6 @@ def draw_scrolling_header():
 
     bg = pygame.Rect(2, hdr_y + 2, WIDTH - 3, SCHED_H - 3)
     rect_gradient_h(screen, LTBLUE, BLUE, bg)
-    # pygame.draw.rect(screen, BLUE, bg)
 
     screen.blit(FONT.render("PST", True, BLACK), (SCHED_COL1_X + 2, hdr_y + 2 + FONT_PAD))
     screen.blit(FONT.render("EST", True, BLACK), (SCHED_COL2_X + 2, hdr_y + 2 + FONT_PAD))
@@ -197,7 +277,6 @@ def draw_schedule_item(obj, y):
 
     bg = pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3)
     rect_gradient_h(screen, PALEBLUE, LTBLUE, bg)
-    # pygame.draw.rect(screen, LTBLUE, bg)
 
     title_display = update_title(obj['title'], obj['epnum'])
 
@@ -262,14 +341,14 @@ def draw_clock():
     update_time = time_parts[1] + ":00 " + time_parts[2]
     if curr_time == update_time and not is_reloading:
         is_reloading = True
-        start_time = datetime.now()
+        start_t = datetime.now()
         print("Loading...")
         schedule.refresh()
         sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
         draw_schedule_items(HEIGHT_HALF + SCHED_H)
         hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
-        stop_time = datetime.now()
-        print("done. " + str(stop_time - start_time))
+        stop_t = datetime.now()
+        print("done. " + str(stop_t - start_t))
         is_reloading = False
 
 
@@ -281,7 +360,9 @@ def draw_vertical_separators():
     pygame.draw.rect(screen, WHITE, sep1)
 
 
-if __name__ == '__main__':
+def setup():
+    global sched, hdr_y
+
     print("Loading...")
     start_time = datetime.now()
     summaries.refresh()
@@ -293,6 +374,10 @@ if __name__ == '__main__':
     draw_schedule_items(HEIGHT_HALF + SCHED_H)
     hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
 
+
+if __name__ == '__main__':
+    setup()
+
     while running:
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
@@ -301,18 +386,62 @@ if __name__ == '__main__':
 
         screen.fill(BLACK)
 
-        move_schedule()
         draw_image()
         draw_summary()
+        fun()
+        move_schedule()
         draw_schedule_header()
         draw_vertical_separators()
         draw_clock()
+
+        # Time for fun?
+        # random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
+        random_fun = 1
+        if int(timer_tick) % 60 == 0 and not is_fun and random_fun == 1:
+            is_fun = True
+            title = sched[0]['title']
+            epnum = sched[0]['epnum']
+            print("Starting fun for: {} {}".format(title, epnum))
+
+            if epnum == "620":
+                is_deathray = True
+                deathray = DeathRay()
+
+            if epnum in ["302", "304", "308", "312", "316", "1307"] and not is_gamera:
+                is_gamera = True
+                gamera = Gamera()
+
+            if epnum == "410" and not is_sandstorm:
+                is_sandstorm = True
+                for _ in range(random.randrange(5, 10)):
+                    sandstorms.append(SandStorm())
+
+            if epnum == "612" and not is_starfighter:
+                is_starfighter = True
+                for _ in range(random.randrange(3, 5)):
+                    starfighters.append(Starfighter())
+
+            if epnum == "624" and not is_vampire_woman:
+                is_vampire_woman = True
+                elsanto = ElSanto()
+                vampire_woman = VampireWoman()
+
+            if epnum == "" and not is_ufo:
+                ufo = Ufo()
+                is_ufo = True
 
         # flip() the display to put your work on screen
         pygame.display.flip()
 
         # limits FPS to 60 - dt is delta time in seconds since last frame.
+        ticker += 1
+        if ticker > 60000:
+            ticker = 0
+
         dt = clock.tick(60) / 1000
         timer_tick += dt
+        # Reset the timer_tick every hour so we don't overflow the variable.
+        if timer_tick >= 3600:
+            timer_tick = 0
 
     pygame.quit()
