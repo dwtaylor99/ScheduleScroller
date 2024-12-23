@@ -15,8 +15,9 @@ class ElSanto(FunBase):
         self.vel_y = -0.7
 
     def animate(self):
-        super().animate()
-        if self.y + self.img.get_height() < self.screen.get_height() / 2:
-            self.vel_y = -self.vel_y
-            if self.y > self.screen.get_height() / 2:
-                self.anim_step = 0
+        if self.anim_step == 1:
+            super().animate()
+            if self.y + self.img.get_height() < self.screen.get_height() / 2:
+                self.vel_y = -self.vel_y
+                if self.y > self.screen.get_height() / 2:
+                    self.anim_step = 0

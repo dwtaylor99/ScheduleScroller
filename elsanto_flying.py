@@ -17,6 +17,7 @@ class ElSantoFlying(FunBase):
         self.vel_y = 10
 
     def animate(self):
-        super().animate()
-        if self.y > self.screen.get_height() / 2:
-            self.anim_step = 0
+        if self.anim_step == 1:
+            super().animate()
+            if self.y > self.screen.get_height() / 2:
+                self.anim_step = 0

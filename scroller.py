@@ -7,7 +7,6 @@ import schedule
 import summaries
 from gradient import rect_gradient_h
 from schedule import PAC_TZ
-from ufo import *
 from util_text import *
 
 pygame.init()

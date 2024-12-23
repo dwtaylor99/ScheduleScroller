@@ -14,6 +14,7 @@ class Ufo(FunBase):
         self.vel_x = 5
 
     def animate(self):
-        super().animate()
-        if self.x > self.screen.get_width():
-            self.anim_step = 0
+        if self.anim_step == 1:
+            super().animate()
+            if self.x > self.screen.get_width():
+                self.anim_step = 0

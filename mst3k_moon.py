@@ -12,9 +12,10 @@ class MST3KMoon(FunBase):
         self.x = -(self.img.get_width()) - 10
         self.y = random.randrange(10, 400)
         self.vel_x = 3
-        self.vel_y = 1 + (random.randrange(-2, 2) * 0.01)
+        self.vel_y = (2 - (random.randrange(0, 4))) * 0.1
 
     def animate(self):
-        super().animate()
-        if self.x > self.screen.get_width():
-            self.anim_step = 0
+        if self.anim_step == 1:
+            super().animate()
+            if self.x > self.screen.get_width():
+                self.anim_step = 0

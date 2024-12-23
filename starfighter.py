@@ -15,6 +15,7 @@ class Starfighter(FunBase):
         self.vel_y = 0
 
     def animate(self):
-        super().animate()
-        if self.x < -self.img.get_width():
-            self.anim_step = 0
+        if self.anim_step == 1:
+            super().animate()
+            if self.x < -self.img.get_width():
+                self.anim_step = 0
