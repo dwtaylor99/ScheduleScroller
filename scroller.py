@@ -1,17 +1,14 @@
 from datetime import datetime
 
+import pygame
+
+import funfactory
 import schedule
 import summaries
-from deathray import DeathRay
-from elsanto import ElSanto
-from gamera import Gamera
 from gradient import rect_gradient_h
-from sandstorm import SandStorm
 from schedule import PAC_TZ
-from starfighter import Starfighter
 from ufo import *
 from util_text import *
-from vampire_woman import VampireWoman
 
 pygame.init()
 
@@ -65,149 +62,32 @@ hdr_y = 0
 ticker = 0
 timer_tick = 0  # start it at 1 so we don't trigger 'fun' immediately
 is_reloading = False
-is_fun = False
+main_img = pygame.Surface((WIDTH, HEIGHT))
 
-is_ufo = False
-ufo = None
-
-is_starfighter = False
-starfighters = []
-
-is_vampire_woman = False
-elsanto = None
-vampire_woman = None
-
-is_sandstorm = False
-sandstorms = []
-
-is_gamera = False
-gamera = None
-
-is_deathray = False
-deathray = None
-HOLE_IMG = pygame.transform.smoothscale_by(pygame.image.load('images/fun/hole_sm.png').convert_alpha(), 1.0)
-
-
-def fun():
-    global is_fun, is_ufo, is_starfighter, is_vampire_woman, is_sandstorm, is_gamera, is_deathray
-
-    if is_deathray:
-        offset = 52
-
-        # Step 0: Raise the Death Ray
-        if deathray.anim_step == 0:
-            screen.blit(deathray.img, (deathray.x, deathray.y))
-            if deathray.y >= HEIGHT_HALF - deathray.img.get_height():
-                deathray.y += deathray.velocity
-            else:
-                deathray.anim_step += 1  # move the next step of animation
-
-        # Step 1: Fire the Death Ray
-        if deathray.anim_step == 1:
-            screen.blit(deathray.img, (deathray.x, deathray.y))
-            if ticker % 3 == 0:
-                for i in range(9):
-                    pygame.draw.aaline(screen, deathray.RAY_COLOR,
-                                       (deathray.x + deathray.img.get_width() - 6, deathray.y + i + offset),
-                                       (deathray.x + deathray.img.get_width() + 650, deathray.y + i + (offset - 28)))
-            if deathray.ticks > 200:
-                deathray.anim_step += 1
-
-        # Step 2: Explosion and hole
-        if deathray.anim_step == 2:
-            screen.blit(deathray.img, (deathray.x, deathray.y))
-            screen.blit(HOLE_IMG, (1133, 367))
-            if deathray.ticks > 360:
-                deathray.anim_step += 1
-
-        # Step 3: Lower the Death Ray
-        if deathray.anim_step == 3:
-            screen.blit(deathray.img, (deathray.x, deathray.y))
-            screen.blit(HOLE_IMG, (1133, 367))
-            if deathray.y <= HEIGHT_HALF:
-                deathray.y += -deathray.velocity
-            else:
-                deathray.anim_step += 1  # move the next step of animation
-
-        # Step 4: Fade out the hole
-        if deathray.anim_step == 4:
-            HOLE_IMG.set_alpha(HOLE_IMG.get_alpha() - 2)
-            screen.blit(HOLE_IMG, (1133, 367))
-            if HOLE_IMG.get_alpha() == 0:
-                is_deathray = False
-                is_fun = False
-        deathray.ticks += 1
-
-    if is_gamera:
-        screen.blit(gamera.img, (gamera.x, gamera.y))
-        gamera.x += gamera.velocity
-        if gamera.x > WIDTH:
-            is_gamera = False
-            is_fun = False
-
-    if is_sandstorm:
-        all_offscreen = True
-        for s in sandstorms:
-            screen.blit(s.img, (s.x, s.y))
-            s.x += s.velocity
-            if s.x < WIDTH:
-                all_offscreen = False
-        if all_offscreen:
-            is_sandstorm = False
-            is_fun = False
-            sandstorms.clear()
-
-    if is_starfighter:
-        all_offscreen = True
-        for s in starfighters:
-            screen.blit(s.img, (s.x, s.y))
-            s.x += s.velocity
-            if s.x > -s.img.get_width():
-                all_offscreen = False
-        if all_offscreen:
-            is_starfighter = False
-            is_fun = False
-            starfighters.clear()
-
-    if is_ufo:
-        screen.blit(ufo.img, (ufo.x, ufo.y))
-        ufo.x += ufo.velocity
-        if ufo.x > WIDTH + ufo.img.get_width():
-            is_ufo = False
-            is_fun = False
-
-    if is_vampire_woman:
-        screen.blit(vampire_woman.img, (vampire_woman.x, vampire_woman.y))
-        screen.blit(elsanto.img, (elsanto.x, elsanto.y))
-        vampire_woman.y += vampire_woman.velocity
-        elsanto.y += elsanto.velocity
-        elsanto.x = vampire_woman.x + 25
-        if vampire_woman.y + vampire_woman.img.get_height() < HEIGHT_HALF:
-            vampire_woman.velocity = -vampire_woman.velocity
-            elsanto.velocity = -elsanto.velocity
-        if vampire_woman.y > HEIGHT_HALF and vampire_woman.velocity > 0:
-            is_vampire_woman = False
-            is_fun = False
+fun_obj = None
+fun_objs = []
 
 
 def draw_image():
+    global main_img
+
     bg = pygame.Rect(0, 0, WIDTH_HALF, HEIGHT_HALF)
     rect_gradient_h(screen, BLACK, DK_GRAY, bg)
 
-    img = pygame.image.load('images/' + sched[0]['image']).convert()
-    iw = img.get_width()
-    ih = img.get_height()
+    if main_img is not None:
+        iw = main_img.get_width()
+        ih = main_img.get_height()
 
-    new_w = (WIDTH_HALF / iw)
-    new_h = (HEIGHT_HALF / ih)
+        new_w = (WIDTH_HALF / iw)
+        new_h = (HEIGHT_HALF / ih)
 
-    if new_w < new_h:
-        img_scaled = pygame.transform.smoothscale_by(img, new_w)
-    else:
-        img_scaled = pygame.transform.smoothscale_by(img, new_h)
+        if new_w < new_h:
+            img_scaled = pygame.transform.smoothscale_by(main_img, new_w)
+        else:
+            img_scaled = pygame.transform.smoothscale_by(main_img, new_h)
 
-    iws = (WIDTH_HALF - img_scaled.get_width()) / 2
-    screen.blit(img_scaled, (iws, 0))
+        iws = (WIDTH_HALF - img_scaled.get_width()) / 2
+        screen.blit(img_scaled, (iws, 0))
 
 
 def draw_summary():
@@ -361,7 +241,7 @@ def draw_vertical_separators():
 
 
 def setup():
-    global sched, hdr_y
+    global hdr_y, main_img, sched
 
     print("Loading...")
     start_time = datetime.now()
@@ -371,8 +251,15 @@ def setup():
     stop_time = datetime.now()
     print("done. " + str(stop_time - start_time))
 
+    main_img = pygame.image.load('images/' + sched[0]['image']).convert()
     draw_schedule_items(HEIGHT_HALF + SCHED_H)
     hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
+
+
+def fun():
+    if len(fun_objs) > 0:
+        for o in fun_objs:
+            o.animate()
 
 
 if __name__ == '__main__':
@@ -397,38 +284,11 @@ if __name__ == '__main__':
         # Time for fun?
         # random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
         random_fun = 1
-        if int(timer_tick) % 60 == 0 and not is_fun and random_fun == 1:
-            is_fun = True
+        if int(timer_tick) % 60 == 0 and random_fun == 1:
             title = sched[0]['title']
             epnum = sched[0]['epnum']
             print("Starting fun for: {} {}".format(title, epnum))
-
-            if epnum == "620":
-                is_deathray = True
-                deathray = DeathRay()
-
-            if epnum in ["302", "304", "308", "312", "316", "1307"] and not is_gamera:
-                is_gamera = True
-                gamera = Gamera()
-
-            if epnum == "410" and not is_sandstorm:
-                is_sandstorm = True
-                for _ in range(random.randrange(5, 10)):
-                    sandstorms.append(SandStorm())
-
-            if epnum == "612" and not is_starfighter:
-                is_starfighter = True
-                for _ in range(random.randrange(3, 5)):
-                    starfighters.append(Starfighter())
-
-            if epnum == "624" and not is_vampire_woman:
-                is_vampire_woman = True
-                elsanto = ElSanto()
-                vampire_woman = VampireWoman()
-
-            if epnum == "" and not is_ufo:
-                ufo = Ufo()
-                is_ufo = True
+            fun_objs = funfactory.get(screen, title, epnum)
 
         # flip() the display to put your work on screen
         pygame.display.flip()
