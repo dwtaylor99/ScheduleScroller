@@ -77,19 +77,10 @@ def draw_image():
     rect_gradient_h(screen, BLACK, DK_GRAY, bg)
 
     if main_img is not None:
-        iw = main_img.get_width()
-        ih = main_img.get_height()
-
-        new_w = (WIDTH_HALF / iw)
-        new_h = (HEIGHT_HALF / ih)
-
-        if new_w < new_h:
-            img_scaled = pygame.transform.smoothscale_by(main_img, new_w)
-        else:
-            img_scaled = pygame.transform.smoothscale_by(main_img, new_h)
-
-        iws = (WIDTH_HALF - img_scaled.get_width()) / 2
-        screen.blit(img_scaled, (iws, 0))
+        new_w = WIDTH_HALF / main_img.get_width()
+        new_h = HEIGHT_HALF / main_img.get_height()
+        img_scaled = pygame.transform.smoothscale_by(main_img, min(new_w, new_h))
+        screen.blit(img_scaled, ((WIDTH_HALF - img_scaled.get_width()) / 2, 0))
 
 
 def draw_summary():
@@ -106,9 +97,8 @@ def draw_summary():
 def draw_schedule_header():
     """This is the schedule header that doesn't scroll"""
 
-    y = int(HEIGHT / 2)
-    bg_border = pygame.Rect(0, y, WIDTH, SCHED_H)
-    pygame.draw.rect(screen, WHITE, bg_border)
+    y = HEIGHT_HALF
+    pygame.draw.rect(screen, WHITE, pygame.Rect(0, y, WIDTH, SCHED_H))
 
     bg = pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 4)
     rect_gradient_h(screen, LTBLUE, BLUE, bg)
@@ -126,15 +116,24 @@ def draw_scrolling_header():
         # Move this item to the end of the list
         hdr_y += int((len(sched) + 1) * SCHED_H)
 
-    bg_border = pygame.Rect(0, hdr_y, WIDTH, SCHED_H)
-    pygame.draw.rect(screen, WHITE, bg_border)
-
-    bg = pygame.Rect(2, hdr_y + 2, WIDTH - 3, SCHED_H - 3)
-    rect_gradient_h(screen, LTBLUE, BLUE, bg)
+    pygame.draw.rect(screen, WHITE, pygame.Rect(0, hdr_y, WIDTH, SCHED_H))
+    rect_gradient_h(screen, LTBLUE, BLUE, pygame.Rect(2, hdr_y + 2, WIDTH - 3, SCHED_H - 3))
 
     drop_shadow(FONT, "PST", YELLOW, SCHED_COL1_X, hdr_y + FONT_PAD)
     drop_shadow(FONT, "EST", YELLOW, SCHED_COL2_X, hdr_y + FONT_PAD)
     drop_shadow(FONT, "Title", YELLOW, SCHED_COL3_X, hdr_y + FONT_PAD)
+
+
+def split_time(time: str):
+    """Separate the DOW and Time into individual columns"""
+    pos = time.find(" ")
+    dow = time[:pos]
+    t = time[pos + 1:]
+
+    if len(t) == 7:
+        t = "  " + t
+
+    return dow, t
 
 
 def draw_schedule_item(obj, y):
@@ -142,33 +141,20 @@ def draw_schedule_item(obj, y):
         # Move this item to the end of the list
         y += int((len(sched) + 1) * SCHED_H)
 
-    bg_border = pygame.Rect(0, y, WIDTH, SCHED_H)
-    pygame.draw.rect(screen, WHITE, bg_border)
-
-    bg = pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3)
-    rect_gradient_h(screen, PALEBLUE, LTBLUE, bg)
+    pygame.draw.rect(screen, WHITE, pygame.Rect(0, y, WIDTH, SCHED_H))
+    rect_gradient_h(screen, PALEBLUE, LTBLUE, pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3))
 
     title_display = update_title(obj['title'], obj['epnum'])
 
-    # Separate the DOW and Time into individual columns
-    pos1 = obj['time'].find(" ")
-    dow1 = obj['time'][:pos1]
-    time1 = obj['time'][pos1 + 1:]
-
-    pos2 = obj['time_est'].find(" ")
-    dow2 = obj['time_est'][:pos2]
-    time2 = obj['time_est'][pos2 + 1:]
-
-    if len(time1) == 7:
-        time1 = "  " + time1
-
-    if len(time2) == 7:
-        time2 = "  " + time2
+    dow1, time1 = split_time(obj['time'])
+    dow2, time2 = split_time(obj['time'])
 
     drop_shadow(FONT, dow1, WHITE, SCHED_COL1_X, y + FONT_PAD)
-    drop_shadow(FONT, dow2, WHITE, SCHED_COL2_X, y + FONT_PAD)
     drop_shadow(FONT, time1, WHITE, SCHED_COL1_X + DOW_W, y + FONT_PAD)
+
+    drop_shadow(FONT, dow2, WHITE, SCHED_COL2_X, y + FONT_PAD)
     drop_shadow(FONT, time2, WHITE, SCHED_COL2_X + DOW_W, y + FONT_PAD)
+
     drop_shadow(FONT, title_display, WHITE, SCHED_COL3_X, y + FONT_PAD)
 
     obj['y'] = y
@@ -183,8 +169,6 @@ def draw_schedule_items(y):
 def move_schedule():
     for s in sched:
         draw_schedule_item(s, s['y'] - 1)
-
-    # Add a scrolling header to indicate the list is restarting
     draw_scrolling_header()
 
 
@@ -208,11 +192,8 @@ def draw_clock():
 
 
 def draw_vertical_separators():
-    sep1 = pygame.Rect(SCHED_COL2_X - 30, HEIGHT_HALF, 2, HEIGHT_HALF)
-    pygame.draw.rect(screen, WHITE, sep1)
-
-    sep1 = pygame.Rect(SCHED_COL3_X - 30, HEIGHT_HALF, 2, HEIGHT_HALF)
-    pygame.draw.rect(screen, WHITE, sep1)
+    pygame.draw.rect(screen, WHITE, pygame.Rect(SCHED_COL2_X - 30, HEIGHT_HALF, 2, HEIGHT_HALF))
+    pygame.draw.rect(screen, WHITE, pygame.Rect(SCHED_COL3_X - 30, HEIGHT_HALF, 2, HEIGHT_HALF))
 
 
 def setup():
