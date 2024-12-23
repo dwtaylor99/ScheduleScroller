@@ -111,7 +111,7 @@ def draw_schedule_header():
     bg_border = pygame.Rect(0, y, WIDTH, SCHED_H)
     pygame.draw.rect(screen, WHITE, bg_border)
 
-    bg = pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3)
+    bg = pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 4)
     rect_gradient_h(screen, LTBLUE, BLUE, bg)
 
     screen.blit(FONT.render("Playing:", True, BLACK), (SCHED_COL3_X + 2, y + 2 + FONT_PAD))
@@ -284,10 +284,7 @@ if __name__ == '__main__':
         # random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
         random_fun = 1
         if int(timer_tick) % 60 == 0 and random_fun == 1:
-            title = sched[0]['title']
-            epnum = sched[0]['epnum']
-            print("Starting fun for: {} {}".format(title, epnum))
-            fun_objs = funfactory.get(screen, title, epnum)
+            fun_objs = funfactory.get(screen, sched[0]['title'], sched[0]['epnum'])
 
         # flip() the display to put your work on screen
         pygame.display.flip()

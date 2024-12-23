@@ -8,6 +8,7 @@ from gamera import Gamera
 from meteorite import Meteorite
 from mst3k_moon import MST3KMoon
 from sandstorm import SandStorm
+from sol import SOL
 from starfighter import Starfighter
 from ufo import Ufo
 from vampire_woman import VampireWoman
@@ -42,11 +43,13 @@ def get(screen: Surface, title: str, epnum: str) -> []:
     # No special fun thing
     if len(fun_objs) == 0:
         # r = random.randrange(1, 2)
-        r = 2
+        r = 3
         if r == 1:
             fun_objs.append(Ufo(screen))
         elif r == 2:
             fun_objs.append(MST3KMoon(screen))
+        elif r == 3:
+            fun_objs.append(SOL(screen))
 
     return fun_objs
 
