@@ -58,14 +58,16 @@ running = True
 dt = 0
 sched = []
 hdr_y = 0
-ticker = 0
 timer_tick = 0  # start it at 1 so we don't trigger 'fun' immediately
 is_reloading = False
 main_img = pygame.Surface((WIDTH, HEIGHT))
 main_summary = ""
-
-fun_obj = None
 fun_objs = []
+
+
+def drop_shadow(font, text, color, x, y):
+    screen.blit(font.render(text, True, BLACK), (x + 2, y + 2))
+    screen.blit(font.render(text, True, color), (x, y))
 
 
 def draw_image():
@@ -98,8 +100,7 @@ def draw_summary():
 
     parts = main_summary.split("\n")
     for i, p in enumerate(parts):
-        screen.blit(FONT.render(p, True, BLACK), (WIDTH_HALF + 32, ((FONT_SIZE + 10) * i) + 16))
-        screen.blit(FONT.render(p, True, WHITE), (WIDTH_HALF + 30, ((FONT_SIZE + 10) * i) + 14))
+        drop_shadow(FONT, p, WHITE, WIDTH_HALF + 30, ((FONT_SIZE + 10) * i) + 14)
 
 
 def draw_schedule_header():
@@ -112,12 +113,8 @@ def draw_schedule_header():
     bg = pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 4)
     rect_gradient_h(screen, LTBLUE, BLUE, bg)
 
-    screen.blit(FONT.render("Playing:", True, BLACK), (SCHED_COL3_X + 2, y + 2 + FONT_PAD))
-    screen.blit(FONT.render("Playing:", True, YELLOW), (SCHED_COL3_X, y + FONT_PAD))
-
-    title = update_title(sched[0]['title'], sched[0]['epnum'])
-    screen.blit(FONT.render(title, True, BLACK), (SCHED_COL3_X + 126, y + 2 + FONT_PAD))
-    screen.blit(FONT.render(title, True, WHITE), (SCHED_COL3_X + 128, y + FONT_PAD))
+    drop_shadow(FONT, "Playing:", YELLOW, SCHED_COL3_X, y + FONT_PAD)
+    drop_shadow(FONT, update_title(sched[0]['title'], sched[0]['epnum']), YELLOW, SCHED_COL3_X + 128, y + FONT_PAD)
 
 
 def draw_scrolling_header():
@@ -135,13 +132,9 @@ def draw_scrolling_header():
     bg = pygame.Rect(2, hdr_y + 2, WIDTH - 3, SCHED_H - 3)
     rect_gradient_h(screen, LTBLUE, BLUE, bg)
 
-    screen.blit(FONT.render("PST", True, BLACK), (SCHED_COL1_X + 2, hdr_y + 2 + FONT_PAD))
-    screen.blit(FONT.render("EST", True, BLACK), (SCHED_COL2_X + 2, hdr_y + 2 + FONT_PAD))
-    screen.blit(FONT.render("Title", True, BLACK), (SCHED_COL3_X + 2, hdr_y + 2 + FONT_PAD))
-
-    screen.blit(FONT.render("PST", True, YELLOW), (SCHED_COL1_X, hdr_y + FONT_PAD))
-    screen.blit(FONT.render("EST", True, YELLOW), (SCHED_COL2_X, hdr_y + FONT_PAD))
-    screen.blit(FONT.render("Title", True, YELLOW), (SCHED_COL3_X, hdr_y + FONT_PAD))
+    drop_shadow(FONT, "PST", YELLOW, SCHED_COL1_X, hdr_y + FONT_PAD)
+    drop_shadow(FONT, "EST", YELLOW, SCHED_COL2_X, hdr_y + FONT_PAD)
+    drop_shadow(FONT, "Title", YELLOW, SCHED_COL3_X, hdr_y + FONT_PAD)
 
 
 def draw_schedule_item(obj, y):
@@ -172,17 +165,11 @@ def draw_schedule_item(obj, y):
     if len(time2) == 7:
         time2 = "  " + time2
 
-    screen.blit(FONT.render(dow1, True, BLACK), (SCHED_COL1_X + 2, y + 2 + FONT_PAD))
-    screen.blit(FONT.render(dow2, True, BLACK), (SCHED_COL2_X + 2, y + 2 + FONT_PAD))
-    screen.blit(FONT.render(time1, True, BLACK), (SCHED_COL1_X + DOW_W + 2, y + 2 + FONT_PAD))
-    screen.blit(FONT.render(time2, True, BLACK), (SCHED_COL2_X + DOW_W + 2, y + 2 + FONT_PAD))
-    screen.blit(FONT.render(title_display, True, BLACK), (SCHED_COL3_X + 2, y + 2 + FONT_PAD))
-
-    screen.blit(FONT.render(dow1, True, WHITE), (SCHED_COL1_X, y + FONT_PAD))
-    screen.blit(FONT.render(dow2, True, WHITE), (SCHED_COL2_X, y + FONT_PAD))
-    screen.blit(FONT.render(time1, True, WHITE), (SCHED_COL1_X + DOW_W, y + FONT_PAD))
-    screen.blit(FONT.render(time2, True, WHITE), (SCHED_COL2_X + DOW_W, y + FONT_PAD))
-    screen.blit(FONT.render(title_display, True, WHITE), (SCHED_COL3_X, y + FONT_PAD))
+    drop_shadow(FONT, dow1, WHITE, SCHED_COL1_X, y + FONT_PAD)
+    drop_shadow(FONT, dow2, WHITE, SCHED_COL2_X, y + FONT_PAD)
+    drop_shadow(FONT, time1, WHITE, SCHED_COL1_X + DOW_W, y + FONT_PAD)
+    drop_shadow(FONT, time2, WHITE, SCHED_COL2_X + DOW_W, y + FONT_PAD)
+    drop_shadow(FONT, title_display, WHITE, SCHED_COL3_X, y + FONT_PAD)
 
     obj['y'] = y
 
@@ -206,12 +193,10 @@ def draw_clock():
 
     pac = datetime.now().astimezone(PAC_TZ)
     pac_time = datetime.strftime(pac, CLOCK_FORMAT).lstrip("0")
-    screen.blit(FONT.render(pac_time, True, BLACK), (SCHED_COL1_X + 2, HEIGHT_HALF + 2 + FONT_PAD))
-    screen.blit(FONT.render(pac_time, True, YELLOW), (SCHED_COL1_X, HEIGHT_HALF + FONT_PAD))
+    drop_shadow(FONT, pac_time, YELLOW, SCHED_COL1_X, HEIGHT_HALF + FONT_PAD)
 
     curr_time = datetime.strftime(datetime.now(), CLOCK_FORMAT).lstrip("0")
-    screen.blit(FONT.render(curr_time, True, BLACK), (SCHED_COL2_X + 2, HEIGHT_HALF + 2 + FONT_PAD))
-    screen.blit(FONT.render(curr_time, True, YELLOW), (SCHED_COL2_X, HEIGHT_HALF + FONT_PAD))
+    drop_shadow(FONT, curr_time, YELLOW, SCHED_COL2_X, HEIGHT_HALF + FONT_PAD)
 
     # Is it time to reload the schedule?
     time_parts = sched[1]['time_est'].split(" ")
@@ -219,14 +204,6 @@ def draw_clock():
     if curr_time == update_time and not is_reloading:
         is_reloading = True
         setup()
-        # start_t = datetime.now()
-        # print("Loading...")
-        # schedule.refresh()
-        # sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
-        # draw_schedule_items(HEIGHT_HALF + SCHED_H)
-        # hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
-        # stop_t = datetime.now()
-        # print("done. " + str(stop_t - start_t))
         is_reloading = False
 
 
@@ -241,12 +218,11 @@ def draw_vertical_separators():
 def setup():
     global hdr_y, main_img, main_summary, sched
 
-    print("Loading...")
     start_time = datetime.now()
     schedule.refresh()
     sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
     stop_time = datetime.now()
-    print("done. " + str(stop_time - start_time))
+    print("Loading finished in " + str(stop_time - start_time))
 
     if sched[0]['image'] != "":
         main_img = pygame.image.load('images/' + sched[0]['image']).convert()
@@ -295,10 +271,6 @@ if __name__ == '__main__':
         pygame.display.flip()
 
         # limits FPS to 60 - dt is delta time in seconds since last frame.
-        ticker += 1
-        if ticker > 60000:
-            ticker = 0
-
         dt = clock.tick(60) / 1000
         timer_tick += dt
         # Reset the timer_tick every hour so we don't overflow the variable.
