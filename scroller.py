@@ -253,9 +253,9 @@ if __name__ == '__main__':
 
         # limits FPS to 60 - dt is delta time in seconds since last frame.
         dt = clock.tick(60) / 1000
+
         timer_tick += dt
-        # Reset the timer_tick every hour so we don't overflow the variable.
-        if timer_tick >= 3600:
+        if timer_tick >= 7200:  # Reset every two hours
             timer_tick = 0
 
     pygame.quit()

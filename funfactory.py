@@ -43,8 +43,8 @@ def get(screen: Surface, title: str, epnum: str) -> []:
 
     # No special fun thing
     if len(fun_objs) == 0:
-        # r = random.randrange(1, 2)
-        r = 3
+        r = random.randrange(1, 3)
+        # r = 3
         if r == 1:
             fun_objs.append(Ufo(screen))
         elif r == 2:
