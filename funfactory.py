@@ -2,6 +2,7 @@ import random
 
 from pygame import Surface
 
+from apple import Apple
 from deathray import DeathRay
 from elsanto_flying import ElSantoFlying
 from gamera import Gamera
@@ -10,12 +11,11 @@ from mst3k_moon import MST3KMoon
 from sandstorm import SandStorm
 from sol import SOL
 from starfighter import Starfighter
-from ufo import Ufo
 from vampire_woman import VampireWoman
 from widowmaker import Widowmaker
 
 
-def get(screen: Surface, title: str, epnum: str) -> []:
+def get_old(screen: Surface, title: str, epnum: str) -> []:
     fun_objs = []
 
     if epnum == "1007":
@@ -43,10 +43,9 @@ def get(screen: Surface, title: str, epnum: str) -> []:
 
     # No special fun thing
     if len(fun_objs) == 0:
-        r = random.randrange(1, 3)
-        # r = 3
+        r = random.randrange(1, 4)
+        print("Random number: ", r)
         if r == 1:
-            # fun_objs.append(Ufo(screen))
             fun_objs.append(SOL(screen))
         elif r == 2:
             fun_objs.append(MST3KMoon(screen))
@@ -55,6 +54,52 @@ def get(screen: Surface, title: str, epnum: str) -> []:
             fun_objs.append(Widowmaker(screen))
 
     return fun_objs
+
+
+def get(screen: Surface, title: str, epnum: str) -> []:
+    fun_objs = []
+
+    r = random.randint(1, 9)
+
+    if r == 1:
+        for _ in range(random.randrange(3, 8)):
+            fun_objs.append(Meteorite(screen))
+
+    if r == 2:
+        fun_objs.append(DeathRay(screen))
+
+    if r == 3:
+        fun_objs.append(Gamera(screen))
+
+    if r == 4:
+        for _ in range(random.randrange(5, 10)):
+            fun_objs.append(SandStorm(screen))
+
+    if r == 5:
+        for _ in range(random.randrange(3, 5)):
+            fun_objs.append(Starfighter(screen))
+
+    if r == 6:
+        vamp_wom = VampireWoman(screen)
+        fun_objs.append(vamp_wom)
+        fun_objs.append(ElSantoFlying(screen, vamp_wom.x, vamp_wom.y))
+
+    if r == 7:
+        fun_objs.append(SOL(screen))
+
+    if r == 8:
+        fun_objs.append(MST3KMoon(screen))
+
+    if r == 9:
+        fun_objs.append(SOL(screen))
+        fun_objs.append(Widowmaker(screen))
+
+    return fun_objs
+
+
+def get_debug(screen: Surface, title: str, epnum: str) -> []:
+    print("Debugging Apple.")
+    return [Apple(screen)]
 
 
 class FunFactory:

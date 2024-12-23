@@ -7,12 +7,14 @@ import funfactory
 import schedule
 import summaries
 from gradient import rect_gradient_h
-from schedule import PAC_TZ
+from schedule import PAC_TZ, EST_TZ
 from util_text import *
 
 pygame.init()
 
 # Constants
+DEBUG = False
+
 WIDTH = 1920
 HEIGHT = 1080
 
@@ -26,16 +28,20 @@ SCHED_COL2_X = 320
 SCHED_COL3_X = 610
 DOW_W = 80
 
-# Create two fonts
+# Create fonts
 FONT_FACE = "arial"
-FONT_SIZE = 32
-FONT = pygame.font.SysFont(FONT_FACE, FONT_SIZE)
+FONT_FACE_SIM = "fonts/SimianText_Orangutan.otf"
+FONT_SIZE = 36
+FONT = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE)
+
+FONT_SIZE_EXTRA_SMALL = 18
+FONT_XS = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_EXTRA_SMALL)
 
 FONT_SIZE_SMALL = 26
-FONT_SM = pygame.font.SysFont(FONT_FACE, FONT_SIZE_SMALL)
+FONT_SM = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_SMALL)
 
 FONT_SIZE_LARGE = 40
-FONT_LG = pygame.font.SysFont(FONT_FACE, FONT_SIZE_LARGE)
+FONT_LG = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_LARGE)
 
 FONT_PAD = 10  # vertical font spacing
 
@@ -47,10 +53,11 @@ PALEBLUE = pygame.Color(0, 80, 220)
 YELLOW = pygame.Color(192, 192, 0)
 WHITE = pygame.Color(192, 192, 192)
 DK_GRAY = pygame.Color(32, 32, 32)
+GRAY = pygame.Color(128, 128, 128)
 
 NUM_SCHEDULE = 20  # Number of schedule items to load
 
-CLOCK_FORMAT = "%I:%M:%S %p"
+CLOCK_FORMAT = "%I:%M:%S %p %Z"
 
 # Globals
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -61,6 +68,7 @@ sched = []
 hdr_y = 0
 timer_tick = 0  # start it at 1 so we don't trigger 'fun' immediately
 is_reloading = False
+is_loading_fun = False
 main_img = pygame.Surface((WIDTH, HEIGHT))
 main_summary = ""
 fun_objs = []
@@ -120,8 +128,11 @@ def draw_scrolling_header():
     pygame.draw.rect(screen, WHITE, pygame.Rect(0, hdr_y, WIDTH, SCHED_H))
     rect_gradient_h(screen, LTBLUE, BLUE, pygame.Rect(2, hdr_y + 2, WIDTH - 3, SCHED_H - 3))
 
-    drop_shadow(FONT, "PST", YELLOW, SCHED_COL1_X, hdr_y + FONT_PAD)
-    drop_shadow(FONT, "EST", YELLOW, SCHED_COL2_X, hdr_y + FONT_PAD)
+    date_now = datetime.now()
+    ptz = date_now.astimezone(PAC_TZ)
+    etz = date_now.astimezone(EST_TZ)
+    drop_shadow(FONT, datetime.strftime(ptz, "%Z"), YELLOW, SCHED_COL1_X, hdr_y + FONT_PAD)
+    drop_shadow(FONT, datetime.strftime(etz, "%Z"), YELLOW, SCHED_COL2_X, hdr_y + FONT_PAD)
     drop_shadow(FONT, "Title", YELLOW, SCHED_COL3_X, hdr_y + FONT_PAD)
 
 
@@ -179,20 +190,23 @@ def draw_clock():
     right_now = datetime.now()
 
     pac = right_now.astimezone(PAC_TZ)
-    pac_time = datetime.strftime(pac, CLOCK_FORMAT).lstrip("0") + " PST"
-    drop_shadow(FONT, pac_time, YELLOW, SCHED_COL1_X, HEIGHT_HALF + FONT_PAD)
+    pac_time = datetime.strftime(pac, CLOCK_FORMAT).lstrip("0")
+    pac_pos = pac_time.find(" ")
+    drop_shadow(FONT, pac_time[:pac_pos], YELLOW, SCHED_COL1_X, HEIGHT_HALF + FONT_PAD)
+    drop_shadow(FONT_SM, pac_time[pac_pos + 1:], YELLOW, SCHED_COL1_X + 160, HEIGHT_HALF + FONT_PAD)
 
-    curr_time = datetime.strftime(right_now, CLOCK_FORMAT).lstrip("0") + " EST"
-    drop_shadow(FONT, curr_time, YELLOW, SCHED_COL2_X, HEIGHT_HALF + FONT_PAD)
+    curr = right_now.astimezone(EST_TZ)
+    curr_time = datetime.strftime(curr, CLOCK_FORMAT).lstrip("0")
+    curr_pos = curr_time.find(" ")
+    drop_shadow(FONT, curr_time[:curr_pos], YELLOW, SCHED_COL2_X, HEIGHT_HALF + FONT_PAD)
+    drop_shadow(FONT_SM, curr_time[curr_pos + 1:], YELLOW, SCHED_COL2_X + 160, HEIGHT_HALF + FONT_PAD)
 
     # Is it time to reload the schedule?
     time_parts = sched[1]['time_est'].split(" ")
     update_time = time_parts[1] + ":00 " + time_parts[2]
-    update_time2 = time_parts[1] + ":01 " + time_parts[2]
-    if (curr_time == update_time or curr_time == update_time2) and not is_reloading:
-        is_reloading = True
+    curr_time = curr_time.rstrip(" EST").rstrip(" EDT")  # Remove the timezone
+    if curr_time == update_time and not is_reloading:
         setup()
-        is_reloading = False
 
 
 def draw_vertical_separators():
@@ -201,8 +215,9 @@ def draw_vertical_separators():
 
 
 def setup():
-    global hdr_y, main_img, main_summary, sched
+    global hdr_y, is_reloading, main_img, main_summary, sched
 
+    is_reloading = True
     start_time = datetime.now()
     schedule.refresh()
     sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
@@ -218,12 +233,18 @@ def setup():
     main_summary = wrap_text(main_summary).strip()
     draw_schedule_items(HEIGHT_HALF + SCHED_H)
     hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
+    is_reloading = False
 
 
 def fun():
     if len(fun_objs) > 0:
         for o in fun_objs:
             o.animate()
+
+
+def draw_gizmoplex():
+    drop_shadow(FONT_XS, "twitch.tv/mst3k", GRAY, WIDTH - 150, HEIGHT_HALF - 50)
+    drop_shadow(FONT_XS, "gizmoplex.com", GRAY, WIDTH - 150, HEIGHT_HALF - 30)
 
 
 if __name__ == '__main__':
@@ -240,6 +261,7 @@ if __name__ == '__main__':
 
         draw_image()
         draw_summary()
+        draw_gizmoplex()
         fun()
         move_schedule()
         draw_schedule_header()
@@ -248,9 +270,16 @@ if __name__ == '__main__':
 
         # Time for fun?
         random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
-        # random_fun = 1
-        if int(timer_tick) % 60 == 0 and random_fun == 1:
-            fun_objs = funfactory.get(screen, sched[0]['title'], sched[0]['epnum'])
+        random_fun = 1
+        if int(timer_tick) % 60 == 0 and random_fun == 1 and not is_loading_fun:
+            is_loading_fun = True
+            if DEBUG:
+                fun_objs = funfactory.get_debug(screen, sched[0]['title'], sched[0]['epnum'])
+            else:
+                fun_objs = funfactory.get(screen, sched[0]['title'], sched[0]['epnum'])
+
+        if int(timer_tick) % 64 == 0:
+            is_loading_fun = False
 
         # flip() the display to put your work on screen
         pygame.display.flip()
