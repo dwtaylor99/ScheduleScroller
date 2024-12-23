@@ -12,6 +12,7 @@ from sol import SOL
 from starfighter import Starfighter
 from ufo import Ufo
 from vampire_woman import VampireWoman
+from widowmaker import Widowmaker
 
 
 def get(screen: Surface, title: str, epnum: str) -> []:
@@ -50,6 +51,7 @@ def get(screen: Surface, title: str, epnum: str) -> []:
             fun_objs.append(MST3KMoon(screen))
         elif r == 3:
             fun_objs.append(SOL(screen))
+            fun_objs.append(Widowmaker(screen))
 
     return fun_objs
 

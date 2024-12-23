@@ -62,6 +62,7 @@ ticker = 0
 timer_tick = 0  # start it at 1 so we don't trigger 'fun' immediately
 is_reloading = False
 main_img = pygame.Surface((WIDTH, HEIGHT))
+main_summary = ""
 
 fun_obj = None
 fun_objs = []
@@ -95,10 +96,7 @@ def draw_summary():
     bg = pygame.Rect(WIDTH_HALF, 0, WIDTH_HALF, HEIGHT_HALF)
     rect_gradient_h(screen, BLACK, DK_GRAY, bg)
 
-    summary = prepare_summary(sched[0]['about'])
-    summary += " (" + sched[0]['year'] + ")"
-    s = wrap_text(summary).strip()
-    parts = s.split("\n")
+    parts = main_summary.split("\n")
     for i, p in enumerate(parts):
         screen.blit(FONT.render(p, True, BLACK), (WIDTH_HALF + 32, ((FONT_SIZE + 10) * i) + 16))
         screen.blit(FONT.render(p, True, WHITE), (WIDTH_HALF + 30, ((FONT_SIZE + 10) * i) + 14))
@@ -220,14 +218,15 @@ def draw_clock():
     update_time = time_parts[1] + ":00 " + time_parts[2]
     if curr_time == update_time and not is_reloading:
         is_reloading = True
-        start_t = datetime.now()
-        print("Loading...")
-        schedule.refresh()
-        sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
-        draw_schedule_items(HEIGHT_HALF + SCHED_H)
-        hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
-        stop_t = datetime.now()
-        print("done. " + str(stop_t - start_t))
+        setup()
+        # start_t = datetime.now()
+        # print("Loading...")
+        # schedule.refresh()
+        # sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
+        # draw_schedule_items(HEIGHT_HALF + SCHED_H)
+        # hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
+        # stop_t = datetime.now()
+        # print("done. " + str(stop_t - start_t))
         is_reloading = False
 
 
@@ -240,17 +239,22 @@ def draw_vertical_separators():
 
 
 def setup():
-    global hdr_y, main_img, sched
+    global hdr_y, main_img, main_summary, sched
 
     print("Loading...")
     start_time = datetime.now()
-    summaries.refresh()
     schedule.refresh()
     sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
     stop_time = datetime.now()
     print("done. " + str(stop_time - start_time))
 
-    main_img = pygame.image.load('images/' + sched[0]['image']).convert()
+    if sched[0]['image'] != "":
+        main_img = pygame.image.load('images/' + sched[0]['image']).convert()
+    else:
+        main_img = pygame.image.load('images/mst3k.png').convert()
+
+    main_summary = prepare_summary(sched[0]['about']) + " [" + sched[0]['year'] + "]"
+    main_summary = wrap_text(main_summary).strip()
     draw_schedule_items(HEIGHT_HALF + SCHED_H)
     hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
 
@@ -262,6 +266,7 @@ def fun():
 
 
 if __name__ == '__main__':
+    summaries.refresh()
     setup()
 
     while running:

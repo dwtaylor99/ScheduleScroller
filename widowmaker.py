@@ -5,13 +5,13 @@ import pygame
 from funbase import FunBase
 
 
-class SOL(FunBase):
+class Widowmaker(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/sol.png').convert_alpha(), 0.4)
-        self.x = -(self.img.get_width()) - 10
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/widowmaker.png').convert_alpha(), 0.25)
+        self.x = -(self.img.get_width()) - 600
         self.y = random.randrange(10, 400)
-        self.vel_x = 3
+        self.vel_x = 2.5
         self.vel_y = (2 - (random.randrange(0, 4))) * 0.2
 
     def animate(self):

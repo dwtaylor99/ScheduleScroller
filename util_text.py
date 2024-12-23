@@ -1,6 +1,10 @@
 
+EMDASH = "—"
+ENDASH = "–"
+
+
 def prepare_summary(summary: str) -> str:
-    return summary.replace("--", "—")
+    return summary.replace("--", ENDASH)
 
 
 def update_title(title, epnum):
