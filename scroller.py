@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 
 import pygame
@@ -22,7 +23,7 @@ HEIGHT_HALF = int(HEIGHT / 2)
 SCHED_H = 60
 SCHED_COL1_X = 30
 SCHED_COL2_X = 320
-SCHED_COL3_X = 600
+SCHED_COL3_X = 610
 DOW_W = 80
 
 # Create two fonts
@@ -104,7 +105,7 @@ def draw_schedule_header():
     rect_gradient_h(screen, LTBLUE, BLUE, bg)
 
     drop_shadow(FONT, "Playing:", YELLOW, SCHED_COL3_X, y + FONT_PAD)
-    drop_shadow(FONT, update_title(sched[0]['title'], sched[0]['epnum']), YELLOW, SCHED_COL3_X + 128, y + FONT_PAD)
+    drop_shadow(FONT, update_title(sched[0]['title'], sched[0]['epnum']), WHITE, SCHED_COL3_X + 128, y + FONT_PAD)
 
 
 def draw_scrolling_header():
@@ -147,7 +148,7 @@ def draw_schedule_item(obj, y):
     title_display = update_title(obj['title'], obj['epnum'])
 
     dow1, time1 = split_time(obj['time'])
-    dow2, time2 = split_time(obj['time'])
+    dow2, time2 = split_time(obj['time_est'])
 
     drop_shadow(FONT, dow1, WHITE, SCHED_COL1_X, y + FONT_PAD)
     drop_shadow(FONT, time1, WHITE, SCHED_COL1_X + DOW_W, y + FONT_PAD)
@@ -175,17 +176,20 @@ def move_schedule():
 def draw_clock():
     global sched, hdr_y, is_reloading
 
-    pac = datetime.now().astimezone(PAC_TZ)
-    pac_time = datetime.strftime(pac, CLOCK_FORMAT).lstrip("0")
+    right_now = datetime.now()
+
+    pac = right_now.astimezone(PAC_TZ)
+    pac_time = datetime.strftime(pac, CLOCK_FORMAT).lstrip("0") + " PST"
     drop_shadow(FONT, pac_time, YELLOW, SCHED_COL1_X, HEIGHT_HALF + FONT_PAD)
 
-    curr_time = datetime.strftime(datetime.now(), CLOCK_FORMAT).lstrip("0")
+    curr_time = datetime.strftime(right_now, CLOCK_FORMAT).lstrip("0") + " EST"
     drop_shadow(FONT, curr_time, YELLOW, SCHED_COL2_X, HEIGHT_HALF + FONT_PAD)
 
     # Is it time to reload the schedule?
     time_parts = sched[1]['time_est'].split(" ")
     update_time = time_parts[1] + ":00 " + time_parts[2]
-    if curr_time == update_time and not is_reloading:
+    update_time2 = time_parts[1] + ":01 " + time_parts[2]
+    if (curr_time == update_time or curr_time == update_time2) and not is_reloading:
         is_reloading = True
         setup()
         is_reloading = False
@@ -243,8 +247,8 @@ if __name__ == '__main__':
         draw_clock()
 
         # Time for fun?
-        # random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
-        random_fun = 1
+        random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
+        # random_fun = 1
         if int(timer_tick) % 60 == 0 and random_fun == 1:
             fun_objs = funfactory.get(screen, sched[0]['title'], sched[0]['epnum'])
 

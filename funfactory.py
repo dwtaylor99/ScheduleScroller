@@ -46,7 +46,8 @@ def get(screen: Surface, title: str, epnum: str) -> []:
         r = random.randrange(1, 3)
         # r = 3
         if r == 1:
-            fun_objs.append(Ufo(screen))
+            # fun_objs.append(Ufo(screen))
+            fun_objs.append(SOL(screen))
         elif r == 2:
             fun_objs.append(MST3KMoon(screen))
         elif r == 3:
