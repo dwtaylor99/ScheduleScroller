@@ -5,11 +5,11 @@ import pygame
 from funbase import FunBase
 
 
-class TimeChasersPlane(FunBase):
+class TimeChasersPlaneOther(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/time_chasers_plane.png').convert_alpha(), 0.5)
-        self.x = screen.get_width()
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/time_chasers_plane_other.png').convert_alpha(), 0.25)
+        self.x = screen.get_width() + 500
         self.y = random.randrange(30, 450)
         self.vel_x = -7
         self.vel_y = (2 - (random.randrange(0, 4))) * 0.2

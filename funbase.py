@@ -15,7 +15,7 @@ class FunBase:
         self.screen = screen
 
     def animate(self):
-        if self.anim_step == 1:
+        if self.anim_step >= 1:
             self.screen.blit(self.img, (self.x, self.y))
             self.x += self.vel_x
             self.y += self.vel_y

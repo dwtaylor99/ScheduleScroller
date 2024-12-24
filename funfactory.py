@@ -9,9 +9,11 @@ from gamera import Gamera
 from meteorite import Meteorite
 from mst3k_moon import MST3KMoon
 from sandstorm import SandStorm
+from santa_sleigh import SantaSleigh
 from sol import SOL
 from starfighter import Starfighter
 from time_chasers_plane import TimeChasersPlane
+from time_chasers_plane_other import TimeChasersPlaneOther
 from vampire_woman import VampireWoman
 from vi_head import ViHead
 from widowmaker import Widowmaker
@@ -61,7 +63,7 @@ def get_old(screen: Surface, title: str, epnum: str) -> []:
 def get(screen: Surface, title: str, epnum: str) -> []:
     fun_objs = []
 
-    r = random.randint(1, 11)
+    r = random.randint(1, 12)
 
     if r == 1:
         for _ in range(random.randrange(3, 8)):
@@ -101,6 +103,17 @@ def get(screen: Surface, title: str, epnum: str) -> []:
 
     if r == 11:
         fun_objs.append(TimeChasersPlane(screen))
+
+    if r == 12:
+        fun_objs.append(TimeChasersPlane(screen))
+        fun_objs.append(TimeChasersPlaneOther(screen))
+
+    if r == 13:
+        fun_objs.append(SantaSleigh(screen))
+
+    # if r == 13:
+    #     for _ in range(30):
+    #         fun_objs.append(SnowFlake(screen))
 
     return fun_objs
 

@@ -1,0 +1,50 @@
+import random
+
+import pygame
+
+from funbase import FunBase
+
+SCALE = 0.25
+XOFFSET = 200 * SCALE
+YOFFSET = 188 * SCALE
+IW = 116 * SCALE
+IH = 128 * SCALE
+
+
+class SnowFlake(FunBase):
+    def __init__(self, screen):
+        super().__init__(screen)
+
+        img_sheet = pygame.transform.smoothscale_by(pygame.image.load('images/fun/snowflakes2.png').convert_alpha(), SCALE)
+        i = random.randint(1, 9)
+        if i == 1:
+            img_sheet.set_clip(pygame.Rect(0, 0, IW, IH))
+        elif i == 2:
+            img_sheet.set_clip(pygame.Rect(XOFFSET, 0, IW, IH))
+        elif i == 3:
+            img_sheet.set_clip(pygame.Rect(XOFFSET * 2, 0, IW, IH))
+        elif i == 4:
+            img_sheet.set_clip(pygame.Rect(0, YOFFSET, IW, IH))
+        elif i == 5:
+            img_sheet.set_clip(pygame.Rect(XOFFSET, YOFFSET, IW, IH))
+        elif i == 6:
+            img_sheet.set_clip(pygame.Rect(XOFFSET * 2, YOFFSET, IW, IH))
+        elif i == 7:
+            img_sheet.set_clip(pygame.Rect(0, YOFFSET * 2, IW, IH))
+        elif i == 8:
+            img_sheet.set_clip(pygame.Rect(XOFFSET, YOFFSET * 2, IW, IH))
+        elif i == 9:
+            img_sheet.set_clip(pygame.Rect(XOFFSET * 2, YOFFSET * 2, IW, IH))
+
+        self.img = img_sheet.subsurface(img_sheet.get_clip())
+
+        self.x = random.randrange(10, screen.get_width() - 10)
+        self.y = -random.randrange(30, 500)
+        self.vel_x = (2 - (random.randrange(0, 4))) * 0.2
+        self.vel_y = 3
+
+    def animate(self):
+        if self.anim_step == 1:
+            super().animate()
+            if self.y > self.screen.get_height() // 2:
+                self.anim_step = 0
