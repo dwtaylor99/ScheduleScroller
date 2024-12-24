@@ -11,7 +11,9 @@ from mst3k_moon import MST3KMoon
 from sandstorm import SandStorm
 from sol import SOL
 from starfighter import Starfighter
+from time_chasers_plane import TimeChasersPlane
 from vampire_woman import VampireWoman
+from vi_head import ViHead
 from widowmaker import Widowmaker
 
 
@@ -59,7 +61,7 @@ def get_old(screen: Surface, title: str, epnum: str) -> []:
 def get(screen: Surface, title: str, epnum: str) -> []:
     fun_objs = []
 
-    r = random.randint(1, 9)
+    r = random.randint(1, 11)
 
     if r == 1:
         for _ in range(random.randrange(3, 8)):
@@ -93,6 +95,12 @@ def get(screen: Surface, title: str, epnum: str) -> []:
     if r == 9:
         fun_objs.append(SOL(screen))
         fun_objs.append(Widowmaker(screen))
+
+    if r == 10:
+        fun_objs.append(ViHead(screen))
+
+    if r == 11:
+        fun_objs.append(TimeChasersPlane(screen))
 
     return fun_objs
 

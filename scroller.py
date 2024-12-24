@@ -29,7 +29,7 @@ SCHED_COL3_X = 610
 DOW_W = 80
 
 # Create fonts
-FONT_FACE = "arial"
+# FONT_FACE = "arial"
 FONT_FACE_SIM = "fonts/SimianText_Orangutan.otf"
 FONT_SIZE = 36
 FONT = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE)
@@ -205,6 +205,7 @@ def draw_clock():
     time_parts = sched[1]['time_est'].split(" ")
     update_time = time_parts[1] + ":00 " + time_parts[2]
     curr_time = curr_time.rstrip(" EST").rstrip(" EDT")  # Remove the timezone
+    # print(curr_time + " | " + update_time + " | is_reloading: " + str(is_reloading))
     if curr_time == update_time and not is_reloading:
         setup()
 
@@ -229,8 +230,10 @@ def setup():
     else:
         main_img = pygame.image.load('images/mst3k.png').convert()
 
-    main_summary = prepare_summary(sched[0]['about']) + " [" + sched[0]['year'] + "]"
-    main_summary = wrap_text(main_summary).strip()
+    main_summary = wrap_text(prepare_summary(sched[0]['about'])).strip()
+    if sched[0]['year'] != "":
+        main_summary += " [" + sched[0]['year'] + "]"
+
     draw_schedule_items(HEIGHT_HALF + SCHED_H)
     hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
     is_reloading = False
@@ -243,8 +246,8 @@ def fun():
 
 
 def draw_gizmoplex():
-    drop_shadow(FONT_XS, "twitch.tv/mst3k", GRAY, WIDTH - 150, HEIGHT_HALF - 50)
-    drop_shadow(FONT_XS, "gizmoplex.com", GRAY, WIDTH - 150, HEIGHT_HALF - 30)
+    drop_shadow(FONT_XS, "twitch.tv/mst3k", GRAY, WIDTH - 140, HEIGHT_HALF - 50)
+    drop_shadow(FONT_XS, "gizmoplex.com", GRAY, WIDTH - 140, HEIGHT_HALF - 30)
 
 
 if __name__ == '__main__':
@@ -270,7 +273,7 @@ if __name__ == '__main__':
 
         # Time for fun?
         random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
-        random_fun = 1
+        # random_fun = 1
         if int(timer_tick) % 60 == 0 and random_fun == 1 and not is_loading_fun:
             is_loading_fun = True
             if DEBUG:
