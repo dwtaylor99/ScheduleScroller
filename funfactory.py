@@ -63,7 +63,7 @@ def get_old(screen: Surface, title: str, epnum: str) -> []:
 def get(screen: Surface, title: str, epnum: str) -> []:
     fun_objs = []
 
-    r = random.randint(1, 12)
+    r = random.randint(1, 18)
 
     if r == 1:
         for _ in range(random.randrange(3, 8)):
@@ -108,12 +108,8 @@ def get(screen: Surface, title: str, epnum: str) -> []:
         fun_objs.append(TimeChasersPlane(screen))
         fun_objs.append(TimeChasersPlaneOther(screen))
 
-    if r == 13:
+    if r >= 13:
         fun_objs.append(SantaSleigh(screen))
-
-    # if r == 13:
-    #     for _ in range(30):
-    #         fun_objs.append(SnowFlake(screen))
 
     return fun_objs
 

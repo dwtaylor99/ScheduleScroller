@@ -4,7 +4,7 @@ import pygame
 
 from funbase import FunBase
 
-SCALE = 0.25
+SCALE = 0.15
 XOFFSET = 200 * SCALE
 YOFFSET = 188 * SCALE
 IW = 116 * SCALE
@@ -36,12 +36,13 @@ class SnowFlake(FunBase):
         elif i == 9:
             img_sheet.set_clip(pygame.Rect(XOFFSET * 2, YOFFSET * 2, IW, IH))
 
-        self.img = img_sheet.subsurface(img_sheet.get_clip())
+        rand_scale = random.randrange(1, 4) * 0.4
+        self.img = pygame.transform.smoothscale_by(img_sheet.subsurface(img_sheet.get_clip()), rand_scale)
 
         self.x = random.randrange(10, screen.get_width() - 10)
         self.y = -random.randrange(30, 500)
         self.vel_x = (2 - (random.randrange(0, 4))) * 0.2
-        self.vel_y = 3
+        self.vel_y = 2 + (2 - (random.randrange(0, 4))) * 0.2
 
     def animate(self):
         if self.anim_step == 1:

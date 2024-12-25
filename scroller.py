@@ -77,7 +77,7 @@ main_img = pygame.Surface((WIDTH, HEIGHT))
 main_summary = ""
 fun_objs = []
 
-NUM_SNOWFLAKES = 200
+NUM_SNOWFLAKES = 100
 snow_flakes = []
 for _ in range(NUM_SNOWFLAKES):
     snow_flakes.append(SnowFlake(screen))
