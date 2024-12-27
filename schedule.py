@@ -815,7 +815,7 @@ movies = [
     Movie(0, 0, "Radar Men from the Moon", "1952", [], "", ""),
 
     # Host Segments Only
-    Movie(0, 0, "Rocketship X-M (Host Segments)", "1950", [], "Sep 22, 1990", "201", "0042897"),
+    # Movie(0, 0, "Rocketship X-M (Host Segments)", "1950", [], "Sep 22, 1990", "201", "0042897"),
     Movie(0, 0, "Godzilla vs. Megalon (Host Segments)", "1973", [], "Jan 19, 1991", "212", "0070122"),
     Movie(0, 0, "Godzilla vs. the Sea Monster (Host Segments)", "1966", [], "Feb 2, 1991", "213", "0060464"),
     Movie(0, 0, "The Amazing Colossal Man (Host Segments)", "1957", [], "Aug 3, 1991", "309", "0050118"),
@@ -869,7 +869,7 @@ movies = [
     Movie(1, 12, "Untamed Youth", "1957", [], "Jan 27, 1990", "112", "0051139"),
     Movie(1, 13, "The Black Scorpion", "1957", [], "Feb 3, 1990", "113", "0050197"),
 
-    # Movie(2, 1, "Rocketship X-M", "1950", [], "Sep 22, 1990", "201", "0042897"),
+    Movie(2, 1, "Rocketship X-M", "1950", [], "Sep 22, 1990", "201", "0042897"),
     Movie(2, 2, "The Side Hackers", "1969", [], "Sep 29, 1990", "202", "0061671"),
     Movie(2, 3, "Jungle Goddess", "1948", ["The Phantom Creeps, Chapter 1: 'The Menacing Power'"], "Oct 6, 1990",
           "203", "0040500"),

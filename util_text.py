@@ -10,7 +10,7 @@ def prepare_summary(summary: str) -> str:
 def update_title(title, epnum):
     title_display = title
     if title.startswith("The Incredibly Strange Creatures"):
-        title_display = "The Incredibly Strange Creatures Who Stopped Living…"
+        title_display = "The Incredibly Strange Creatures…"
     if epnum != "":
         title_display += " (" + epnum + ")"
     return title_display
@@ -22,7 +22,7 @@ def wrap_text(text) -> str:
     for i in range(0, len(text)):
         t = text[i]
 
-        if i % 54 == 0:
+        if i % 52 == 0:
             s = s[:last_space + 1] + "\n" + s[last_space + 2:]
 
         if t == " ":

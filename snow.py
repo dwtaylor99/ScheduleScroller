@@ -39,13 +39,27 @@ class SnowFlake(FunBase):
         rand_scale = random.randrange(1, 4) * 0.4
         self.img = pygame.transform.smoothscale_by(img_sheet.subsurface(img_sheet.get_clip()), rand_scale)
 
-        self.x = random.randrange(10, screen.get_width() - 10)
+        self.rotate_speed = (2 - (random.randrange(0, 4)))
+        self.angle = 0
+
+        self.x = random.randrange(0, screen.get_width())
         self.y = -random.randrange(30, 500)
         self.vel_x = (2 - (random.randrange(0, 4))) * 0.2
         self.vel_y = 2 + (2 - (random.randrange(0, 4))) * 0.2
 
     def animate(self):
         if self.anim_step == 1:
-            super().animate()
+            old_center = self.img.get_rect().center
+            self.angle = (self.angle + self.rotate_speed) % 360
+            new_image = pygame.transform.rotate(self.img, self.angle)
+            new_rect = new_image.get_rect()
+            new_rect.center = old_center
+            new_rect.x += self.x
+            new_rect.y += self.y
+
+            self.screen.blit(new_image, new_rect)
+            self.x += self.vel_x
+            self.y += self.vel_y
+
             if self.y > self.screen.get_height() // 2:
                 self.anim_step = 0

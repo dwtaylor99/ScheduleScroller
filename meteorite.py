@@ -19,7 +19,7 @@ class Meteorite(FunBase):
     def animate(self):
         if self.anim_step == 1:
             super().animate()
-            self.screen.blit(self.img, (self.x, self.y))
+            # self.screen.blit(self.img, (self.x, self.y))
 
             # Stop the animation?
             if self.x < -self.img.get_width() or self.y > self.screen.get_height() / 2:

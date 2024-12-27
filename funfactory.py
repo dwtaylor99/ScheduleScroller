@@ -2,14 +2,16 @@ import random
 
 from pygame import Surface
 
-from apple import Apple
 from deathray import DeathRay
 from elsanto_flying import ElSantoFlying
 from gamera import Gamera
+from horse_running import HorseRunning
 from meteorite import Meteorite
+from mood_servo import MoodServo
 from mst3k_moon import MST3KMoon
 from sandstorm import SandStorm
 from santa_sleigh import SantaSleigh
+from skydiver import Skydiver
 from sol import SOL
 from starfighter import Starfighter
 from time_chasers_plane import TimeChasersPlane
@@ -17,6 +19,7 @@ from time_chasers_plane_other import TimeChasersPlaneOther
 from vampire_woman import VampireWoman
 from vi_head import ViHead
 from widowmaker import Widowmaker
+from zap_beer import ZapBeer
 
 
 def get_old(screen: Surface, title: str, epnum: str) -> []:
@@ -63,7 +66,7 @@ def get_old(screen: Surface, title: str, epnum: str) -> []:
 def get(screen: Surface, title: str, epnum: str) -> []:
     fun_objs = []
 
-    r = random.randint(1, 18)
+    r = random.randint(1, 16)
 
     if r == 1:
         for _ in range(random.randrange(3, 8)):
@@ -108,15 +111,20 @@ def get(screen: Surface, title: str, epnum: str) -> []:
         fun_objs.append(TimeChasersPlane(screen))
         fun_objs.append(TimeChasersPlaneOther(screen))
 
-    if r >= 13:
-        fun_objs.append(SantaSleigh(screen))
+    if r == 13:
+        fun_objs.append(HorseRunning(screen))
+
+    if r == 14:
+        # fun_objs.append(SantaSleigh(screen))
+        fun_objs.append(ZapBeer(screen))
+
+    if r == 15:
+        fun_objs.append(Skydiver(screen))
+
+    if r == 16:
+        fun_objs.append(MoodServo(screen))
 
     return fun_objs
-
-
-def get_debug(screen: Surface, title: str, epnum: str) -> []:
-    print("Debugging Apple.")
-    return [Apple(screen)]
 
 
 class FunFactory:
