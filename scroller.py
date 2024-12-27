@@ -51,11 +51,18 @@ FONT_PAD = 10  # vertical font spacing
 BLACK = pygame.Color(0, 0, 0)
 BLUE = pygame.Color(0, 0, 120)
 LTBLUE = pygame.Color(0, 0, 200)
+MEDBLUE = pygame.Color(0, 50, 180)
 PALEBLUE = pygame.Color(0, 80, 220)
 YELLOW = pygame.Color(192, 192, 0)
 WHITE = pygame.Color(192, 192, 192)
 DK_GRAY = pygame.Color(32, 32, 32)
 GRAY = pygame.Color(128, 128, 128)
+
+JOEL_RED = pygame.Color(201, 58, 34)  # "C93A22"
+MIKE_BLUE = pygame.Color(0, 115, 164)  # "0073A4"
+JONAH_YELLOW = pygame.Color(211, 161, 1)  # "D3A101"
+EMILY_PURPLE = pygame.Color(100, 96, 173)  # "6460AD"
+GROUP_GREEN = pygame.Color(33, 130, 0)  # "218200"
 
 NUM_SCHEDULE = 20  # Number of schedule items to load
 
@@ -71,8 +78,8 @@ hdr_y = 0
 timer_tick = 0  # start it at 1 so we don't trigger 'fun' immediately
 is_reloading = False
 is_loading_fun = False
-is_loading_fun = False
 main_img = pygame.Surface((WIDTH, HEIGHT))
+profile_img = pygame.Surface((1, 1))
 main_summary = ""
 fun_objs = []
 header_color = pygame.Color(192, 192, 0, 0)
@@ -80,8 +87,6 @@ title_color = pygame.Color(192, 192, 192, 0)
 
 NUM_SNOWFLAKES = 100
 snow_flakes = []
-for _ in range(NUM_SNOWFLAKES):
-    snow_flakes.append(SnowFlake(screen))
 
 # game variables
 wall_thickness = 10
@@ -111,6 +116,39 @@ def draw_image():
         new_h = HEIGHT_HALF / main_img.get_height()
         img_scaled = pygame.transform.smoothscale_by(main_img, min(new_w, new_h))
         screen.blit(img_scaled, ((WIDTH_HALF - img_scaled.get_width()) // 2, 0))
+
+    epnum = sched[0]['epnum']
+    if epnum != "":
+        # Overwrite the weird episode numbers on the main_img if this is a MST3K episode
+        # Who is the host?
+        num = int(sched[0]['epnum'])
+        host_color = JOEL_RED
+        if 512 < num <= 1013:
+            host_color = MIKE_BLUE
+        elif 1101 < num < 1302 or num in [1304, 1307, 1309, 1311]:
+            host_color = JONAH_YELLOW
+        elif num in [1303, 1305, 1308, 1310]:
+            host_color = EMILY_PURPLE
+        elif num in [1306, 1312]:
+            host_color = JOEL_RED
+        elif num == 1313:
+            host_color = GROUP_GREEN
+
+        # Draw the background rounded rectangle
+        # pygame.draw.rect(screen, host_color, pygame.Rect(-30, 356, 116, 160), 0, 20)
+
+        # Load the host image and display it
+        # pygame.transform.smoothscale_by(pygame.image.load(host_img_name), 0.9)
+
+        # Draw the experiment number
+        xpos = 2
+        if len(epnum) == 4:
+            xpos = -4
+
+        FONT.set_bold(True)
+        text = FONT.render(" " + epnum + " ", True, (252, 252, 252), host_color)
+        screen.blit(text, (xpos, 470))
+        FONT.set_bold(False)
 
 
 def draw_summary():
@@ -218,7 +256,8 @@ def draw_schedule_item(obj, y):
         y += int((len(sched) + 1) * SCHED_H)
 
     pygame.draw.rect(screen, WHITE, pygame.Rect(0, y, WIDTH, SCHED_H))
-    rect_gradient_h(screen, PALEBLUE, LTBLUE, pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3))
+    pygame.draw.rect(screen, MEDBLUE, pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3))
+    # rect_gradient_h(screen, PALEBLUE, LTBLUE, pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3))
 
     title_display = update_title(obj['title'], obj['epnum'])
 
@@ -257,13 +296,13 @@ def draw_clock():
     pac_time = datetime.strftime(pac, CLOCK_FORMAT).lstrip("0")
     pac_pos = pac_time.find(" ")
     drop_shadow(FONT, pac_time[:pac_pos], YELLOW, SCHED_COL1_X, HEIGHT_HALF + FONT_PAD)
-    drop_shadow(FONT_SM, pac_time[pac_pos + 1:], YELLOW, SCHED_COL1_X + 160, HEIGHT_HALF + FONT_PAD)
+    drop_shadow(FONT_SM, pac_time[pac_pos + 1:], YELLOW, SCHED_COL1_X + 165, HEIGHT_HALF + FONT_PAD)
 
     curr = right_now.astimezone(EST_TZ)
     curr_time = datetime.strftime(curr, CLOCK_FORMAT).lstrip("0")
     curr_pos = curr_time.find(" ")
     drop_shadow(FONT, curr_time[:curr_pos], YELLOW, SCHED_COL2_X, HEIGHT_HALF + FONT_PAD)
-    drop_shadow(FONT_SM, curr_time[curr_pos + 1:], YELLOW, SCHED_COL2_X + 160, HEIGHT_HALF + FONT_PAD)
+    drop_shadow(FONT_SM, curr_time[curr_pos + 1:], YELLOW, SCHED_COL2_X + 165, HEIGHT_HALF + FONT_PAD)
 
     # Is it time to reload the schedule?
     time_parts = sched[1]['time_est'].split(" ")
@@ -350,6 +389,9 @@ if __name__ == '__main__':
 
         # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus, 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
         if sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
+            if len(snow_flakes) == 0:
+                for _ in range(NUM_SNOWFLAKES):
+                    snow_flakes.append(SnowFlake(screen))
             snow()
         else:
             snow_flakes.clear()

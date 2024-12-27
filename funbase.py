@@ -8,7 +8,6 @@ class FunBase:
     y = 0
     vel_x = 0
     vel_y = 0
-    ticks = 0
     anim_step = 1
 
     def __init__(self, screen: Surface):

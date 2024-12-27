@@ -22,72 +22,68 @@ from anims.widowmaker import Widowmaker
 from anims.zap_beer import ZapBeer
 
 
-def get(screen: Surface, title: str, epnum: str) -> []:
-    fun_objs = []
+def get_by_epnum(screen, epnum: str):
+    objs = []
 
-    r = random.randint(1, 17)
-
-    if r == 1:
-        for _ in range(random.randrange(3, 8)):
-            fun_objs.append(Meteorite(screen))
-
-    if r == 2:
-        fun_objs.append(DeathRay(screen))
-
-    if r == 3:
-        fun_objs.append(Gamera(screen))
-
-    if r == 4:
-        for _ in range(random.randrange(5, 10)):
-            fun_objs.append(SandStorm(screen))
-
-    if r == 5:
-        for _ in range(random.randrange(3, 5)):
-            fun_objs.append(Starfighter(screen))
-
-    if r == 6:
-        vamp_wom = VampireWoman(screen)
-        fun_objs.append(vamp_wom)
-        fun_objs.append(ElSantoFlying(screen, vamp_wom.x, vamp_wom.y))
-
-    if r == 7:
-        fun_objs.append(SOL(screen))
-
-    if r == 8:
-        fun_objs.append(MST3KMoon(screen))
-
-    if r == 9:
-        fun_objs.append(SOL(screen))
-        fun_objs.append(Widowmaker(screen))
-
-    if r == 10:
-        fun_objs.append(ViHead(screen))
-
-    if r == 11:
-        fun_objs.append(TimeChasersPlane(screen))
-
-    if r == 12:
-        fun_objs.append(TimeChasersPlane(screen))
-        fun_objs.append(TimeChasersPlaneOther(screen))
-
-    if r == 13:
-        fun_objs.append(HorseRunning(screen))
-
-    if r == 14:
-        # fun_objs.append(SantaSleigh(screen))
-        fun_objs.append(ZapBeer(screen))
-
-    if r == 15:
-        fun_objs.append(Skydiver(screen))
-
-    if r == 16:
-        fun_objs.append(MoodServo(screen))
-
-    if r == 17:
+    if epnum in ['302', '304', '308', '312', '316', '1307']:
+        objs.append(Gamera(screen))
+    elif epnum in ['322', '324']:
         for _ in range(random.randrange(2, 5)):
-            fun_objs.append(Shuriken(screen))
+            objs.append(Shuriken(screen))
+    elif epnum == "410":
+        for _ in range(random.randrange(5, 10)):
+            objs.append(SandStorm(screen))
+    elif epnum == "414":
+        objs.append(ViHead(screen))
+    elif epnum == "609":
+        objs.append(Skydiver(screen))
+    elif epnum == "611":
+        objs.append(HorseRunning(screen))
+    elif epnum == "612":
+        for _ in range(random.randrange(3, 5)):
+            objs.append(Starfighter(screen))
+    elif epnum == "620":
+        objs.append(DeathRay(screen))
+    elif epnum == "624":
+        vamp_wom = VampireWoman(screen)
+        objs.append(vamp_wom)
+        objs.append(ElSantoFlying(screen, vamp_wom.x, vamp_wom.y))
+    elif epnum == "821":
+        objs.append(TimeChasersPlane(screen))
+        objs.append(TimeChasersPlaneOther(screen))
+    elif epnum == "910":
+        objs.append(ZapBeer(screen))
+    elif epnum == "1007":
+        for _ in range(random.randrange(3, 8)):
+            objs.append(Meteorite(screen))
+    elif epnum == "1306":
+        objs.append(MoodServo(screen))
 
-    return fun_objs
+    return objs
+
+
+def get(screen: Surface, title: str, epnum: str) -> []:
+    anim_list = ['302', '304', '308', '312', '316', '322', '324', '410', '414',
+                 '609', '611', '612', '620', '624', '812', '821', '910', '1007',
+                 '1306', '1307']
+
+    # If the episode has an animation, choose it 50% of the time
+    if epnum in anim_list and random.randrange(1, 2) == 1:
+        # Choose the specific animation for this episode
+        return get_by_epnum(screen, epnum)
+    else:
+        # Choose a random animation
+        if random.randrange(1, 10) == 1:
+            # Generic animation
+            rn = random.randrange(1, 3)
+            if rn == 1:
+                return [SOL(screen)]
+            elif rn == 2:
+                return [SOL(screen), Widowmaker(screen)]
+            elif rn == 3:
+                return [MST3KMoon(screen)]
+        else:
+            return get_by_epnum(screen, random.choice(anim_list))
 
 
 class FunFactory:
