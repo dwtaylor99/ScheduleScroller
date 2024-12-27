@@ -7,10 +7,9 @@ import pygame
 import funfactory
 import schedule
 import summaries
-from ball import Ball
 from gradient import rect_gradient_h
 from schedule import PAC_TZ, EST_TZ
-from snow import SnowFlake
+from anims.snow import SnowFlake
 from util_text import *
 
 pygame.init()
@@ -71,6 +70,7 @@ sched = []
 hdr_y = 0
 timer_tick = 0  # start it at 1 so we don't trigger 'fun' immediately
 is_reloading = False
+is_loading_fun = False
 is_loading_fun = False
 main_img = pygame.Surface((WIDTH, HEIGHT))
 main_summary = ""
@@ -133,25 +133,20 @@ def draw_schedule_header():
     bg = pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 4)
     rect_gradient_h(screen, LTBLUE, BLUE, bg)
 
-    # drop_shadow(FONT, "Playing:", header_color, SCHED_COL3_X, y + FONT_PAD)
-    # drop_shadow(FONT, update_title(sched[0]['title'], sched[0]['epnum']), title_color, SCHED_COL3_X + 128, y + FONT_PAD)
-
     alpha_step = 2
     tick = int(timer_tick) % 60
-    if tick < 3:
+    if tick < 2:
         # FADE IN: Playing
         if header_color.a + alpha_step <= 255:
             header_color.a += alpha_step
         if title_color.a + alpha_step <= 255:
             title_color.a += alpha_step
         display_index = 0
-        anim_state = 1
-    elif tick < 27:
+    elif tick < 28:
         # DISPLAY: Playing
         header_color.a = 255
         title_color.a = 255
         display_index = 0
-        anim_state = 2
     elif tick < 30:
         # FADE OUT: Playing
         if header_color.a - alpha_step >= 0:
@@ -159,21 +154,18 @@ def draw_schedule_header():
         if title_color.a - alpha_step >= 0:
             title_color.a -= alpha_step
         display_index = 0
-        anim_state = 3
-    elif tick < 33:
+    elif tick < 32:
         # FADE IN: Next
         if header_color.a + alpha_step <= 255:
             header_color.a += alpha_step
         if title_color.a + alpha_step <= 255:
             title_color.a += alpha_step
         display_index = 1
-        anim_state = 4
-    elif tick < 57:
+    elif tick < 58:
         # DISPLAY: Next
         header_color.a = 255
         title_color.a = 255
         display_index = 1
-        anim_state = 5
     else:
         # FADE OUT: Next
         if header_color.a - alpha_step >= 0:
@@ -181,7 +173,6 @@ def draw_schedule_header():
         if title_color.a - alpha_step >= 0:
             title_color.a -= alpha_step
         display_index = 1
-        anim_state = 6
 
     leading_word = "Playing:" if display_index == 0 else "Up Next:"
     drop_shadow(FONT, leading_word, header_color, SCHED_COL3_X, y + FONT_PAD)
@@ -331,7 +322,7 @@ def snow():
         if flake.anim_step == 0:
             snow_flakes.append(SnowFlake(screen))
 
-    # Remove and snowflakes that are finished falling
+    # Remove any snowflakes that are finished falling
     temp_objs = []
     for flake in snow_flakes:
         if flake.anim_step > 0:
@@ -357,8 +348,7 @@ if __name__ == '__main__':
         draw_gizmoplex()
         fun()
 
-        # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus, 813=Jack Frost,
-        # 1104=Avalanche, 1113=Xmas That Almost Wasn't
+        # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus, 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
         if sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
             snow()
         else:

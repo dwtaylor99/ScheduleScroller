@@ -9,7 +9,7 @@ import urllib.request
 
 def load() -> dict:
     summaries = {}
-    with open("summaries.csv", "r", encoding="utf-8") as csvfile:
+    with open("data/summaries.csv", "r", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=",")
         for line in reader:
             if reader.line_num < 5 and len(line) > 0 and line[0].lower() == "<!doctype html>":
@@ -65,6 +65,6 @@ def update():
     try:
         url = "https://docs.google.com/spreadsheets/d/1kHmgGySs0VaP9UPf74T0rdc2batgc7k_4I027fE50-s/gviz/tq" \
               "?tqx=out:csv&sheet=Sheet1"
-        urllib.request.urlretrieve(url, "summaries.csv")
+        urllib.request.urlretrieve(url, "data/summaries.csv")
     except urllib.error.HTTPError:
         print("HTTPError trying to download Summaries spreadsheet")

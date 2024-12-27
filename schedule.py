@@ -473,8 +473,61 @@ IMAGE_NAMES = {
     "MST3K Little Gold Statue Preview 1995": "little_gold_statue.png",
     "MST3K Summer Blockbuster Review 1997": "blockbuster_review_1997.png",
     "MST3K Summer Blockbuster Review 1998": "blockbuster_review_1998.png",
-    "MST3K Academy of Robots' Choice Awards Special": "academy_robots_choice.png"
+    "MST3K Academy of Robots' Choice Awards Special": "academy_robots_choice.png",
+
+    "Godzilla vs. Megalon (Host Segments)": "212.png",
+    "Godzilla vs. the Sea Monster (Host Segments)": "213.png",
+    "The Amazing Colossal Man (Host Segments)": "309.png",
+    "It Conquered the World (Host Segments)": "311.png",
+    "Space Travelers (Host Segments)": "401.png",
+    "Fire Maidens of Outer Space (Host Segments)": "416.png",
+    "Attack of the The Eye Creatures (Host Segments)": "418.png",
+    "Teen-Age Crime Wave (Host Segments)": "522.png",
+    "12 to the Moon (Host Segments)": "524.png",
+    "Girls Town (Host Segments)": "601.png",
+    "Colossus and the Headhunters (Host Segments)": "605.png",
+    "San Francisco International (Host Segments)": "614.png",
+    "Kitten with a Whip (Host Segments)": "615.png",
+    "This Island Earth (Host Segments)": "700.png",
+    "The Incredible Melting Man (Host Segments)": "704.png",
+    "Revenge of the Creature (Host Segments)": "801.png",
+    "The Leech Woman (Host Segments)": "802.png",
+    "The Mole People (Host Segments)": "803.png",
+    "The Deadly Mantis (Host Segments)": "804.png",
+    "The Thing That Couldn't Die (Host Segments)": "805.png",
+    "Terror from the Year 5000 (Host Segments)": "807.png",
+    "I Was a Teenage Werewolf (Host Segments)": "809.png",
+    "Riding with Death (Host Segments)": "814.png",
+    "Agent for H.A.R.M. (Host Segments)": "815.png",
+    "The Projected Man (Host Segments)": "901.png",
+    "The Deadly Bees (Host Segments)": "905.png",
+    "The Space Children (Host Segments)": "906.png",
+    "Soultaker (Host Segments)": "1001.png",
+    "Squirm (Host Segments)": "1012.png",
+    "Diabolik (Host Segments)": "1013.png"
 }
+"""
+    "Reptilicus": "",
+    "Cry Wilderness": "",
+    "The Time Travelers": "",
+    "Avalanche": "",
+    "The Beast of Hollow Mountain": "",
+    "Starcrash": "",
+    "The Land That Time Forgot": "",
+    "The Loves of Hercules": "",
+    "Yongary - Monster from the Deep": "",
+    "Wizards of the Lost Kingdom": "",
+    "Wizards of the Lost Kingdom II": "",
+    "Carnival Magic": "",
+    "The Christmas that Almost Wasn't": "",
+    "At the Earth's Core": "",
+    "Mac and Me": "",
+    "Atlantic Rim": "",
+    "Lords of the Deep": "",
+    "The Day Time Ended": "",
+    "Killer Fish": "",
+    "Ator, the Fighting Eagle": ""
+"""
 
 
 def get_image_name(title: str) -> str:
@@ -599,7 +652,7 @@ def load() -> [str]:
     Title - formatted like "1002 Girl in Gold Boots" or "CT11 War of the Insects"
     """
     csvmovies = []
-    with open("times.csv", "r") as csvfile:
+    with open("data/times.csv", "r") as csvfile:
         reader = csv.reader(csvfile, delimiter=",")
         for line in reader:
             if reader.line_num > 1:
@@ -619,13 +672,12 @@ def update() -> None:
     try:
         url = "https://docs.google.com/spreadsheets/d/1fNpYG3BTl06V-X-bVdwKW7QF4xrDQj1-5V-3oP9q5RM/gviz/tq?tqx=out" \
               ":csv&sheet=Times"
-        urllib.request.urlretrieve(url, 'times.csv')
+        urllib.request.urlretrieve(url, 'data/times.csv')
     except urllib.error.HTTPError:
         print("HTTPError trying to download Movie Times spreadsheet")
 
 
 movies_unairing = [
-    Movie(2, 1, "Rocketship X-M", "1950", [], "Sep 22, 1990", "201", "0042897"),
     Movie(2, 12, "Godzilla vs. Megalon", "1973", [], "Jan 19, 1991", "212", "0070122"),
     Movie(2, 13, "Godzilla vs. the Sea Monster", "1966", [], "Feb 2, 1991", "213", "0060464"),
     Movie(3, 9, "The Amazing Colossal Man", "1957", [], "Aug 3, 1991", "309", "0050118"),
