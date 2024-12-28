@@ -9,6 +9,7 @@ from anims.horse_running import HorseRunning
 from anims.meteorite import Meteorite
 from anims.mood_servo import MoodServo
 from anims.mst3k_moon import MST3KMoon
+from anims.orbit_jet import OrbitJet
 from anims.sandstorm import SandStorm
 from anims.shuriken import Shuriken
 from anims.skydiver import Skydiver
@@ -16,10 +17,12 @@ from anims.sol import SOL
 from anims.starfighter import Starfighter
 from anims.time_chasers_plane import TimeChasersPlane
 from anims.time_chasers_plane_other import TimeChasersPlaneOther
+from anims.troy_csonka import TroyCsonka
 from anims.vampire_woman import VampireWoman
 from anims.vi_head import ViHead
 from anims.widowmaker import Widowmaker
 from anims.zap_beer import ZapBeer
+from scroller import DEBUG
 
 
 def get_by_epnum(screen, epnum: str):
@@ -33,6 +36,8 @@ def get_by_epnum(screen, epnum: str):
     elif epnum == "410":
         for _ in range(random.randrange(5, 10)):
             objs.append(SandStorm(screen))
+    elif epnum in ["413", "417"]:
+        objs.append(OrbitJet(screen))
     elif epnum == "414":
         objs.append(ViHead(screen))
     elif epnum == "609":
@@ -52,7 +57,10 @@ def get_by_epnum(screen, epnum: str):
         objs.append(TimeChasersPlane(screen))
         objs.append(TimeChasersPlaneOther(screen))
     elif epnum == "910":
-        objs.append(ZapBeer(screen))
+        if random.randrange(1, 2) == 1:
+            objs.append(TroyCsonka(screen))
+        else:
+            objs.append(ZapBeer(screen))
     elif epnum == "1007":
         for _ in range(random.randrange(3, 8)):
             objs.append(Meteorite(screen))
@@ -66,6 +74,9 @@ def get(screen: Surface, title: str, epnum: str) -> []:
     anim_list = ['302', '304', '308', '312', '316', '322', '324', '410', '414',
                  '609', '611', '612', '620', '624', '812', '821', '910', '1007',
                  '1306', '1307']
+
+    if DEBUG:
+        return [TroyCsonka(screen)]
 
     # If the episode has an animation, choose it 50% of the time
     if epnum in anim_list and random.randrange(1, 2) == 1:

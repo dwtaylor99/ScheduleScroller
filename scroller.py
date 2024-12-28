@@ -15,7 +15,7 @@ from util_text import *
 pygame.init()
 
 # Constants
-DEBUG = False
+DEBUG = True
 
 WIDTH = 1920
 HEIGHT = 1080
@@ -142,11 +142,13 @@ def draw_image():
 
         # Draw the experiment number
         xpos = 2
+        display_epnum = "  " + epnum + "  "
         if len(epnum) == 4:
             xpos = -4
+            display_epnum = " " + epnum
 
         FONT.set_bold(True)
-        text = FONT.render(" " + epnum + " ", True, (252, 252, 252), host_color)
+        text = FONT.render(display_epnum, True, (252, 252, 252), host_color)
         screen.blit(text, (xpos, 470))
         FONT.set_bold(False)
 
@@ -403,7 +405,7 @@ if __name__ == '__main__':
 
         # Time for fun?
         random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
-        # random_fun = 1
+        random_fun = 1
         if int(timer_tick) % 60 == 0 and random_fun == 1 and not is_loading_fun:
             is_loading_fun = True
             fun_objs = funfactory.get(screen, sched[0]['title'], sched[0]['epnum'])
