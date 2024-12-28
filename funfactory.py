@@ -54,8 +54,11 @@ def get_by_epnum(screen, epnum: str):
         objs.append(vamp_wom)
         objs.append(ElSantoFlying(screen, vamp_wom.x, vamp_wom.y))
     elif epnum == "821":
-        objs.append(TimeChasersPlane(screen))
-        objs.append(TimeChasersPlaneOther(screen))
+        if random.randrange(1, 2) == 1:
+            objs.append(TimeChasersPlane(screen))
+        else:
+            objs.append(TimeChasersPlane(screen))
+            objs.append(TimeChasersPlaneOther(screen))
     elif epnum == "910":
         if random.randrange(1, 2) == 1:
             objs.append(TroyCsonka(screen))

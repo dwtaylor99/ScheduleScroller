@@ -402,7 +402,7 @@ if __name__ == '__main__':
         draw_clock()
 
         # Time for fun?
-        random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
+        # random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
         random_fun = 1
         if int(timer_tick) % 60 == 0 and random_fun == 1 and not is_loading_fun:
             is_loading_fun = True
