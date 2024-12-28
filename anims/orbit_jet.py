@@ -40,8 +40,8 @@ class OrbitJet(FunBase):
             # Land the Orbit Jet
             super().animate()
 
-            self.frame_index = (self.frame_index + 1) % len(self.frames)
-            frame = self.frames[self.frame_index]
+            self.frame_index = (self.frame_index + 0.5) % len(self.frames)
+            frame = self.frames[int(self.frame_index)]
             self.screen.blit(frame, (self.x + 17, self.y + self.img.get_height()))
 
             # Stop the animation?
