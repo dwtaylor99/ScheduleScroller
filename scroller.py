@@ -15,7 +15,7 @@ from util_text import *
 pygame.init()
 
 # Constants
-DEBUG = True
+DEBUG = False
 
 WIDTH = 1920
 HEIGHT = 1080
@@ -140,15 +140,13 @@ def draw_image():
         # Load the host image and display it
         # pygame.transform.smoothscale_by(pygame.image.load(host_img_name), 0.9)
 
-        # Draw the experiment number
-        xpos = 2
-        display_epnum = "  " + epnum + "  "
-        if len(epnum) == 4:
-            xpos = -4
-            display_epnum = " " + epnum
+        # Extend the rectangle to cover the bottom curve
+        pygame.draw.rect(screen, host_color, (0, 470, 85, 45))
 
+        # Draw the experiment number
         FONT.set_bold(True)
-        text = FONT.render(display_epnum, True, (252, 252, 252), host_color)
+        text = FONT.render(epnum, True, (252, 252, 252), host_color)
+        xpos = (85 - text.get_size()[0]) // 2
         screen.blit(text, (xpos, 470))
         FONT.set_bold(False)
 
