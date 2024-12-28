@@ -306,10 +306,11 @@ def draw_clock():
 
     # Is it time to reload the schedule?
     time_parts = sched[1]['time_est'].split(" ")
-    update_time = time_parts[1] + ":00 " + time_parts[2]
+    update_times = [time_parts[1] + ":00 " + time_parts[2],
+                    time_parts[1] + ":01 " + time_parts[2],
+                    time_parts[1] + ":02 " + time_parts[2]]
     curr_time = curr_time.rstrip(" EST").rstrip(" EDT")  # Remove the timezone
-    # print(curr_time + " | " + update_time + " | is_reloading: " + str(is_reloading))
-    if curr_time == update_time and not is_reloading:
+    if curr_time in update_times and not is_reloading:
         setup()
 
 
