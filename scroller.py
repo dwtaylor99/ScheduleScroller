@@ -1,15 +1,13 @@
 import os.path
-import random
 from datetime import datetime
-
-import pygame
 
 import funfactory
 import schedule
 import summaries
+from anims.snow import SnowFlake
+from colors import *
 from gradient import rect_gradient_h
 from schedule import PAC_TZ, EST_TZ
-from anims.snow import SnowFlake
 from util_text import *
 
 pygame.init()
@@ -29,9 +27,10 @@ SCHED_COL1_X = 30
 SCHED_COL2_X = 320
 SCHED_COL3_X = 610
 DOW_W = 80
+HOUR_W = 20
+MIN_W = 36
+MERID_W = 50
 
-# Create fonts
-# FONT_FACE = "arial"
 FONT_FACE_SIM = "fonts/SimianText_Orangutan.otf"
 FONT_SIZE = 36
 FONT = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE)
@@ -45,24 +44,8 @@ FONT_SM = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_SMALL)
 FONT_SIZE_LARGE = 40
 FONT_LG = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_LARGE)
 
-FONT_PAD = 10  # vertical font spacing
-
-# Colors
-BLACK = pygame.Color(0, 0, 0)
-BLUE = pygame.Color(0, 0, 120)
-LTBLUE = pygame.Color(0, 0, 200)
-MEDBLUE = pygame.Color(0, 50, 180)
-PALEBLUE = pygame.Color(0, 80, 220)
-YELLOW = pygame.Color(192, 192, 0)
-WHITE = pygame.Color(192, 192, 192)
-DK_GRAY = pygame.Color(32, 32, 32)
-GRAY = pygame.Color(128, 128, 128)
-
-JOEL_RED = pygame.Color(201, 58, 34)  # "C93A22"
-MIKE_BLUE = pygame.Color(0, 115, 164)  # "0073A4"
-JONAH_YELLOW = pygame.Color(211, 161, 1)  # "D3A101"
-EMILY_PURPLE = pygame.Color(100, 96, 173)  # "6460AD"
-GROUP_GREEN = pygame.Color(33, 130, 0)  # "218200"
+# vertical font spacing
+FONT_PAD = 10
 
 NUM_SCHEDULE = 20  # Number of schedule items to load
 
@@ -105,6 +88,22 @@ def drop_shadow(font, text, color: pygame.Color, x, y):
     screen.blit(hilite, (x, y))
 
 
+def draw_episode_number(epnum: str):
+    """Overwrite the weird episode numbers on the main_img if this is a MST3K episode"""
+    # Who is the host?
+    host_color = get_host_color(epnum)
+
+    # Extend the rectangle to cover the bottom curve
+    pygame.draw.rect(screen, host_color, (0, 470, 85, 45), 0, 0, 0, 0, 0, 20)
+
+    # Draw the experiment number
+    FONT.set_bold(True)
+    text = FONT.render(epnum, True, (252, 252, 252), host_color)
+    xpos = (85 - text.get_size()[0]) // 2
+    screen.blit(text, (xpos, 470))
+    FONT.set_bold(False)
+
+
 def draw_image():
     global main_img
 
@@ -119,36 +118,7 @@ def draw_image():
 
     epnum = sched[0]['epnum']
     if epnum != "":
-        # Overwrite the weird episode numbers on the main_img if this is a MST3K episode
-        # Who is the host?
-        num = int(sched[0]['epnum'])
-        host_color = JOEL_RED
-        if 512 < num <= 1013:
-            host_color = MIKE_BLUE
-        elif 1101 < num < 1302 or num in [1304, 1307, 1309, 1311]:
-            host_color = JONAH_YELLOW
-        elif num in [1303, 1305, 1308, 1310]:
-            host_color = EMILY_PURPLE
-        elif num in [1306, 1312]:
-            host_color = JOEL_RED
-        elif num == 1313:
-            host_color = GROUP_GREEN
-
-        # Draw the background rounded rectangle
-        # pygame.draw.rect(screen, host_color, pygame.Rect(-30, 356, 116, 160), 0, 20)
-
-        # Load the host image and display it
-        # pygame.transform.smoothscale_by(pygame.image.load(host_img_name), 0.9)
-
-        # Extend the rectangle to cover the bottom curve
-        pygame.draw.rect(screen, host_color, (0, 470, 85, 45))
-
-        # Draw the experiment number
-        FONT.set_bold(True)
-        text = FONT.render(epnum, True, (252, 252, 252), host_color)
-        xpos = (85 - text.get_size()[0]) // 2
-        screen.blit(text, (xpos, 470))
-        FONT.set_bold(False)
+        draw_episode_number(epnum)
 
 
 def draw_summary():
@@ -240,14 +210,18 @@ def draw_scrolling_header():
 
 def split_time(time: str):
     """Separate the DOW and Time into individual columns"""
-    pos = time.find(" ")
-    dow = time[:pos]
-    t = time[pos + 1:]
+    # pos = time.find(" ")
+    # dow = time[:pos]
+    # t = time[pos + 1:]
+    parts = time.split(" ")
+    dow = parts[0]
+    merid = parts[2]
 
-    if len(t) == 7:
-        t = "  " + t
+    parts2 = parts[1].split(":")
+    hour = parts2[0]
+    mins = parts2[1]
 
-    return dow, t
+    return dow, hour, mins, merid
 
 
 def draw_schedule_item(obj, y):
@@ -261,14 +235,30 @@ def draw_schedule_item(obj, y):
 
     title_display = update_title(obj['title'], obj['epnum'])
 
-    dow1, time1 = split_time(obj['time'])
-    dow2, time2 = split_time(obj['time_est'])
+    dow1, hour1, min1, merid1 = split_time(obj['time'])
+    dow2, hour2, min2, merid2 = split_time(obj['time_est'])
+
+    hour1_adj = 0
+    if len(hour1) == 1:
+        hour1 = "  " + hour1
+    if hour1 == "11":
+        hour1 = " " + hour1
+
+    hour2_adj = 0
+    if len(hour2) == 1:
+        hour2 = "  " + hour2
+    if hour2 == "11":
+        hour2 = " " + hour2
 
     drop_shadow(FONT, dow1, WHITE, SCHED_COL1_X, y + FONT_PAD)
-    drop_shadow(FONT, time1, WHITE, SCHED_COL1_X + DOW_W, y + FONT_PAD)
+    drop_shadow(FONT, hour1 + ":" + min1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + hour1_adj, y + FONT_PAD)
+    # drop_shadow(TIME_FONT, min1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + MIN_W, y + FONT_PAD)
+    drop_shadow(FONT, merid1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + MIN_W + MERID_W, y + FONT_PAD)
 
     drop_shadow(FONT, dow2, WHITE, SCHED_COL2_X, y + FONT_PAD)
-    drop_shadow(FONT, time2, WHITE, SCHED_COL2_X + DOW_W, y + FONT_PAD)
+    drop_shadow(FONT, hour2 + ":" + min2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + hour2_adj, y + FONT_PAD)
+    # drop_shadow(FONT, min2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + MIN_W, y + FONT_PAD)
+    drop_shadow(FONT, merid2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + MIN_W + MERID_W, y + FONT_PAD)
 
     drop_shadow(FONT, title_display, WHITE, SCHED_COL3_X, y + FONT_PAD)
 
@@ -372,11 +362,14 @@ def snow():
 
 
 def draw_gizmoplex():
-    drop_shadow(FONT_XS, "twitch.tv/mst3k", GRAY, WIDTH - 140, HEIGHT_HALF - 50)
-    drop_shadow(FONT_XS, "gizmoplex.com", GRAY, WIDTH - 140, HEIGHT_HALF - 30)
+    drop_shadow(FONT_XS, "twitch.tv/mst3k", WHITE, WIDTH - 130, HEIGHT_HALF - 50)
+    drop_shadow(FONT_XS, "gizmoplex.com", WHITE, WIDTH - 130, HEIGHT_HALF - 30)
 
 
 if __name__ == '__main__':
+    # print(split_time("Sun 3:50 AM"))
+    # sys.exit()
+
     summaries.refresh()
     setup()
 
@@ -388,7 +381,8 @@ if __name__ == '__main__':
         draw_gizmoplex()
         fun()
 
-        # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus, 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
+        # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus,
+        # 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
         if sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
             if len(snow_flakes) == 0:
                 for _ in range(NUM_SNOWFLAKES):
@@ -407,7 +401,7 @@ if __name__ == '__main__':
         random_fun = 1
         if int(timer_tick) % 60 == 0 and random_fun == 1 and not is_loading_fun:
             is_loading_fun = True
-            fun_objs = funfactory.get(screen, sched[0]['title'], sched[0]['epnum'])
+            fun_objs = funfactory.get(sched[0]['title'], sched[0]['epnum'])
 
         if int(timer_tick) % 64 == 0:
             is_loading_fun = False

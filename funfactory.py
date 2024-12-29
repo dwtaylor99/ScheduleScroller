@@ -1,9 +1,8 @@
 import random
 
-from pygame import Surface
-
 from anims.deathray import DeathRay
 from anims.elsanto_flying import ElSantoFlying
+from anims.fingal import Fingal
 from anims.gamera import Gamera
 from anims.horse_running import HorseRunning
 from anims.meteorite import Meteorite
@@ -22,10 +21,10 @@ from anims.vampire_woman import VampireWoman
 from anims.vi_head import ViHead
 from anims.widowmaker import Widowmaker
 from anims.zap_beer import ZapBeer
-from scroller import DEBUG
+from scroller import screen
 
 
-def get_by_epnum(screen, epnum: str):
+def get_by_epnum(epnum: str):
     objs = []
 
     if epnum in ['302', '304', '308', '312', '316', '1307']:
@@ -50,15 +49,17 @@ def get_by_epnum(screen, epnum: str):
     elif epnum == "620":
         objs.append(DeathRay(screen))
     elif epnum == "624":
-        vamp_wom = VampireWoman(screen)
-        objs.append(vamp_wom)
-        objs.append(ElSantoFlying(screen, vamp_wom.x, vamp_wom.y))
+        # vamp_wom = VampireWoman(screen)
+        # objs.append(vamp_wom)
+        objs.append(ElSantoFlying(screen))
     elif epnum == "821":
         if random.randrange(1, 2) == 1:
             objs.append(TimeChasersPlane(screen))
         else:
             objs.append(TimeChasersPlane(screen))
             objs.append(TimeChasersPlaneOther(screen))
+    elif epnum == "822":
+        objs.append(Fingal(screen))
     elif epnum == "910":
         if random.randrange(1, 2) == 1:
             objs.append(TroyCsonka(screen))
@@ -73,18 +74,15 @@ def get_by_epnum(screen, epnum: str):
     return objs
 
 
-def get(screen: Surface, title: str, epnum: str) -> []:
+def get(title: str, epnum: str) -> []:
     anim_list = ['302', '304', '308', '312', '316', '322', '324', '410', '413', '414', '417',
-                 '609', '611', '612', '620', '624', '812', '821', '910', '1007',
+                 '609', '611', '612', '620', '624', '812', '821', '822', '910', '1007',
                  '1306', '1307']
-
-    if DEBUG:
-        return [TroyCsonka(screen)]
 
     # If the episode has an animation, choose it 50% of the time
     if epnum in anim_list and random.randrange(1, 2) == 1:
         # Choose the specific animation for this episode
-        return get_by_epnum(screen, epnum)
+        return get_by_epnum(epnum)
     else:
         # Choose a random animation
         if random.randrange(1, 10) == 1:
@@ -97,7 +95,8 @@ def get(screen: Surface, title: str, epnum: str) -> []:
             elif rn == 3:
                 return [MST3KMoon(screen)]
         else:
-            return get_by_epnum(screen, random.choice(anim_list))
+            return get_by_epnum(random.choice(['302', '322', '410', '413', '414', '609', '611', '612', '620', '624',
+                                               '812', '821', '822', '910', '1007', '1306', '1307']))
 
 
 class FunFactory:
