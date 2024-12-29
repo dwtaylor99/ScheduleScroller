@@ -329,9 +329,10 @@ def setup():
     else:
         main_img = pygame.image.load('images/movies/mst3k.png').convert()
 
-    main_summary = wrap_text(prepare_summary(sched[0]['about'])).strip()
+    main_summary = prepare_summary(sched[0]['about'])
     if sched[0]['year'] != "":
         main_summary += " [" + sched[0]['year'] + "]"
+    main_summary = wrap_text(main_summary).strip()
 
     draw_schedule_items(HEIGHT_HALF + SCHED_H)
     hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H

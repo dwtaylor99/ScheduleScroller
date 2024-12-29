@@ -17,7 +17,6 @@ from anims.starfighter import Starfighter
 from anims.time_chasers_plane import TimeChasersPlane
 from anims.time_chasers_plane_other import TimeChasersPlaneOther
 from anims.troy_csonka import TroyCsonka
-from anims.vampire_woman import VampireWoman
 from anims.vi_head import ViHead
 from anims.widowmaker import Widowmaker
 from anims.zap_beer import ZapBeer
@@ -49,8 +48,6 @@ def get_by_epnum(epnum: str):
     elif epnum == "620":
         objs.append(DeathRay(screen))
     elif epnum == "624":
-        # vamp_wom = VampireWoman(screen)
-        # objs.append(vamp_wom)
         objs.append(ElSantoFlying(screen))
     elif epnum == "821":
         if random.randrange(1, 2) == 1:
