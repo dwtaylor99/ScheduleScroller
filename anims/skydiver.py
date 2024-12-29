@@ -11,7 +11,7 @@ class Skydiver(FunBase):
     def __init__(self, screen: Surface):
         super().__init__(screen)
         self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/skydiver.png').convert_alpha(), 0.5)
-        self.x = random.randrange(500, screen.get_width() - 300)
+        self.x = random.randrange(500, screen.get_width() - 100)
         self.y = -500
         self.vel_x = -2
         self.vel_y = 2

@@ -231,33 +231,23 @@ def draw_schedule_item(obj, y):
 
     pygame.draw.rect(screen, WHITE, pygame.Rect(0, y, WIDTH, SCHED_H))
     pygame.draw.rect(screen, MEDBLUE, pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3))
-    # rect_gradient_h(screen, PALEBLUE, LTBLUE, pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3))
 
     title_display = update_title(obj['title'], obj['epnum'])
 
     dow1, hour1, min1, merid1 = split_time(obj['time'])
     dow2, hour2, min2, merid2 = split_time(obj['time_est'])
 
-    hour1_adj = 0
-    if len(hour1) == 1:
-        hour1 = "  " + hour1
-    if hour1 == "11":
-        hour1 = " " + hour1
-
-    hour2_adj = 0
-    if len(hour2) == 1:
-        hour2 = "  " + hour2
-    if hour2 == "11":
-        hour2 = " " + hour2
+    h1 = FONT.render(hour1, True, WHITE)
+    h2 = FONT.render(hour2, True, WHITE)
 
     drop_shadow(FONT, dow1, WHITE, SCHED_COL1_X, y + FONT_PAD)
-    drop_shadow(FONT, hour1 + ":" + min1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + hour1_adj, y + FONT_PAD)
-    # drop_shadow(TIME_FONT, min1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + MIN_W, y + FONT_PAD)
+    drop_shadow(FONT, hour1 + ":", WHITE, SCHED_COL1_X + DOW_W + HOUR_W + 26 - h1.get_width(), y + FONT_PAD)
+    drop_shadow(FONT, min1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + MIN_W, y + FONT_PAD)
     drop_shadow(FONT, merid1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + MIN_W + MERID_W, y + FONT_PAD)
 
     drop_shadow(FONT, dow2, WHITE, SCHED_COL2_X, y + FONT_PAD)
-    drop_shadow(FONT, hour2 + ":" + min2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + hour2_adj, y + FONT_PAD)
-    # drop_shadow(FONT, min2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + MIN_W, y + FONT_PAD)
+    drop_shadow(FONT, hour2 + ":", WHITE, SCHED_COL2_X + DOW_W + HOUR_W + 26 - h2.get_width(), y + FONT_PAD)
+    drop_shadow(FONT, min2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + MIN_W, y + FONT_PAD)
     drop_shadow(FONT, merid2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + MIN_W + MERID_W, y + FONT_PAD)
 
     drop_shadow(FONT, title_display, WHITE, SCHED_COL3_X, y + FONT_PAD)
@@ -368,9 +358,6 @@ def draw_gizmoplex():
 
 
 if __name__ == '__main__':
-    # print(split_time("Sun 3:50 AM"))
-    # sys.exit()
-
     summaries.refresh()
     setup()
 
