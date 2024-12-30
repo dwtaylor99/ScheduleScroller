@@ -62,9 +62,11 @@ timer_tick = 0  # start it at 1 so we don't trigger 'fun' immediately
 is_reloading = False
 is_loading_fun = False
 main_img = pygame.Surface((WIDTH, HEIGHT))
-profile_img = pygame.Surface((1, 1))
 main_summary = ""
+main_year = ""
 fun_objs = []
+
+# Used for fading between "Playing" and "Up Next"
 header_color = pygame.Color(192, 192, 0, 0)
 title_color = pygame.Color(192, 192, 192, 0)
 
@@ -119,6 +121,13 @@ def draw_image():
     epnum = sched[0]['epnum']
     if epnum != "":
         draw_episode_number(epnum)
+
+
+def draw_year():
+    global main_year
+
+    if main_year != "":
+        drop_shadow(FONT_SM, "(" + main_year + ")", GRAY, WIDTH_HALF - 72, HEIGHT_HALF - 30)
 
 
 def draw_summary():
@@ -300,7 +309,7 @@ def draw_vertical_separators():
 
 
 def setup():
-    global hdr_y, is_reloading, main_img, main_summary, sched
+    global hdr_y, is_reloading, main_img, main_summary, main_year, sched
 
     is_reloading = True
     start_time = datetime.now()
@@ -319,10 +328,8 @@ def setup():
     else:
         main_img = pygame.image.load('images/movies/mst3k.png').convert()
 
-    main_summary = prepare_summary(sched[0]['about'])
-    if sched[0]['year'] != "":
-        main_summary += " [" + sched[0]['year'] + "]"
-    main_summary = wrap_text(main_summary).strip()
+    main_summary = wrap_text(prepare_summary(sched[0]['about'])).strip()
+    main_year = sched[0]['year']
 
     draw_schedule_items(HEIGHT_HALF + SCHED_H)
     hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
@@ -365,6 +372,7 @@ if __name__ == '__main__':
         screen.fill(BLACK)
 
         draw_image()
+        draw_year()
         draw_summary()
         draw_gizmoplex()
         fun()

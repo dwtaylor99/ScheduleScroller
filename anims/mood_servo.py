@@ -84,5 +84,5 @@ class MoodServo(FunBase):
             self.x += self.vel_x
             self.y += self.vel_y
 
-            if self.y > self.screen.get_height() // 2:
+            if self.y >= self.screen.get_height() // 2:
                 self.anim_step = 0

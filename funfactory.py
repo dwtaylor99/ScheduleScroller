@@ -27,45 +27,60 @@ def get_by_epnum(epnum: str):
     objs = []
 
     if epnum in ['302', '304', '308', '312', '316', '1307']:
+        print("Fun: Gamera")
         objs.append(Gamera(screen))
     elif epnum in ['322', '324']:
+        print("Fun: Shuriken")
         for _ in range(random.randrange(2, 5)):
             objs.append(Shuriken(screen))
     elif epnum == "410":
+        print("Fun: Sandstorm")
         for _ in range(random.randrange(5, 10)):
             objs.append(SandStorm(screen))
     elif epnum in ["413", "417"]:
+        print("Fun: OrbitJet")
         objs.append(OrbitJet(screen))
     elif epnum == "414":
+        print("Fun: ViHead")
         objs.append(ViHead(screen))
     elif epnum == "609":
+        print("Fun: Skydiver")
         objs.append(Skydiver(screen))
     elif epnum == "611":
+        print("Fun: HorseRunning")
         objs.append(HorseRunning(screen))
     elif epnum == "612":
+        print("Fun: Starfighters")
         for _ in range(random.randrange(3, 5)):
             objs.append(Starfighter(screen))
     elif epnum == "620":
+        print("Fun: Deathray")
         objs.append(DeathRay(screen))
     elif epnum == "624":
+        print("Fun: ElSanto")
         objs.append(ElSantoFlying(screen))
     elif epnum == "821":
+        print("Fun: TimeChasers")
+        objs.append(TimeChasersPlane(screen))
         if random.randrange(1, 2) == 1:
-            objs.append(TimeChasersPlane(screen))
-        else:
-            objs.append(TimeChasersPlane(screen))
+            print("Fun: TimeChasersOther")
             objs.append(TimeChasersPlaneOther(screen))
     elif epnum == "822":
+        print("Fun: Fingal")
         objs.append(Fingal(screen))
     elif epnum == "910":
         if random.randrange(1, 2) == 1:
+            print("Fun: Troy")
             objs.append(TroyCsonka(screen))
         else:
+            print("Fun: Zap")
             objs.append(ZapBeer(screen))
     elif epnum == "1007":
+        print("Fun: Meteorite")
         for _ in range(random.randrange(3, 8)):
             objs.append(Meteorite(screen))
     elif epnum == "1306":
+        print("Fun: MoodServo")
         objs.append(MoodServo(screen))
 
     return objs
@@ -86,10 +101,13 @@ def get(title: str, epnum: str) -> []:
             # Generic animation
             rn = random.randrange(1, 3)
             if rn == 1:
+                print("Fun: SOL")
                 return [SOL(screen)]
             elif rn == 2:
+                print("Fun: SOL, Widowmaker")
                 return [SOL(screen), Widowmaker(screen)]
             elif rn == 3:
+                print("Fun: MST3KMoon")
                 return [MST3KMoon(screen)]
         else:
             return get_by_epnum(random.choice(['302', '322', '410', '413', '414', '609', '611', '612', '620', '624',
