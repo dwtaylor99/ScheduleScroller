@@ -12,6 +12,7 @@ MAX_RESULTS: int = 5  # Default number of top players to display
 TRIVIA_MINUTE: int = 10  # Minute of the hour to start Triva
 TRIVIA_GAUNTLET: bool = False  # Are we currently in a Trivia Gauntlet?
 TRIVIA_WINNERS = "/me Congratulations to trivia winners "
+TRIVIA_FILE = "../../MovieVox/trivia_winners.json"
 
 
 class Trivia:
@@ -117,7 +118,7 @@ def get_trivia_points(name):
     """Get the trivia points for a user."""
     points = 0
 
-    with open("trivia_winners.json", "r", encoding='utf-8') as jsonfile:
+    with open(TRIVIA_FILE, "r", encoding='utf-8') as jsonfile:
         winners = json.load(jsonfile)
         jsonfile.close()
         for w in winners:
@@ -130,7 +131,7 @@ def get_trivia_points(name):
 
 def load_sorted_list():
     """Load the trivia winners and sort the list from most points to least."""
-    with open("trivia_winners.json", "r") as jsonfile:
+    with open(TRIVIA_FILE, "r") as jsonfile:
         data = json.load(jsonfile)
         jsonfile.close()
 
@@ -196,7 +197,7 @@ def refresh():
 
 
 def save_trivia_user_with_points(username: str, points: int):
-    with open("trivia_winners.json", "r") as jsonfile:
+    with open(TRIVIA_FILE, "r") as jsonfile:
         winners = json.load(jsonfile)
         jsonfile.close()
 
@@ -220,15 +221,15 @@ def save_trivia_user_with_points(username: str, points: int):
     if IS_DEBUG:
         print(winners)
     else:
-        with open("trivia_winners.json", "w") as jsonfile:
+        with open(TRIVIA_FILE, "w") as jsonfile:
             json.dump(winners, jsonfile, indent=2)
             jsonfile.close()
 
 
 def save_trivia_winners(winner_list: [str]):
     """Save winner and number of wins to file."""
-    if not os.path.exists("trivia_winners.json"):
-        with open("trivia_winners.json", "w") as jsonfile:
+    if not os.path.exists(TRIVIA_FILE):
+        with open(TRIVIA_FILE, "w") as jsonfile:
             json.dump({}, jsonfile)
             jsonfile.close()
 
@@ -237,7 +238,7 @@ def save_trivia_winners(winner_list: [str]):
     #         json.dump({}, monthlyjson)
     #         monthlyjson.close()
 
-    with open("trivia_winners.json", "r") as jsonfile:
+    with open(TRIVIA_FILE, "r") as jsonfile:
         winners = json.load(jsonfile)
         jsonfile.close()
 
@@ -265,7 +266,7 @@ def save_trivia_winners(winner_list: [str]):
         if not found:
             winners.append({"name": author, "points": 1})
 
-    with open("trivia_winners.json", "w") as jsonfile:
+    with open(TRIVIA_FILE, "w") as jsonfile:
         json.dump(winners, jsonfile, indent=2)
         jsonfile.close()
 

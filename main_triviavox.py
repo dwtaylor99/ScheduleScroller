@@ -141,7 +141,7 @@ class TriviaBot(commands.Bot):
         self.auto_update_game.start()
 
         print("TriviaVox ready, channel is live={}".format(self.is_live))
-        self.alt_loop()
+        self.alt_loop(self.screen)
 
     async def bot_print(self, txt):
         print(txt)
@@ -168,7 +168,7 @@ class TriviaBot(commands.Bot):
     async def event_command_error(self, ctx: commands.Context, error):
         pass
 
-    @routines.routine(minutes=2)
+    @routines.routine(minutes=5)
     async def auto_trivia(self):
         """Run a trivia question every few minutes."""
         # Choose a game type
@@ -271,6 +271,15 @@ class TriviaBot(commands.Bot):
             bottrivia.save_trivia_winners(winners)
             self.trivia_winners.clear()
 
+    @commands.command(name="latency", aliases=['Latency', 'LATENCY'])
+    async def cmd_latency(self, ctx: commands.Context):
+        """Show a message about Twitch latency"""
+
+        output = ("Make sure you are watching on Source mode to have the least amount "
+                  "of latency between what is on screen and what is in chat. Click the gear on the "
+                  "video and under Settings, choose 'Source'.")
+        await self.bot_print(output)
+
     @commands.command(name="rank", aliases=['Rank', 'RANK', 'points', 'Points', 'POINTS'])
     async def cmd_rank(self, ctx: commands.Context):
         """Show all trivia player's points and rank"""
@@ -324,23 +333,22 @@ class TriviaBot(commands.Bot):
         self.screen.blit(alt_screen, (960, 0))
 
     def game_loop(self):
-        global is_running, dt, alt_dt
+        global is_running, dt
 
         if is_running:
             self.screen.fill(BLACK)
             self.draw_screen()
 
-            # scroller.main_loop()
-            scroller.draw_image()
-            scroller.draw_year()
+            scroller.draw_image(self.screen)
+            scroller.draw_year(self.screen)
             if self.trivia_question is None:
-                scroller.draw_summary()
-            scroller.draw_gizmoplex()
+                scroller.draw_summary(self.screen)
+            scroller.draw_gizmoplex(self.screen)
             scroller.fun()
-            scroller.move_schedule()
-            scroller.draw_schedule_header()
-            scroller.draw_vertical_separators()
-            scroller.draw_clock()
+            scroller.move_schedule(self.screen)
+            scroller.draw_schedule_header(self.screen)
+            scroller.draw_vertical_separators(self.screen)
+            scroller.draw_clock(self.screen)
 
             # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus,
             # 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
@@ -348,7 +356,7 @@ class TriviaBot(commands.Bot):
                 if len(scroller.snow_flakes) == 0:
                     for _ in range(scroller.NUM_SNOWFLAKES):
                         scroller.snow_flakes.append(SnowFlake(self.screen))
-                scroller.snow()
+                scroller.snow(self.screen)
             else:
                 scroller.snow_flakes.clear()
 
@@ -426,12 +434,12 @@ if __name__ == '__main__':
     clk = pygame.time.Clock()
 
     summaries.refresh()
-    scroller.setup()
+    scroller.setup(scr)
 
     bot = TriviaBot(scr, clk, scroller.main_loop)
     bot.run()
 
 """
 TODO:
-Fix Playing/Up Next (Up Next never appears)
+
 """

@@ -10,7 +10,6 @@ from anims.snow import SnowFlake
 from colors import *
 from gradient import rect_gradient_h
 from schedule import PAC_TZ, EST_TZ
-from triviavox import TriviaBot
 from util_text import *
 
 pygame.init()
@@ -58,9 +57,9 @@ NUM_SCHEDULE = 20  # Number of schedule items to load
 CLOCK_FORMAT = "%I:%M:%S %p %Z"
 
 # Globals
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("ScheduleScroller")
-clock = pygame.time.Clock()
+# screen = pygame.display.set_mode((WIDTH, HEIGHT))
+# pygame.display.set_caption("ScheduleScroller")
+# clock = pygame.time.Clock()
 running = True
 dt = 0
 sched = []
@@ -87,7 +86,7 @@ bounce_stop = 0.3
 mouse_trajectory = []  # track positions of mouse to get movement vector
 
 
-def drop_shadow(font, text, color: pygame.Color, x, y):
+def drop_shadow(screen, font, text, color: pygame.Color, x, y):
     shadow = font.render(text, True, BLACK)
     shadow.set_alpha(color.a)
     screen.blit(shadow, (x + 2, y + 2))
@@ -97,7 +96,7 @@ def drop_shadow(font, text, color: pygame.Color, x, y):
     screen.blit(hilite, (x, y))
 
 
-def draw_episode_number(epnum: str):
+def draw_episode_number(screen, epnum: str):
     """Overwrite the weird episode numbers on the main_img if this is a MST3K episode"""
     # Who is the host?
     host_color = get_host_color(epnum)
@@ -113,7 +112,7 @@ def draw_episode_number(epnum: str):
     FONT.set_bold(False)
 
 
-def draw_image():
+def draw_image(screen):
     global main_img
 
     bg = pygame.Rect(0, 0, WIDTH_HALF, HEIGHT_HALF)
@@ -127,17 +126,17 @@ def draw_image():
 
     epnum = sched[0]['epnum']
     if epnum != "":
-        draw_episode_number(epnum)
+        draw_episode_number(screen, epnum)
 
 
-def draw_year():
+def draw_year(screen):
     global main_year
 
     if main_year != "":
-        drop_shadow(FONT_SM, "(" + main_year + ")", GRAY, WIDTH_HALF - 72, HEIGHT_HALF - 30)
+        drop_shadow(screen, FONT_SM, "(" + main_year + ")", GRAY, WIDTH_HALF - 72, HEIGHT_HALF - 30)
 
 
-def draw_summary():
+def draw_summary(screen):
     """Split the long 'about' string into several pieces and render them."""
 
     bg = pygame.Rect(WIDTH_HALF, 0, WIDTH_HALF, HEIGHT_HALF)
@@ -145,10 +144,10 @@ def draw_summary():
 
     parts = main_summary.split("\n")
     for i, p in enumerate(parts):
-        drop_shadow(FONT, p, WHITE, WIDTH_HALF + 30, ((FONT_SIZE + 10) * i) + 14)
+        drop_shadow(screen, FONT, p, WHITE, WIDTH_HALF + 30, ((FONT_SIZE + 10) * i) + 14)
 
 
-def draw_schedule_header():
+def draw_schedule_header(screen):
     """This is the schedule header that doesn't scroll"""
 
     y = HEIGHT_HALF
@@ -199,12 +198,12 @@ def draw_schedule_header():
         display_index = 1
 
     leading_word = "Playing:" if display_index == 0 else "Up Next:"
-    drop_shadow(FONT, leading_word, header_color, SCHED_COL3_X, y + FONT_PAD)
-    drop_shadow(FONT, update_title(sched[display_index]['title'], sched[display_index]['epnum']),
+    drop_shadow(screen, FONT, leading_word, header_color, SCHED_COL3_X, y + FONT_PAD)
+    drop_shadow(screen, FONT, update_title(sched[display_index]['title'], sched[display_index]['epnum']),
                 title_color, SCHED_COL3_X + 136, y + FONT_PAD)
 
 
-def draw_scrolling_header():
+def draw_scrolling_header(screen):
     """The scrolling header is part of the scrolling list of titles"""
 
     global hdr_y
@@ -219,9 +218,9 @@ def draw_scrolling_header():
     date_now = datetime.now()
     ptz = date_now.astimezone(PAC_TZ)
     etz = date_now.astimezone(EST_TZ)
-    drop_shadow(FONT, datetime.strftime(ptz, "%Z"), YELLOW, SCHED_COL1_X, hdr_y + FONT_PAD)
-    drop_shadow(FONT, datetime.strftime(etz, "%Z"), YELLOW, SCHED_COL2_X, hdr_y + FONT_PAD)
-    drop_shadow(FONT, "Title", YELLOW, SCHED_COL3_X, hdr_y + FONT_PAD)
+    drop_shadow(screen, FONT, datetime.strftime(ptz, "%Z"), YELLOW, SCHED_COL1_X, hdr_y + FONT_PAD)
+    drop_shadow(screen, FONT, datetime.strftime(etz, "%Z"), YELLOW, SCHED_COL2_X, hdr_y + FONT_PAD)
+    drop_shadow(screen, FONT, "Title", YELLOW, SCHED_COL3_X, hdr_y + FONT_PAD)
 
 
 def split_time(time: str):
@@ -240,7 +239,7 @@ def split_time(time: str):
     return dow, hour, mins, merid
 
 
-def draw_schedule_item(obj, y):
+def draw_schedule_item(screen, obj, y):
     if y < HEIGHT_HALF:
         # Move this item to the end of the list
         y += int((len(sched) + 1) * SCHED_H)
@@ -256,34 +255,34 @@ def draw_schedule_item(obj, y):
     h1 = FONT.render(hour1, True, WHITE)
     h2 = FONT.render(hour2, True, WHITE)
 
-    drop_shadow(FONT, dow1, WHITE, SCHED_COL1_X, y + FONT_PAD)
-    drop_shadow(FONT, hour1 + ":", WHITE, SCHED_COL1_X + DOW_W + HOUR_W + 26 - h1.get_width(), y + FONT_PAD)
-    drop_shadow(FONT, min1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + MIN_W, y + FONT_PAD)
-    drop_shadow(FONT, merid1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + MIN_W + MERID_W, y + FONT_PAD)
+    drop_shadow(screen, FONT, dow1, WHITE, SCHED_COL1_X, y + FONT_PAD)
+    drop_shadow(screen, FONT, hour1 + ":", WHITE, SCHED_COL1_X + DOW_W + HOUR_W + 26 - h1.get_width(), y + FONT_PAD)
+    drop_shadow(screen, FONT, min1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + MIN_W, y + FONT_PAD)
+    drop_shadow(screen, FONT, merid1, WHITE, SCHED_COL1_X + DOW_W + HOUR_W + MIN_W + MERID_W, y + FONT_PAD)
 
-    drop_shadow(FONT, dow2, WHITE, SCHED_COL2_X, y + FONT_PAD)
-    drop_shadow(FONT, hour2 + ":", WHITE, SCHED_COL2_X + DOW_W + HOUR_W + 26 - h2.get_width(), y + FONT_PAD)
-    drop_shadow(FONT, min2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + MIN_W, y + FONT_PAD)
-    drop_shadow(FONT, merid2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + MIN_W + MERID_W, y + FONT_PAD)
+    drop_shadow(screen, FONT, dow2, WHITE, SCHED_COL2_X, y + FONT_PAD)
+    drop_shadow(screen, FONT, hour2 + ":", WHITE, SCHED_COL2_X + DOW_W + HOUR_W + 26 - h2.get_width(), y + FONT_PAD)
+    drop_shadow(screen, FONT, min2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + MIN_W, y + FONT_PAD)
+    drop_shadow(screen, FONT, merid2, WHITE, SCHED_COL2_X + DOW_W + HOUR_W + MIN_W + MERID_W, y + FONT_PAD)
 
-    drop_shadow(FONT, title_display, WHITE, SCHED_COL3_X, y + FONT_PAD)
+    drop_shadow(screen, FONT, title_display, WHITE, SCHED_COL3_X, y + FONT_PAD)
 
     obj['y'] = y
 
 
-def draw_schedule_items(y):
+def draw_schedule_items(screen, y):
     for s in sched:
-        draw_schedule_item(s, y)
+        draw_schedule_item(screen, s, y)
         y += SCHED_H
 
 
-def move_schedule():
+def move_schedule(screen):
     for s in sched:
-        draw_schedule_item(s, s['y'] - 1)
-    draw_scrolling_header()
+        draw_schedule_item(screen, s, s['y'] - 1)
+    draw_scrolling_header(screen)
 
 
-def draw_clock():
+def draw_clock(screen):
     global sched, hdr_y, is_reloading
 
     right_now = datetime.now()
@@ -291,14 +290,14 @@ def draw_clock():
     pac = right_now.astimezone(PAC_TZ)
     pac_time = datetime.strftime(pac, CLOCK_FORMAT).lstrip("0")
     pac_pos = pac_time.find(" ")
-    drop_shadow(FONT, pac_time[:pac_pos], YELLOW, SCHED_COL1_X, HEIGHT_HALF + FONT_PAD)
-    drop_shadow(FONT_SM, pac_time[pac_pos + 1:], YELLOW, SCHED_COL1_X + 165, HEIGHT_HALF + FONT_PAD)
+    drop_shadow(screen, FONT, pac_time[:pac_pos], YELLOW, SCHED_COL1_X, HEIGHT_HALF + FONT_PAD)
+    drop_shadow(screen, FONT_SM, pac_time[pac_pos + 1:], YELLOW, SCHED_COL1_X + 165, HEIGHT_HALF + FONT_PAD)
 
     curr = right_now.astimezone(EST_TZ)
     curr_time = datetime.strftime(curr, CLOCK_FORMAT).lstrip("0")
     curr_pos = curr_time.find(" ")
-    drop_shadow(FONT, curr_time[:curr_pos], YELLOW, SCHED_COL2_X, HEIGHT_HALF + FONT_PAD)
-    drop_shadow(FONT_SM, curr_time[curr_pos + 1:], YELLOW, SCHED_COL2_X + 165, HEIGHT_HALF + FONT_PAD)
+    drop_shadow(screen, FONT, curr_time[:curr_pos], YELLOW, SCHED_COL2_X, HEIGHT_HALF + FONT_PAD)
+    drop_shadow(screen, FONT_SM, curr_time[curr_pos + 1:], YELLOW, SCHED_COL2_X + 165, HEIGHT_HALF + FONT_PAD)
 
     # Is it time to reload the schedule?
     time_parts = sched[1]['time_est'].split(" ")
@@ -307,24 +306,25 @@ def draw_clock():
                     time_parts[1] + ":02 " + time_parts[2]]
     curr_time = curr_time.rstrip(" EST").rstrip(" EDT")  # Remove the timezone
     if curr_time in update_times and not is_reloading:
-        setup()
+        setup(screen)
 
 
-def draw_vertical_separators():
+def draw_vertical_separators(screen):
     pygame.draw.rect(screen, WHITE, pygame.Rect(SCHED_COL2_X - 30, HEIGHT_HALF, 2, HEIGHT_HALF))
     pygame.draw.rect(screen, WHITE, pygame.Rect(SCHED_COL3_X - 30, HEIGHT_HALF, 2, HEIGHT_HALF))
 
 
-def draw_loading():
+def draw_loading(screen):
+    screen.fill(BLACK)
     img = pygame.image.load('images/fun/seven_years_later2.png').convert_alpha()
     screen.blit(img, ((WIDTH - img.get_width()) // 2, (HEIGHT - img.get_height()) // 2))
     pygame.display.flip()
 
 
-def setup():
+def setup(screen):
     global hdr_y, is_reloading, main_img, main_summary, main_year, sched
 
-    draw_loading()
+    draw_loading(screen)
 
     is_reloading = True
     start_time = datetime.now()
@@ -346,7 +346,7 @@ def setup():
     main_summary = wrap_text(prepare_summary(sched[0]['about'])).strip()
     main_year = sched[0]['year']
 
-    draw_schedule_items(HEIGHT_HALF + SCHED_H)
+    draw_schedule_items(screen, HEIGHT_HALF + SCHED_H)
     hdr_y = HEIGHT_HALF + (len(sched) + 1) * SCHED_H
     is_reloading = False
 
@@ -357,7 +357,7 @@ def fun():
             o.animate()
 
 
-def snow():
+def snow(screen):
     global snow_flakes
 
     for flake in snow_flakes:
@@ -374,20 +374,20 @@ def snow():
     snow_flakes = temp_objs
 
 
-def draw_gizmoplex():
-    drop_shadow(FONT_XS, "twitch.tv/mst3k", WHITE, WIDTH - 130, HEIGHT_HALF - 50)
-    drop_shadow(FONT_XS, "gizmoplex.com", WHITE, WIDTH - 130, HEIGHT_HALF - 30)
+def draw_gizmoplex(screen):
+    drop_shadow(screen, FONT_XS, "twitch.tv/mst3k", WHITE, WIDTH - 130, HEIGHT_HALF - 50)
+    drop_shadow(screen, FONT_XS, "gizmoplex.com", WHITE, WIDTH - 130, HEIGHT_HALF - 30)
 
 
-def main_loop():
+def main_loop(screen):
     global running, dt, timer_tick, is_loading_fun, fun_objs
 
     # while running:
     if running:
         screen.fill(BLACK)
 
-        draw_image()
-        draw_year()
+        draw_image(screen)
+        draw_year(screen)
         # draw_summary()
         # draw_gizmoplex()
         fun()
@@ -398,14 +398,14 @@ def main_loop():
             if len(snow_flakes) == 0:
                 for _ in range(NUM_SNOWFLAKES):
                     snow_flakes.append(SnowFlake(screen))
-            snow()
+            snow(screen)
         else:
             snow_flakes.clear()
 
-        move_schedule()
-        draw_schedule_header()
-        draw_vertical_separators()
-        draw_clock()
+        move_schedule(screen)
+        draw_schedule_header(screen)
+        draw_vertical_separators(screen)
+        draw_clock(screen)
 
         # Time for fun?
         # random_fun = random.randrange(1, 5)  # 20% chance of fun every minute
@@ -441,11 +441,10 @@ def main_loop():
 
 
 if __name__ == '__main__':
-    summaries.refresh()
-    setup()
+    scr = pygame.display.set_mode((WIDTH, HEIGHT))
 
-    bot = TriviaBot(screen, clock, main_loop)
-    bot.run()
+    summaries.refresh()
+    setup(scr)
 
     # main_loop()
 
