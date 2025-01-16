@@ -46,8 +46,7 @@ FONT_SM = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_SMALL)
 FONT_SIZE_LARGE = 40
 FONT_LG = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_LARGE)
 
-FONT_SIZE_LARGE = 56
-FONT_XL = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_LARGE)
+TXT_LOADING = FONT_LG.render("Loading...", True, WHITE)
 
 # vertical font spacing
 FONT_PAD = 10
@@ -78,12 +77,6 @@ title_color = pygame.Color(192, 192, 192, 0)
 
 NUM_SNOWFLAKES = 100
 snow_flakes = []
-
-# game variables
-wall_thickness = 10
-gravity = 0.5
-bounce_stop = 0.3
-mouse_trajectory = []  # track positions of mouse to get movement vector
 
 
 def drop_shadow(screen, font, text, color: pygame.Color, x, y):
@@ -318,6 +311,7 @@ def draw_loading(screen):
     screen.fill(BLACK)
     img = pygame.image.load('images/fun/seven_years_later2.png').convert_alpha()
     screen.blit(img, ((WIDTH - img.get_width()) // 2, (HEIGHT - img.get_height()) // 2))
+    screen.blit(TXT_LOADING, ((WIDTH - TXT_LOADING.get_width()) // 2, HEIGHT - 200))
     pygame.display.flip()
 
 
@@ -442,10 +436,23 @@ def main_loop(screen):
 
 if __name__ == '__main__':
     scr = pygame.display.set_mode((WIDTH, HEIGHT))
+    clk = pygame.time.Clock()
 
-    summaries.refresh()
-    setup(scr)
-
+    # summaries.refresh()
+    # setup(scr)
     # main_loop()
+
+    # Testing fonts
+    while running:
+        scr.fill(BLACK)
+
+        txt = FONT_LG.render("Fifteen years from now", True, WHITE)
+        scr.blit(txt, (500, 500))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        dt = clk.tick(60)
+        pygame.display.flip()
 
     pygame.quit()

@@ -138,6 +138,7 @@ class TriviaBot(commands.Bot):
 
         self.auto_trivia.start()
         self.auto_trivia_stop.start()
+        self.auto_message.start()
         self.auto_update_game.start()
 
         print("TriviaVox ready, channel is live={}".format(self.is_live))
@@ -246,8 +247,13 @@ class TriviaBot(commands.Bot):
 
     @routines.routine(seconds=UPDATE_RATE)
     async def auto_update_game(self):
-        # self.alt_loop()
         self.game_loop()
+
+    @routines.routine(minutes=7)
+    async def auto_message(self):
+        output = "MST3K Trivia every 5 minutes (yes, it counts toward MST3K channel trivia points). "
+        output += "Watch on 'Source' mode to reduce latency between screen and chat (!latency for more)."
+        await self.bot_print(output)
 
     async def stop_trivia(self):
         """Stop the trivia game, display the winners, update winners' points"""
@@ -441,5 +447,6 @@ if __name__ == '__main__':
 
 """
 TODO:
-
+Add more loading screens?
+City Limits = Cambria
 """
