@@ -53,7 +53,7 @@ RED = (128, 0, 0)
 LT_RED = (192, 0, 0)
 GREEN = (0, 128, 0)
 
-STINGER_PATH = "data/stingers"
+STINGER_PATH = "images/stingers"
 
 FONT_MD = pygame.font.Font("fonts/Inter.ttf", 16)
 FONT_LG = pygame.font.Font("fonts/Inter.ttf", 30)
@@ -79,11 +79,11 @@ STR_NEXT = "Next question coming up soon..."
 TXT_NEXT = FONT_MST3K_LG.render(STR_NEXT, True, YELLOW)
 
 STR_EMOJI = "Name the MST3K movie described by these emoji:"
-TXT_EMOJI = FONT_MST3K_LG.render(STR_EMOJI, True, WHITE)
+TXT_EMOJI = FONT_MST3K_LG.render(STR_EMOJI, True, YELLOW)
 
 is_running = True
 dt = 0
-alt_dt = 0
+
 
 class GameType(Enum):
     TRIVIA = "Trivia"
@@ -119,9 +119,15 @@ class TriviaBot(commands.Bot):
         self.stinger_num = 0
         self.prev_stingers = []
 
-    async def event_ready(self):
+    async def get_live(self):
         streams = await self.fetch_streams(user_ids=[CHANNEL_ID])
         self.is_live = len(streams) > 0
+
+    async def event_ready(self):
+        # streams = await self.fetch_streams(user_ids=[CHANNEL_ID])
+        # self.is_live = len(streams) > 0
+        await self.get_live()
+
         self.channel = super().get_channel(CHANNEL_NAME)
 
         bottrivia.update()
@@ -166,6 +172,7 @@ class TriviaBot(commands.Bot):
     async def auto_trivia(self):
         """Run a trivia question every few minutes."""
         # Choose a game type
+        await self.get_live()  # Check if the stream is live
         if self.is_live:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER])
         else:
@@ -290,22 +297,21 @@ class TriviaBot(commands.Bot):
 
     def draw_screen(self):
         if self.trivia_question is not None:
+            gradient.rect_gradient_h(alt_screen, DK_GRAY, BLACK, pygame.Rect(0, 0, W2, H2))
+
             if self.game_type == GameType.STINGER:
-                gradient.rect_gradient_h(alt_screen, DK_GRAY, BLACK, pygame.Rect(0, 0, W2, H2))
                 alt_screen.blit(TXT_STINGER, ((W2 - TXT_STINGER.get_width()) // 2, 10))
                 alt_screen.blit(self.stinger_img, ((W2 - self.stinger_img.get_width()) // 2,
                                                    (H2 - self.stinger_img.get_height()) // 2))
 
             elif self.game_type == GameType.TRIVIA:
-                gradient.rect_gradient_h(self.screen, DK_GRAY, BLACK, pygame.Rect(0, 0, W2, H2))
                 ques = wrap_text(self.trivia_question.question).strip().split("\n")
                 text_height = (H2 - (36 * len(ques))) // 2
                 for i, q in enumerate(ques):
-                    txt = FONT_MST3K_LG.render(q, True, WHITE)
+                    txt = FONT_MST3K_LG.render(q, True, YELLOW)
                     alt_screen.blit(txt, (50, text_height + (36 * i)))
 
             elif self.game_type == GameType.EMOJI:
-                gradient.rect_gradient_h(alt_screen, DK_GRAY, BLACK, pygame.Rect(0, 0, W2, H2))
                 alt_screen.blit(TXT_EMOJI, ((W2 - TXT_EMOJI.get_width()) // 2, H2 // 2 - 70))
                 txt = FONT_EMOJI_LG.render(self.trivia_question.question.split(":")[1], True, WHITE)
                 alt_screen.blit(txt, ((W2 - txt.get_width()) // 2, H2 // 2))

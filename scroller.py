@@ -117,7 +117,7 @@ def draw_image():
     global main_img
 
     bg = pygame.Rect(0, 0, WIDTH_HALF, HEIGHT_HALF)
-    rect_gradient_h(screen, BLACK, DK_GRAY, bg)
+    rect_gradient_h(screen, DK_GRAY, BLACK, bg)
 
     if main_img is not None:
         new_w = WIDTH_HALF / main_img.get_width()
@@ -141,7 +141,7 @@ def draw_summary():
     """Split the long 'about' string into several pieces and render them."""
 
     bg = pygame.Rect(WIDTH_HALF, 0, WIDTH_HALF, HEIGHT_HALF)
-    rect_gradient_h(screen, BLACK, DK_GRAY, bg)
+    rect_gradient_h(screen, DK_GRAY, BLACK, bg)
 
     parts = main_summary.split("\n")
     for i, p in enumerate(parts):
