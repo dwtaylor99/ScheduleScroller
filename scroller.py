@@ -1,6 +1,8 @@
 import os.path
 from datetime import datetime
 
+import pygame.display
+
 import funfactory
 import schedule
 import summaries
@@ -8,6 +10,7 @@ from anims.snow import SnowFlake
 from colors import *
 from gradient import rect_gradient_h
 from schedule import PAC_TZ, EST_TZ
+from triviavox import TriviaBot
 from util_text import *
 
 pygame.init()
@@ -44,6 +47,9 @@ FONT_SM = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_SMALL)
 FONT_SIZE_LARGE = 40
 FONT_LG = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_LARGE)
 
+FONT_SIZE_LARGE = 56
+FONT_XL = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_LARGE)
+
 # vertical font spacing
 FONT_PAD = 10
 
@@ -53,6 +59,7 @@ CLOCK_FORMAT = "%I:%M:%S %p %Z"
 
 # Globals
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("ScheduleScroller")
 clock = pygame.time.Clock()
 running = True
 dt = 0
@@ -308,8 +315,16 @@ def draw_vertical_separators():
     pygame.draw.rect(screen, WHITE, pygame.Rect(SCHED_COL3_X - 30, HEIGHT_HALF, 2, HEIGHT_HALF))
 
 
+def draw_loading():
+    img = pygame.image.load('images/fun/seven_years_later2.png').convert_alpha()
+    screen.blit(img, ((WIDTH - img.get_width()) // 2, (HEIGHT - img.get_height()) // 2))
+    pygame.display.flip()
+
+
 def setup():
     global hdr_y, is_reloading, main_img, main_summary, main_year, sched
+
+    draw_loading()
 
     is_reloading = True
     start_time = datetime.now()
@@ -364,17 +379,17 @@ def draw_gizmoplex():
     drop_shadow(FONT_XS, "gizmoplex.com", WHITE, WIDTH - 130, HEIGHT_HALF - 30)
 
 
-if __name__ == '__main__':
-    summaries.refresh()
-    setup()
+def main_loop():
+    global running, dt, timer_tick, is_loading_fun, fun_objs
 
-    while running:
+    # while running:
+    if running:
         screen.fill(BLACK)
 
         draw_image()
         draw_year()
-        draw_summary()
-        draw_gizmoplex()
+        # draw_summary()
+        # draw_gizmoplex()
         fun()
 
         # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus,
@@ -397,7 +412,7 @@ if __name__ == '__main__':
         random_fun = 1
         if int(timer_tick) % 60 == 0 and random_fun == 1 and not is_loading_fun:
             is_loading_fun = True
-            fun_objs = funfactory.get(sched[0]['title'], sched[0]['epnum'])
+            fun_objs = funfactory.get(screen, sched[0]['title'], sched[0]['epnum'])
 
         if int(timer_tick) % 64 == 0:
             is_loading_fun = False
@@ -410,18 +425,28 @@ if __name__ == '__main__':
             fun_objs = temp_objs
 
         # pygame.QUIT event means the user clicked X to close your window
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+        # for event in pygame.event.get():
+        #     if event.type == pygame.QUIT:
+        #         running = False
 
         # flip() the display to put your work on screen
-        pygame.display.flip()
+        # pygame.display.flip()
 
         # limits FPS to 60 - dt is delta time in seconds since last frame.
-        dt = clock.tick(60) / 1000
+        # dt = clock.tick(60) / 1000
 
-        timer_tick += dt
-        if timer_tick >= 7200:  # Reset every two hours
-            timer_tick = 0
+        # timer_tick += dt
+        # if timer_tick >= 7200:  # Reset every two hours
+        #     timer_tick = 0
+
+
+if __name__ == '__main__':
+    summaries.refresh()
+    setup()
+
+    bot = TriviaBot(screen, clock, main_loop)
+    bot.run()
+
+    # main_loop()
 
     pygame.quit()

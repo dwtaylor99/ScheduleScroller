@@ -13,7 +13,7 @@ class ElSantoFlying(FunBase):
         self.target_x = target_x
         self.target_y = target_y
         if target_x == -1:
-            self.x = random.randrange(100, 1200)
+            self.x = random.randrange(300, 1200)
         else:
             self.x = target_x + 1400
 

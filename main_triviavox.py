@@ -1,0 +1,431 @@
+import asyncio
+import random
+import re
+import time
+from enum import Enum
+from os import listdir
+from os.path import isfile, join
+
+import pygame
+from twitchio import Message
+from twitchio.ext import commands, routines
+
+import botemoji
+import botsecrets
+import bottrivia
+import funfactory
+import gradient
+import scroller
+import summaries
+from anims.snow import SnowFlake
+from movie_names import MOVIE_NAMES
+from util_text import wrap_text
+
+IS_DEBUG = True
+
+# CHANNEL_ID = 105623158
+# CHANNEL_NAME = "mst3k"
+CHANNEL_ID = 476069938
+CHANNEL_NAME = "movievox"
+
+FPS = 60
+UPDATE_RATE = 1 / (FPS * 2)
+
+WIDTH = 1920  # // 2
+HEIGHT = 1080  # // 2
+
+W2 = WIDTH // 2
+H2 = HEIGHT // 2
+
+pygame.init()
+alt_screen = pygame.display.set_mode((WIDTH, HEIGHT))
+alt_clock = pygame.time.Clock()
+
+BLACK = (0, 0, 0)
+BLUE = (0, 0, 120)
+LT_BLUE = (0, 0, 200)
+PALE_BLUE = (127, 156, 212)
+YELLOW = (192, 192, 0)
+WHITE = (192, 192, 192)
+DK_GRAY = (32, 32, 32)
+GRAY = (128, 128, 128)
+RED = (128, 0, 0)
+LT_RED = (192, 0, 0)
+GREEN = (0, 128, 0)
+
+STINGER_PATH = "data/stingers"
+
+FONT_MD = pygame.font.Font("fonts/Inter.ttf", 16)
+FONT_LG = pygame.font.Font("fonts/Inter.ttf", 30)
+FONT_XL = pygame.font.Font("fonts/Inter.ttf", 48)
+
+# Font used in Overdrawn at the Memory Bank
+FONT_FINGAL_MD = pygame.font.Font("fonts/HandelGo.ttf", 16)
+FONT_FINGAL_LG = pygame.font.Font("fonts/HandelGo.ttf", 30)
+FONT_FINGAL_XL = pygame.font.Font("fonts/HandelGo.ttf", 48)
+
+# Font used in modern MST3K stuff
+FONT_MST3K_MD = pygame.font.Font("fonts/SimianText_Orangutan.otf", 20)
+FONT_MST3K_LG = pygame.font.Font("fonts/SimianText_Orangutan.otf", 36)
+FONT_MST3K_XL = pygame.font.Font("fonts/SimianText_Orangutan.otf", 52)
+
+# Font used to render emoji
+FONT_EMOJI_LG = pygame.font.Font("fonts/seguiemj.ttf", 48)
+
+STR_STINGER = "Name the MST3K movie this stinger is from:"
+TXT_STINGER = FONT_MST3K_LG.render(STR_STINGER, True, YELLOW)
+
+STR_NEXT = "Next question coming up soon..."
+TXT_NEXT = FONT_MST3K_LG.render(STR_NEXT, True, YELLOW)
+
+STR_EMOJI = "Name the MST3K movie described by these emoji:"
+TXT_EMOJI = FONT_MST3K_LG.render(STR_EMOJI, True, WHITE)
+
+is_running = True
+dt = 0
+alt_dt = 0
+
+class GameType(Enum):
+    TRIVIA = "Trivia"
+    EMOJI = "Emoji"
+    STINGER = "Stinger"
+
+
+class TriviaBot(commands.Bot):
+    def __init__(self, screen, clock, alt_loop):
+        super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
+        self.screen = screen
+        self.clock = clock
+        self.alt_loop = alt_loop
+
+        self.stream = None
+        self.channel = super().get_channel(CHANNEL_NAME)
+        self.is_connecting = True
+        self.is_live = True
+
+        self.game_type = GameType.TRIVIA
+        self.trivia_questions = []
+        self.prev_trivia = []
+
+        self.emoji_questions = []
+        self.prev_emoji = []
+
+        self.trivia_question = None
+        self.preserved_answer = ""
+        self.trivia_winners = []
+        self.game_end_time = 0
+
+        self.stinger_img = None
+        self.stinger_num = 0
+        self.prev_stingers = []
+
+    async def event_ready(self):
+        streams = await self.fetch_streams(user_ids=[CHANNEL_ID])
+        self.is_live = len(streams) > 0
+        self.channel = super().get_channel(CHANNEL_NAME)
+
+        bottrivia.update()
+        self.trivia_questions = bottrivia.load_as_array()
+
+        botemoji.update()
+        self.emoji_questions = botemoji.load_as_array()
+
+        self.auto_trivia.start()
+        self.auto_trivia_stop.start()
+        self.auto_update_game.start()
+
+        print("TriviaVox ready, channel is live={}".format(self.is_live))
+        self.alt_loop()
+
+    async def bot_print(self, txt):
+        print(txt)
+        if self.channel is not None:
+            await self.channel.send(txt)
+
+    async def event_message(self, message: Message) -> None:
+        if message.echo:
+            return
+
+        if self.trivia_question is not None:
+            guess = normalize_answers([message.content])[0]
+            if guess in self.trivia_question.answers:
+                self.trivia_winners.append(message.author.display_name)
+                # print("Correct answer from {}".format(message.author.display_name))
+
+                # Only start the timer after the first winner is detected.
+                if len(self.trivia_winners) == 1:
+                    await asyncio.sleep(12)
+                    await self.stop_trivia()
+
+        await self.handle_commands(message)
+
+    async def event_command_error(self, ctx: commands.Context, error):
+        pass
+
+    @routines.routine(minutes=2)
+    async def auto_trivia(self):
+        """Run a trivia question every few minutes."""
+        # Choose a game type
+        if self.is_live:
+            self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER])
+        else:
+            self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
+
+        # self.game_type = GameType.STINGER
+
+        if self.game_type == GameType.TRIVIA:
+            self.trivia_question = random.choice(self.trivia_questions)
+            while self.trivia_question in self.prev_trivia:
+                self.trivia_question = random.choice(self.trivia_questions)
+
+            self.preserved_answer = self.trivia_question.answers[0]
+            self.trivia_question.answers = normalize_answers(self.trivia_question.answers)
+            self.prev_trivia.append(self.trivia_question)
+            if len(self.prev_trivia) > 20:
+                self.prev_trivia.pop(0)
+            self.trivia_winners.clear()
+            self.game_end_time = time.time() + 60
+
+            await self.bot_print("/me Trivia Time! Q: {}".format(self.trivia_question.question))
+            print(self.trivia_question.answers)
+
+        elif self.game_type == GameType.EMOJI:
+            self.trivia_question = random.choice(self.emoji_questions)
+            while self.trivia_question in self.prev_emoji:
+                self.trivia_question = random.choice(self.emoji_questions)
+
+            self.preserved_answer = self.trivia_question.answers[0]
+            self.trivia_question.answers = normalize_answers(self.trivia_question.answers)
+            self.prev_trivia.append(self.trivia_question)
+            if len(self.prev_emoji) > 20:
+                self.prev_emoji.pop(0)
+            self.trivia_winners.clear()
+            self.game_end_time = time.time() + 60
+
+            await self.bot_print("/me Emoji Time! Q: {}".format(self.trivia_question.question))
+            print(self.trivia_question.answers)
+
+        elif self.game_type == GameType.STINGER:
+            stinger_file = choose_stinger()
+            stinger_num = stinger_file[:-4]
+            while stinger_num in self.prev_stingers:
+                stinger_file = choose_stinger()
+                stinger_num = stinger_file[:-4]
+
+            answers = MOVIE_NAMES[stinger_num]
+            self.trivia_question = bottrivia.Trivia(STR_STINGER, answers)
+
+            self.preserved_answer = self.trivia_question.answers[0]
+            self.trivia_question.answers = normalize_answers(self.trivia_question.answers)
+            self.prev_stingers.append(self.trivia_question)
+            if len(self.prev_stingers) > 20:
+                self.prev_stingers.pop(0)
+            self.trivia_winners.clear()
+            self.game_end_time = time.time() + 60
+
+            await self.bot_print("/me Name the stinger seen on screen.")
+            print(self.trivia_question.answers)
+
+            self.stinger_img = load_stinger_image(STINGER_PATH + '/' + stinger_file)
+
+    @routines.routine(seconds=2)
+    async def auto_trivia_stop(self):
+        """Check if it's time to stop the game."""
+        if self.trivia_question is not None and time.time() >= self.game_end_time and len(self.trivia_winners) == 0:
+            output = "/me No trivia winner. Q: {} A: {}".format(
+                self.trivia_question.question, self.preserved_answer)
+            await self.bot_print(output)
+            self.trivia_question = None
+
+    @routines.routine(seconds=UPDATE_RATE)
+    async def auto_update_game(self):
+        # self.alt_loop()
+        self.game_loop()
+
+    async def stop_trivia(self):
+        """Stop the trivia game, display the winners, update winners' points"""
+        if self.trivia_question is not None:
+            self.trivia_question = None
+
+            # Remove any duplicate winners then sort the names (case-insensitive)
+            winners = list(set(self.trivia_winners))
+            winners.sort(key=str.casefold)
+
+            # Look up the points for each winner
+            name_and_points = []
+            for name in winners:
+                name_and_points.append(name + " (" + str(bottrivia.get_trivia_points(name) + 1) + ")")
+
+            # Format the list of winners
+            output = bottrivia.format_round_winners(name_and_points)
+            await self.bot_print(output)
+
+            # Save the new number of points for the winners
+            bottrivia.save_trivia_winners(winners)
+            self.trivia_winners.clear()
+
+    @commands.command(name="rank", aliases=['Rank', 'RANK', 'points', 'Points', 'POINTS'])
+    async def cmd_rank(self, ctx: commands.Context):
+        """Show all trivia player's points and rank"""
+        name = ctx.author.name.lower()
+        parts = ctx.message.content.split(" ")
+        if len(parts) > 1:
+            name = parts[1].lower()
+
+        points = bottrivia.get_trivia_points(name)
+        rank = bottrivia.rank(name)
+        num_users = len(bottrivia.load_sorted_list())
+        point_word = "point" if points == 1 else "points"
+        output = "{} has {} trivia {} and is rank {} of {}.".format(name, points, point_word, rank, num_users)
+        await self.bot_print(output)
+
+    @commands.command(name="top", aliases=['Top', 'TOP'])
+    async def cmd_top(self, ctx: commands.Context):
+        """Show the trivia players with the highest scores"""
+        parts = ctx.message.content.split()
+        if len(parts) > 1:
+            await self.bot_print(bottrivia.format_winners(bottrivia.top(parts[1])))
+        else:
+            await self.bot_print(bottrivia.format_winners(bottrivia.top()))
+
+    def draw_screen(self):
+        if self.trivia_question is not None:
+            if self.game_type == GameType.STINGER:
+                gradient.rect_gradient_h(alt_screen, DK_GRAY, BLACK, pygame.Rect(0, 0, W2, H2))
+                alt_screen.blit(TXT_STINGER, ((W2 - TXT_STINGER.get_width()) // 2, 10))
+                alt_screen.blit(self.stinger_img, ((W2 - self.stinger_img.get_width()) // 2,
+                                                   (H2 - self.stinger_img.get_height()) // 2))
+
+            elif self.game_type == GameType.TRIVIA:
+                gradient.rect_gradient_h(self.screen, DK_GRAY, BLACK, pygame.Rect(0, 0, W2, H2))
+                ques = wrap_text(self.trivia_question.question).strip().split("\n")
+                text_height = (H2 - (36 * len(ques))) // 2
+                for i, q in enumerate(ques):
+                    txt = FONT_MST3K_LG.render(q, True, WHITE)
+                    alt_screen.blit(txt, (50, text_height + (36 * i)))
+
+            elif self.game_type == GameType.EMOJI:
+                gradient.rect_gradient_h(alt_screen, DK_GRAY, BLACK, pygame.Rect(0, 0, W2, H2))
+                alt_screen.blit(TXT_EMOJI, ((W2 - TXT_EMOJI.get_width()) // 2, H2 // 2 - 70))
+                txt = FONT_EMOJI_LG.render(self.trivia_question.question.split(":")[1], True, WHITE)
+                alt_screen.blit(txt, ((W2 - txt.get_width()) // 2, H2 // 2))
+
+        else:
+            # alt_screen.blit(TXT_NEXT, ((W2 - TXT_NEXT.get_width()) // 2, (H2 - TXT_NEXT.get_height()) // 2))
+            pass
+
+        # Blit the internal alt_screen (Surface) on the main screen
+        self.screen.blit(alt_screen, (960, 0))
+
+    def game_loop(self):
+        global is_running, dt, alt_dt
+
+        if is_running:
+            self.screen.fill(BLACK)
+            self.draw_screen()
+
+            # scroller.main_loop()
+            scroller.draw_image()
+            scroller.draw_year()
+            if self.trivia_question is None:
+                scroller.draw_summary()
+            scroller.draw_gizmoplex()
+            scroller.fun()
+            scroller.move_schedule()
+            scroller.draw_schedule_header()
+            scroller.draw_vertical_separators()
+            scroller.draw_clock()
+
+            # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus,
+            # 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
+            if scroller.sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
+                if len(scroller.snow_flakes) == 0:
+                    for _ in range(scroller.NUM_SNOWFLAKES):
+                        scroller.snow_flakes.append(SnowFlake(self.screen))
+                scroller.snow()
+            else:
+                scroller.snow_flakes.clear()
+
+            if int(scroller.timer_tick) % 60 == 0 and not scroller.is_loading_fun:
+                scroller.is_loading_fun = True
+                scroller.fun_objs = funfactory.get(self.screen, scroller.sched[0]['title'], scroller.sched[0]['epnum'])
+
+            if int(scroller.timer_tick) % 64 == 0:
+                scroller.is_loading_fun = False
+
+            if len(scroller.fun_objs) > 0 and not scroller.is_loading_fun:
+                temp_objs = []
+                for obj in scroller.fun_objs:
+                    if obj.anim_step > 0:
+                        temp_objs.append(obj)
+                scroller.fun_objs = temp_objs
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    is_running = False
+
+            pygame.display.flip()
+            dt = alt_clock.tick(FPS)
+            scroller.timer_tick += dt / 1000
+            if scroller.timer_tick >= 7200:  # Reset every two hours
+                scroller.timer_tick = 0
+
+
+def choose_stinger() -> str:
+    """Choose a stinger image"""
+    file_list = [f for f in listdir(STINGER_PATH) if isfile(join(STINGER_PATH, f))]
+    return random.choice(file_list)
+
+
+def load_stinger_image(file_path) -> pygame.Surface:
+    img = pygame.image.load(file_path)
+
+    # scale the image to fit inside the TV borders
+    if img.get_width() < 1600:
+        new_w = 580 / img.get_width()
+        new_h = 440 / img.get_height()
+    else:
+        new_w = 580 / img.get_width()
+        new_h = 325 / img.get_height()
+
+    return pygame.transform.smoothscale_by(img, min(new_w, new_h)).convert()
+
+
+def normalize_answers(answer_list):
+    """Normalize the list of answers to help matching"""
+
+    new_ans = []
+    for ans in answer_list:
+        # Conver to lower case and keep only alphanumerics and spaces
+        a = re.sub(r"[^ a-zA-Z0-9]", "", ans.lower())
+
+        # Remove articles (a, an, the)
+        a = re.sub(r"\ba\b", "", a)
+        a = re.sub(r"\ban\b", "", a)
+        a = re.sub(r"\bthe\b", "", a)
+
+        # Normalize "vs"
+        a = re.sub(r"\bversus\b", "", a)
+        a = re.sub(r"\bvs\b", "", a)
+        a = re.sub(r"\bv\b", "", a)
+
+        # Reduce multiple spaces to a single space
+        a = re.sub(r"\s\s+", " ", a)
+        new_ans.append(a.strip())
+    return new_ans
+
+
+if __name__ == '__main__':
+    scr = pygame.display.set_mode((WIDTH, HEIGHT))
+    clk = pygame.time.Clock()
+
+    summaries.refresh()
+    scroller.setup()
+
+    bot = TriviaBot(scr, clk, scroller.main_loop)
+    bot.run()
+
+"""
+TODO:
+Fix Playing/Up Next (Up Next never appears)
+"""
