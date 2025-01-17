@@ -20,6 +20,7 @@ from anims.time_chasers_plane import TimeChasersPlane
 from anims.time_chasers_plane_other import TimeChasersPlaneOther
 from anims.troy_csonka import TroyCsonka
 from anims.vi_head import ViHead
+from anims.whitedot import WhiteDot
 from anims.widowmaker import Widowmaker
 from anims.zap_beer import ZapBeer
 
@@ -106,16 +107,11 @@ def get(screen, title: str, epnum: str) -> []:
         # Choose a random animation
         if random.randint(1, 10) == 1:
             # Generic animation
-            rn = random.randint(1, 3)
-            if rn == 1:
-                print("Fun: SOL")
-                return [SOL(screen)]
-            elif rn == 2:
-                print("Fun: SOL, Widowmaker")
-                return [SOL(screen), Widowmaker(screen)]
-            elif rn == 3:
-                print("Fun: MST3KMoon")
-                return [MST3KMoon(screen)]
+            return random.choice([[SOL(screen)],
+                                  [SOL(screen), Widowmaker(screen)],
+                                  [MST3KMoon(screen)],
+                                  [WhiteDot(screen)]])
+
         else:
             return get_by_epnum(screen, random.choice(
                 ['111', '302', '322', '410', '413', '414', '609', '611', '612', '620', '624', '812', '821', '822',

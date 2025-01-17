@@ -350,12 +350,8 @@ class TriviaBot(commands.Bot):
             if self.trivia_question is None:
                 scroller.draw_summary(self.screen)
             scroller.draw_gizmoplex(self.screen)
-            scroller.fun()
-            scroller.move_schedule(self.screen)
-            scroller.draw_schedule_header(self.screen)
-            scroller.draw_vertical_separators(self.screen)
-            scroller.draw_clock(self.screen)
 
+            scroller.fun()
             # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus,
             # 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
             if scroller.sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
@@ -365,6 +361,11 @@ class TriviaBot(commands.Bot):
                 scroller.snow(self.screen)
             else:
                 scroller.snow_flakes.clear()
+
+            scroller.move_schedule(self.screen)
+            scroller.draw_schedule_header(self.screen)
+            scroller.draw_vertical_separators(self.screen)
+            scroller.draw_clock(self.screen)
 
             if int(scroller.timer_tick) % 60 == 0 and not scroller.is_loading_fun:
                 # print("A", len(scroller.fun_objs), scroller.timer_tick, int(scroller.timer_tick) % 60)
