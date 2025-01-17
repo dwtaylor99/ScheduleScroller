@@ -38,8 +38,9 @@ W2 = WIDTH // 2
 H2 = HEIGHT // 2
 
 pygame.init()
-alt_screen = pygame.display.set_mode((WIDTH, HEIGHT))
-alt_clock = pygame.time.Clock()
+# alt_screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+# alt_clock = pygame.time.Clock()
+alt_screen = pygame.Surface((W2, H2))
 
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 120)
@@ -179,8 +180,6 @@ class TriviaBot(commands.Bot):
         else:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
 
-        # self.game_type = GameType.STINGER
-
         if self.game_type == GameType.TRIVIA:
             self.trivia_question = random.choice(self.trivia_questions)
             while self.trivia_question in self.prev_trivia:
@@ -249,7 +248,7 @@ class TriviaBot(commands.Bot):
     async def auto_update_game(self):
         self.game_loop()
 
-    @routines.routine(minutes=7)
+    @routines.routine(minutes=15)
     async def auto_message(self):
         output = "MST3K Trivia every 5 minutes (yes, it counts toward MST3K channel trivia points). "
         output += "Watch on 'Source' mode to reduce latency between screen and chat (!latency for more)."
@@ -385,7 +384,7 @@ class TriviaBot(commands.Bot):
                     is_running = False
 
             pygame.display.flip()
-            dt = alt_clock.tick(FPS)
+            dt = clk.tick(FPS)
             scroller.timer_tick += dt / 1000
             if scroller.timer_tick >= 7200:  # Reset every two hours
                 scroller.timer_tick = 0
