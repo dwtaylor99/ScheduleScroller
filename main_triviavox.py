@@ -147,7 +147,7 @@ class TriviaBot(commands.Bot):
 
     async def bot_print(self, txt):
         print(txt)
-        if self.channel is not None:
+        if not IS_DEBUG and self.channel is not None:
             await self.channel.send(txt)
 
     async def event_message(self, message: Message) -> None:

@@ -10,6 +10,7 @@ from anims.mood_servo import MoodServo
 from anims.moonbug import MoonBug
 from anims.mst3k_moon import MST3KMoon
 from anims.orbit_jet import OrbitJet
+from anims.pumaman import Pumaman
 from anims.sandstorm import SandStorm
 from anims.shuriken import Shuriken
 from anims.skydiver import Skydiver
@@ -71,6 +72,9 @@ def get_by_epnum(screen, epnum: str):
     elif epnum == "822":
         print("Fun: Fingal")
         objs.append(Fingal(screen))
+    elif epnum == "903":
+        print("Fun: Pumaman")
+        objs.append(Pumaman(screen))
     elif epnum == "910":
         if random.randint(1, 2) == 1:
             print("Fun: Troy")
@@ -91,8 +95,10 @@ def get_by_epnum(screen, epnum: str):
 
 def get(screen, title: str, epnum: str) -> []:
     anim_list = ['111', '302', '304', '308', '312', '316', '322', '324', '410', '413', '414', '417',
-                 '609', '611', '612', '620', '624', '812', '821', '822', '910', '1007',
+                 '609', '611', '612', '620', '624', '812', '821', '822', '903', '910', '1007',
                  '1306', '1307']
+
+    return get_by_epnum(screen, "903")
 
     # If the episode has a specific animation, choose it 50% of the time
     if epnum in anim_list and random.randint(1, 2) == 1:
@@ -115,7 +121,7 @@ def get(screen, title: str, epnum: str) -> []:
         else:
             return get_by_epnum(screen, random.choice(
                 ['111', '302', '322', '410', '413', '414', '609', '611', '612', '620', '624', '812', '821', '822',
-                 '910', '1007', '1306', '1307']))
+                 '903', '910', '1007', '1306', '1307']))
 
 
 class FunFactory:
