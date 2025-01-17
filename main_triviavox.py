@@ -147,8 +147,8 @@ class TriviaBot(commands.Bot):
 
     async def bot_print(self, txt):
         print(txt)
-        if self.channel is not None:
-            await self.channel.send(txt)
+        # if self.channel is not None:
+        #     await self.channel.send(txt)
 
     async def event_message(self, message: Message) -> None:
         if message.echo:
@@ -366,10 +366,12 @@ class TriviaBot(commands.Bot):
                 scroller.snow_flakes.clear()
 
             if int(scroller.timer_tick) % 60 == 0 and not scroller.is_loading_fun:
+                # print("A", len(scroller.fun_objs), scroller.timer_tick, int(scroller.timer_tick) % 60)
                 scroller.is_loading_fun = True
                 scroller.fun_objs = funfactory.get(self.screen, scroller.sched[0]['title'], scroller.sched[0]['epnum'])
 
-            if int(scroller.timer_tick) % 64 == 0:
+            if int(scroller.timer_tick) % 60 == 1 and scroller.is_loading_fun:
+                # print("B")
                 scroller.is_loading_fun = False
 
             if len(scroller.fun_objs) > 0 and not scroller.is_loading_fun:
