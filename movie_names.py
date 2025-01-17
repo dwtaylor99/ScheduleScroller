@@ -24,7 +24,7 @@ MOVIE_NAMES = {
     "312": ["Gamera vs Guiron"],
     "313": ["Earth vs the Spider"],
     "314": ["Mighty Jack"],
-    "315": ["Teenage Cave Man"],
+    "315": ["Teenage Cave Man", "Teenage Caveman", "Teen Age Caveman", "Teen Age Cave Man"],
     "316": ["Gamera vs Zigra"],
     "317": ["The Saga of the Viking Women and Their Voyage to the Waters of the Great Sea Serpent",
             "Viking Women and the Sea Serpent", "Viking Women"],

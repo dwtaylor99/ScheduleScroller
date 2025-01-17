@@ -98,8 +98,6 @@ def get(screen, title: str, epnum: str) -> []:
                  '609', '611', '612', '620', '624', '812', '821', '822', '903', '910', '1007',
                  '1306', '1307']
 
-    return get_by_epnum(screen, "903")
-
     # If the episode has a specific animation, choose it 50% of the time
     if epnum in anim_list and random.randint(1, 2) == 1:
         # Choose the specific animation for this episode

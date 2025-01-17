@@ -286,7 +286,7 @@ class TriviaBot(commands.Bot):
                   "video and under Settings, choose 'Source'.")
         await self.bot_print(output)
 
-    @commands.command(name="rank", aliases=['Rank', 'RANK', 'points', 'Points', 'POINTS'])
+    @commands.command(name="rank", aliases=['Rank', 'RANK', 'points', 'Points', 'POINTS', "triviarank", "triviapoints"])
     async def cmd_rank(self, ctx: commands.Context):
         """Show all trivia player's points and rank"""
         name = ctx.author.name.lower()
@@ -301,7 +301,7 @@ class TriviaBot(commands.Bot):
         output = "{} has {} trivia {} and is rank {} of {}.".format(name, points, point_word, rank, num_users)
         await self.bot_print(output)
 
-    @commands.command(name="top", aliases=['Top', 'TOP'])
+    @commands.command(name="top", aliases=['Top', 'TOP', 'triviatop'])
     async def cmd_top(self, ctx: commands.Context):
         """Show the trivia players with the highest scores"""
         parts = ctx.message.content.split()
