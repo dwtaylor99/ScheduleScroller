@@ -147,8 +147,8 @@ class TriviaBot(commands.Bot):
 
     async def bot_print(self, txt):
         print(txt)
-        # if self.channel is not None:
-        #     await self.channel.send(txt)
+        if self.channel is not None:
+            await self.channel.send(txt)
 
     async def event_message(self, message: Message) -> None:
         if message.echo:
@@ -220,6 +220,7 @@ class TriviaBot(commands.Bot):
                 stinger_num = stinger_file[:-4]
 
             answers = MOVIE_NAMES[stinger_num]
+            answers.append(str(stinger_num))
             self.trivia_question = bottrivia.Trivia(STR_STINGER, answers)
 
             self.preserved_answer = self.trivia_question.answers[0]
