@@ -90,7 +90,7 @@ class GameType(Enum):
     STINGER = "Stinger"
 
 
-class TriviaBot(commands.Bot):
+class TriviaVox(commands.Bot):
     def __init__(self, screen, clock):
         super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
         self.screen = screen
@@ -435,7 +435,7 @@ if __name__ == '__main__':
     summaries.refresh()
     scroller.setup(scr)
 
-    bot = TriviaBot(scr, clk)
+    bot = TriviaVox(scr, clk)
     bot.run()
 
 """
