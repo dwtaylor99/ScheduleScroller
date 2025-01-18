@@ -502,6 +502,4 @@ add support for missing emoji:
 [110]
 [125]
 [142]
-
-White scale from center?
 """

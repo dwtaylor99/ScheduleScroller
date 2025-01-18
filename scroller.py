@@ -448,18 +448,3 @@ if __name__ == '__main__':
     # summaries.refresh()
     # setup(scr)
     # main_loop()
-
-    # Testing fonts
-    while running:
-        scr.fill(BLACK)
-
-        txt = FONT_LG.render("Fifteen years from now", True, WHITE)
-        scr.blit(txt, (500, 500))
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-        dt = clk.tick(60)
-        pygame.display.flip()
-
-    pygame.quit()
