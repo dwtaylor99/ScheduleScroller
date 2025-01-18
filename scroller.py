@@ -1,5 +1,4 @@
 import os.path
-from datetime import datetime
 
 import pygame.display
 
@@ -381,6 +380,7 @@ def draw_gizmoplex(screen):
 
 
 def main_loop(screen):
+    """This is called from TriviaVox now."""
     global running, dt, timer_tick, is_loading_fun, fun_objs
 
     # while running:

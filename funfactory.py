@@ -1,5 +1,6 @@
 import random
 
+from anims.ator_glider import AtorGlider
 from anims.deathray import DeathRay
 from anims.elsanto_flying import ElSantoFlying
 from anims.fingal import Fingal
@@ -33,6 +34,9 @@ def get_by_epnum(screen, epnum: str):
     if epnum == "111":
         print("Fun: MoonBug")
         objs.append(MoonBug(screen))
+    elif epnum == "301":
+        print("Fun: Ator Glider")
+        objs.append(AtorGlider(screen))
     elif epnum in ['302', '304', '308', '312', '316', '1307']:
         print("Fun: Gamera")
         objs.append(Gamera(screen))
@@ -103,9 +107,11 @@ def get_by_epnum(screen, epnum: str):
 
 
 def get(screen, title: str, epnum: str) -> []:
-    anim_list = ['111', '302', '304', '308', '312', '316', '322', '324', '410', '413', '414', '417',
+    anim_list = ['111', '301', '302', '304', '308', '312', '316', '322', '324', '410', '413', '414', '417',
                  '609', '611', '612', '620', '624', '812', '821', '822', '903', '910', '912', '1007', '1304',
                  '1306', '1307']
+
+    return [AtorGlider(screen)]
 
     # If the episode has a specific animation, choose it 50% of the time
     if epnum in anim_list and random.randint(1, 2) == 1:
@@ -122,7 +128,7 @@ def get(screen, title: str, epnum: str) -> []:
 
         else:
             return get_by_epnum(screen, random.choice(
-                ['111', '302', '322', '410', '413', '414', '609', '611', '612', '620', '624', '812', '821', '822',
+                ['111', '301' '302', '322', '410', '413', '414', '609', '611', '612', '620', '624', '812', '821', '822',
                  '903', '910', '912', '1007', '1304', '1306', '1307']))
 
 

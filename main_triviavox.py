@@ -21,7 +21,7 @@ import summaries
 from anims.heart_snow import HeartSnow
 from anims.snow import SnowFlake
 from colors import *
-from constants import VALENTINES_DAY
+from constants import *
 from movie_names import MOVIE_NAMES
 from util_text import wrap_text
 
