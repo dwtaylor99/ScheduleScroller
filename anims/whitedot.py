@@ -18,14 +18,18 @@ class WhiteDot(FunBase):
 
     def animate(self):
         if self.anim_step == 1:
-            # super().animate()
-
             self.scale += self.swing
             if self.scale <= 1.0 or self.scale >= 1.25:
                 self.swing = -self.swing
 
-            temp_img = pygame.transform.smoothscale_by(self.img, self.scale).convert_alpha()
-            self.screen.blit(temp_img, (self.x, self.y))
+            old_center = self.img.get_rect().center
+            new_image = pygame.transform.smoothscale_by(self.img, self.scale).convert_alpha()
+            new_rect = new_image.get_rect()
+            new_rect.center = old_center
+            new_rect.x += self.x
+            new_rect.y += self.y
+
+            self.screen.blit(new_image, new_rect)
             self.x += self.vel_x
             self.y += self.vel_y
 
