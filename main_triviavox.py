@@ -1,4 +1,5 @@
 import asyncio
+import platform
 import random
 import re
 import time
@@ -425,6 +426,9 @@ def normalize_answers(answer_list):
 
 
 if __name__ == '__main__':
+    if platform.system().lower() == "window":
+        IS_DEBUG = True
+
     scr = pygame.display.set_mode((WIDTH, HEIGHT))
     clk = pygame.time.Clock()
 
