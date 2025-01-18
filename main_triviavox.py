@@ -448,7 +448,7 @@ def normalize_answers(answer_list):
 
     new_ans = []
     for ans in answer_list:
-        # Conver to lower case and keep only alphanumerics and spaces
+        # Convert to lower case and keep only alphanumerics and spaces
         a = re.sub(r"[^ a-zA-Z0-9]", "", ans.lower())
 
         # Remove articles (a, an, the)
@@ -474,7 +474,7 @@ if __name__ == '__main__':
     scr = pygame.display.set_mode((WIDTH, HEIGHT))
     clk = pygame.time.Clock()
 
-    # Images used to fix missing emoji and flags
+    # Images used to fix missing emoji and flags (they need to be loaded after setting the screen mode)
     EMJ_NINJA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/ninja_1f977.png'), 0.12).convert_alpha()
     EMJ_MELT_FACE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/melting-face_1fae0.png'), 0.12).convert_alpha()
     EMJ_BKNIGHT = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/black-knight-2692.png'), 0.5).convert_alpha()
