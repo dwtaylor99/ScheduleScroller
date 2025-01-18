@@ -10,9 +10,11 @@ from anims.mood_servo import MoodServo
 from anims.moonbug import MoonBug
 from anims.mst3k_moon import MST3KMoon
 from anims.orbit_jet import OrbitJet
+from anims.pizza import Pizza
 from anims.pumaman import Pumaman
 from anims.sandstorm import SandStorm
 from anims.shuriken import Shuriken
+from anims.skull import ScreamingSkull
 from anims.skydiver import Skydiver
 from anims.sol import SOL
 from anims.starfighter import Starfighter
@@ -83,10 +85,16 @@ def get_by_epnum(screen, epnum: str):
         else:
             print("Fun: Zap")
             objs.append(ZapBeer(screen))
+    elif epnum == "912":
+        print("Fun: ScreamingSkull")
+        objs.append(ScreamingSkull(screen))
     elif epnum == "1007":
         print("Fun: Meteorite")
         for _ in range(random.randint(3, 8)):
             objs.append(Meteorite(screen))
+    elif epnum == "1304":
+        print("Fun: Pizza")
+        objs.append(Pizza(screen))
     elif epnum == "1306":
         print("Fun: MoodServo")
         objs.append(MoodServo(screen))
@@ -96,7 +104,7 @@ def get_by_epnum(screen, epnum: str):
 
 def get(screen, title: str, epnum: str) -> []:
     anim_list = ['111', '302', '304', '308', '312', '316', '322', '324', '410', '413', '414', '417',
-                 '609', '611', '612', '620', '624', '812', '821', '822', '903', '910', '1007',
+                 '609', '611', '612', '620', '624', '812', '821', '822', '903', '910', '912', '1007', '1304',
                  '1306', '1307']
 
     # If the episode has a specific animation, choose it 50% of the time
@@ -115,7 +123,7 @@ def get(screen, title: str, epnum: str) -> []:
         else:
             return get_by_epnum(screen, random.choice(
                 ['111', '302', '322', '410', '413', '414', '609', '611', '612', '620', '624', '812', '821', '822',
-                 '903', '910', '1007', '1306', '1307']))
+                 '903', '910', '912', '1007', '1304', '1306', '1307']))
 
 
 class FunFactory:
