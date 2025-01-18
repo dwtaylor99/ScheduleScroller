@@ -137,7 +137,7 @@ MOVIE_NAMES = {
     "819": ["Invasion of the Neptune Men", "Neptune Men"],
     "820": ["Space Mutiny"],
     "821": ["Time Chasers"],
-    "822": ["Overdrawn at the Memory Bank", "Overdrawn", "Memory Bank"],
+    "822": ["Overdrawn at the Memory Bank", "Overdrawn", "Memory Bank", "OATMB", "ODATMB"],
     "901": ["The Projected Man"],
     "902": ["The Phantom Planet"],
     "903": ["The Pumaman", "The Puma Man"],
