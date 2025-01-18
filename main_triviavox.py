@@ -31,15 +31,15 @@ CHANNEL_NAME = "movievox"
 FPS = 60
 UPDATE_RATE = 1 / (FPS * 2)
 
-WIDTH = 1920  # // 2
-HEIGHT = 1080  # // 2
+WIDTH = 1920
+HEIGHT = 1080
 
 W2 = WIDTH // 2
 H2 = HEIGHT // 2
 
 pygame.init()
-# alt_screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-# alt_clock = pygame.time.Clock()
+
+# Draw the games onto this smaller Surface and blit them to the main screen Surface
 alt_screen = pygame.Surface((W2, H2))
 
 BLACK = (0, 0, 0)
@@ -76,9 +76,6 @@ FONT_EMOJI_LG = pygame.font.Font("fonts/seguiemj.ttf", 48)
 STR_STINGER = "Name the MST3K movie this stinger is from:"
 TXT_STINGER = FONT_MST3K_LG.render(STR_STINGER, True, YELLOW)
 
-STR_NEXT = "Next question coming up soon..."
-TXT_NEXT = FONT_MST3K_LG.render(STR_NEXT, True, YELLOW)
-
 STR_EMOJI = "Name the MST3K movie described by these emoji:"
 TXT_EMOJI = FONT_MST3K_LG.render(STR_EMOJI, True, YELLOW)
 
@@ -93,11 +90,10 @@ class GameType(Enum):
 
 
 class TriviaBot(commands.Bot):
-    def __init__(self, screen, clock, alt_loop):
+    def __init__(self, screen, clock):
         super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
         self.screen = screen
         self.clock = clock
-        self.alt_loop = alt_loop
 
         self.stream = None
         self.channel = super().get_channel(CHANNEL_NAME)
@@ -120,14 +116,12 @@ class TriviaBot(commands.Bot):
         self.stinger_num = 0
         self.prev_stingers = []
 
-    async def get_live(self):
+    async def check_if_live(self):
         streams = await self.fetch_streams(user_ids=[CHANNEL_ID])
         self.is_live = len(streams) > 0
 
     async def event_ready(self):
-        # streams = await self.fetch_streams(user_ids=[CHANNEL_ID])
-        # self.is_live = len(streams) > 0
-        await self.get_live()
+        await self.check_if_live()
 
         self.channel = super().get_channel(CHANNEL_NAME)
 
@@ -143,7 +137,6 @@ class TriviaBot(commands.Bot):
         self.auto_update_game.start()
 
         print("TriviaVox ready, channel is live={}".format(self.is_live))
-        self.alt_loop(self.screen)
 
     async def bot_print(self, txt):
         print(txt)
@@ -158,7 +151,6 @@ class TriviaBot(commands.Bot):
             guess = normalize_answers([message.content])[0]
             if guess in self.trivia_question.answers:
                 self.trivia_winners.append(message.author.display_name)
-                # print("Correct answer from {}".format(message.author.display_name))
 
                 # Only start the timer after the first winner is detected.
                 if len(self.trivia_winners) == 1:
@@ -174,7 +166,7 @@ class TriviaBot(commands.Bot):
     async def auto_trivia(self):
         """Run a trivia question every few minutes."""
         # Choose a game type
-        await self.get_live()  # Check if the stream is live
+        await self.check_if_live()  # Check if the stream is live
         if self.is_live:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER])
         else:
@@ -331,12 +323,8 @@ class TriviaBot(commands.Bot):
                 txt = FONT_EMOJI_LG.render(self.trivia_question.question.split(":")[1], True, WHITE)
                 alt_screen.blit(txt, ((W2 - txt.get_width()) // 2, H2 // 2))
 
-        else:
-            # alt_screen.blit(TXT_NEXT, ((W2 - TXT_NEXT.get_width()) // 2, (H2 - TXT_NEXT.get_height()) // 2))
-            pass
-
         # Blit the internal alt_screen (Surface) on the main screen
-        self.screen.blit(alt_screen, (960, 0))
+        self.screen.blit(alt_screen, (WIDTH // 2, 0))
 
     def game_loop(self):
         global is_running, dt
@@ -368,12 +356,10 @@ class TriviaBot(commands.Bot):
             scroller.draw_clock(self.screen)
 
             if int(scroller.timer_tick) % 60 == 0 and not scroller.is_loading_fun:
-                # print("A", len(scroller.fun_objs), scroller.timer_tick, int(scroller.timer_tick) % 60)
                 scroller.is_loading_fun = True
                 scroller.fun_objs = funfactory.get(self.screen, scroller.sched[0]['title'], scroller.sched[0]['epnum'])
 
             if int(scroller.timer_tick) % 60 == 1 and scroller.is_loading_fun:
-                # print("B")
                 scroller.is_loading_fun = False
 
             if len(scroller.fun_objs) > 0 and not scroller.is_loading_fun:
@@ -445,7 +431,7 @@ if __name__ == '__main__':
     summaries.refresh()
     scroller.setup(scr)
 
-    bot = TriviaBot(scr, clk, scroller.main_loop)
+    bot = TriviaBot(scr, clk)
     bot.run()
 
 """
