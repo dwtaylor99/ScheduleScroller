@@ -59,7 +59,7 @@ def wrap_text(text) -> str:
     for i in range(0, len(text)):
         t = text[i]
 
-        if i % 60 == 0:
+        if i % 52 == 0:
             s = s[:last_space + 1] + "\n" + s[last_space + 2:]
 
         if t == " ":
