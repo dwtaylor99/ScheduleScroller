@@ -34,7 +34,6 @@ class Pumaman(FunBase):
             self.screen.blit(new_image, new_rect)
             self.x += self.vel_x
             self.y += self.vel_y
-            print(self.x)
 
             # Stop the animation?
             if self.x > self.screen.get_width():

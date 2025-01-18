@@ -140,7 +140,7 @@ def load() -> TriviaCollection:
             if reader.line_num < 5 and len(line) > 0 and line[0].lower() == "<!doctype html>":
                 break
 
-            if reader.line_num > 1 and len(line) > 1:
+            if reader.line_num > 0 and len(line) > 1:
                 question = line.pop(0)
                 answers = list(filter(None, line))  # Only add non-empty strings to the list of answers
                 emoji_coll.trivia.append(Trivia(question, answers))
@@ -159,7 +159,7 @@ def load_as_array() -> [Trivia]:
             if reader.line_num < 5 and len(line) > 0 and line[0].lower() == "<!doctype html>":
                 break
 
-            if reader.line_num > 1 and len(line) > 1:
+            if reader.line_num > 0 and len(line) > 1:
                 question = line.pop(0)
                 answers = list(filter(None, line))  # Only add non-empty strings to the list of answers
                 emoji_coll.append(Trivia(question, answers))
