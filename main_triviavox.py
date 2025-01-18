@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import platform
 import random
 import re
@@ -7,7 +8,6 @@ from enum import Enum
 from os import listdir
 from os.path import isfile, join
 
-import pygame
 from twitchio import Message
 from twitchio.ext import commands, routines
 
@@ -18,7 +18,10 @@ import funfactory
 import gradient
 import scroller
 import summaries
+from anims.heart_snow import HeartSnow
 from anims.snow import SnowFlake
+from colors import *
+from constants import VALENTINES_DAY
 from movie_names import MOVIE_NAMES
 from util_text import wrap_text
 
@@ -42,18 +45,6 @@ pygame.init()
 
 # Draw the games onto this smaller Surface and blit them to the main screen Surface
 alt_screen = pygame.Surface((W2, H2))
-
-BLACK = (0, 0, 0)
-BLUE = (0, 0, 120)
-LT_BLUE = (0, 0, 200)
-PALE_BLUE = (127, 156, 212)
-YELLOW = (192, 192, 0)
-WHITE = (192, 192, 192)
-DK_GRAY = (32, 32, 32)
-GRAY = (128, 128, 128)
-RED = (128, 0, 0)
-LT_RED = (192, 0, 0)
-GREEN = (0, 128, 0)
 
 STINGER_PATH = "images/stingers"
 
@@ -367,7 +358,10 @@ class TriviaVox(commands.Bot):
             if scroller.sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
                 if len(scroller.snow_flakes) == 0:
                     for _ in range(scroller.NUM_SNOWFLAKES):
-                        scroller.snow_flakes.append(SnowFlake(self.screen))
+                        if datetime.strftime(datetime.now(), "%Y-%m-%d") == VALENTINES_DAY:
+                            scroller.snow_flakes.append(HeartSnow(self.screen))
+                        else:
+                            scroller.snow_flakes.append(SnowFlake(self.screen))
                 scroller.snow(self.screen)
             else:
                 scroller.snow_flakes.clear()
@@ -468,7 +462,7 @@ def normalize_answers(answer_list):
 
 
 if __name__ == '__main__':
-    if platform.system().lower() == "window":
+    if platform.system().lower() == "windows":
         IS_DEBUG = True
 
     scr = pygame.display.set_mode((WIDTH, HEIGHT))

@@ -1,20 +1,39 @@
+from datetime import datetime
+
 import pygame
 
+from constants import VALENTINES_DAY
+
 BLACK = pygame.Color(0, 0, 0)
-BLUE = pygame.Color(0, 0, 120)
-LTBLUE = pygame.Color(0, 0, 200)
-MEDBLUE = pygame.Color(0, 50, 180)
-PALEBLUE = pygame.Color(0, 80, 220)
-YELLOW = pygame.Color(192, 192, 0)
 WHITE = pygame.Color(192, 192, 192)
 DK_GRAY = pygame.Color(32, 32, 32)
 GRAY = pygame.Color(128, 128, 128)
+YELLOW = pygame.Color(192, 192, 0)
+GREEN = pygame.Color(0, 128, 0)
+
+BLUE = pygame.Color(0, 0, 120)
+LT_BLUE = pygame.Color(0, 0, 200)
+MED_BLUE = pygame.Color(0, 50, 180)
+PALE_BLUE = pygame.Color(0, 80, 220)
+
+RED = pygame.Color(120, 0, 0)
+MED_RED = pygame.Color(196, 90, 118)
+LT_RED = pygame.Color(156, 70, 82)
+
 
 JOEL_RED = pygame.Color(201, 58, 34)  # "C93A22"
 MIKE_BLUE = pygame.Color(0, 115, 164)  # "0073A4"
 JONAH_YELLOW = pygame.Color(211, 161, 1)  # "D3A101"
 EMILY_PURPLE = pygame.Color(100, 96, 173)  # "6460AD"
 GROUP_GREEN = pygame.Color(33, 130, 0)  # "218200"
+
+# Color schemes [dark, medium, light]:
+SCHEME_DEFAULT = [BLUE, MED_BLUE, LT_BLUE]
+SCHEME_RED_PINK = [(140, 35, 35), MED_RED, LT_RED]
+
+COLOR_SCHEME = SCHEME_DEFAULT
+if datetime.strftime(datetime.now(), "%Y-%m-%d") == VALENTINES_DAY:
+    COLOR_SCHEME = SCHEME_RED_PINK
 
 
 def get_host_color(epnum):

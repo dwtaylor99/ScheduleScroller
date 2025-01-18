@@ -5,9 +5,10 @@ import pygame.display
 
 import funfactory
 import schedule
-import summaries
+from anims.heart_snow import HeartSnow
 from anims.snow import SnowFlake
 from colors import *
+from constants import VALENTINES_DAY
 from gradient import rect_gradient_h
 from schedule import PAC_TZ, EST_TZ
 from util_text import *
@@ -47,6 +48,9 @@ FONT_SIZE_LARGE = 40
 FONT_LG = pygame.font.Font(FONT_FACE_SIM, FONT_SIZE_LARGE)
 
 TXT_LOADING = FONT_LG.render("Loading...", True, WHITE)
+
+STR_TWITCH = "twitch.tv/mst3k"
+STR_GIZMO = "gizmoplex.com"
 
 # vertical font spacing
 FONT_PAD = 10
@@ -147,7 +151,7 @@ def draw_schedule_header(screen):
     pygame.draw.rect(screen, WHITE, pygame.Rect(0, y, WIDTH, SCHED_H))
 
     bg = pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 4)
-    rect_gradient_h(screen, LTBLUE, BLUE, bg)
+    rect_gradient_h(screen, COLOR_SCHEME[2], COLOR_SCHEME[0], bg)
 
     alpha_step = 2
     tick = int(timer_tick) % 60
@@ -206,7 +210,7 @@ def draw_scrolling_header(screen):
         hdr_y += int((len(sched) + 1) * SCHED_H)
 
     pygame.draw.rect(screen, WHITE, pygame.Rect(0, hdr_y, WIDTH, SCHED_H))
-    rect_gradient_h(screen, LTBLUE, BLUE, pygame.Rect(2, hdr_y + 2, WIDTH - 3, SCHED_H - 3))
+    rect_gradient_h(screen, COLOR_SCHEME[2], COLOR_SCHEME[0], pygame.Rect(2, hdr_y + 2, WIDTH - 3, SCHED_H - 3))
 
     date_now = datetime.now()
     ptz = date_now.astimezone(PAC_TZ)
@@ -238,7 +242,7 @@ def draw_schedule_item(screen, obj, y):
         y += int((len(sched) + 1) * SCHED_H)
 
     pygame.draw.rect(screen, WHITE, pygame.Rect(0, y, WIDTH, SCHED_H))
-    pygame.draw.rect(screen, MEDBLUE, pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3))
+    pygame.draw.rect(screen, COLOR_SCHEME[1], pygame.Rect(2, y + 2, WIDTH - 3, SCHED_H - 3))
 
     title_display = update_title(obj['title'], obj['epnum'])
 
@@ -311,7 +315,7 @@ def draw_loading(screen):
     screen.fill(BLACK)
     img = pygame.image.load('images/fun/seven_years_later2.png').convert_alpha()
     screen.blit(img, ((WIDTH - img.get_width()) // 2, (HEIGHT - img.get_height()) // 2))
-    screen.blit(TXT_LOADING, ((WIDTH - TXT_LOADING.get_width()) // 2, HEIGHT - 200))
+    screen.blit(TXT_LOADING, (100, HEIGHT - 100))
     pygame.display.flip()
 
 
@@ -357,9 +361,12 @@ def snow(screen):
     for flake in snow_flakes:
         flake.animate()
         if flake.anim_step == 0:
-            snow_flakes.append(SnowFlake(screen))
+            if datetime.strftime(datetime.now(), "%Y-%m-%d") == VALENTINES_DAY:
+                snow_flakes.append(HeartSnow(screen))
+            else:
+                snow_flakes.append(SnowFlake(screen))
 
-    # Remove any snowflakes that are finished falling
+    # Keep any snowflakes that are still falling
     temp_objs = []
     for flake in snow_flakes:
         if flake.anim_step > 0:
@@ -369,8 +376,8 @@ def snow(screen):
 
 
 def draw_gizmoplex(screen):
-    drop_shadow(screen, FONT_XS, "twitch.tv/mst3k", WHITE, WIDTH - 130, HEIGHT_HALF - 50)
-    drop_shadow(screen, FONT_XS, "gizmoplex.com", WHITE, WIDTH - 130, HEIGHT_HALF - 30)
+    drop_shadow(screen, FONT_XS, STR_TWITCH, WHITE, WIDTH - 130, HEIGHT_HALF - 50)
+    drop_shadow(screen, FONT_XS, STR_GIZMO, WHITE, WIDTH - 130, HEIGHT_HALF - 30)
 
 
 def main_loop(screen):
