@@ -21,7 +21,7 @@ from anims.snow import SnowFlake
 from movie_names import MOVIE_NAMES
 from util_text import wrap_text
 
-IS_DEBUG = True
+IS_DEBUG = False
 
 # CHANNEL_ID = 105623158
 # CHANNEL_NAME = "mst3k"
@@ -243,8 +243,8 @@ class TriviaBot(commands.Bot):
 
     @routines.routine(minutes=15)
     async def auto_message(self):
-        output = "MST3K Trivia every 5 minutes (yes, it counts toward MST3K channel trivia points). "
-        output += "Watch on 'Source' mode to reduce latency between screen and chat (!latency for more)."
+        output = ("MST3K Trivia every 5 minutes (yes, it counts toward MST3K channel trivia points). " 
+                  "Watch on 'Source' mode to reduce latency between screen and chat (!latency for more).")
         await self.bot_print(output)
 
     async def stop_trivia(self):
