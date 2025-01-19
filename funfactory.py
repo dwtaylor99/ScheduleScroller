@@ -28,91 +28,56 @@ from anims.widowmaker import Widowmaker
 from anims.zap_beer import ZapBeer
 
 
+ANIMS_BY_EPNUM = {
+    "111": (MoonBug, 1),
+    "301": (AtorGlider, 1),
+    "302": (Gamera, 1),
+    "304": (Gamera, 1),
+    "308": (Gamera, 1),
+    "312": (Gamera, 1),
+    "316": (Gamera, 1),
+    "322": (Shuriken, random.randint(2, 5)),
+    "324": (Shuriken, random.randint(2, 5)),
+    "410": (SandStorm, random.randint(8, 12)),
+    "413": (OrbitJet, 1),
+    "414": (ViHead, 1),
+    "417": (OrbitJet, 1),
+    "609": (Skydiver, 1),
+    "611": (HorseRunning, 1),
+    "612": (Starfighter, random.randint(3, 5)),
+    "620": (DeathRay, 1),
+    "624": (ElSantoFlying, 1),
+    "821": ([TimeChasersPlane, TimeChasersPlaneOther] if random.randint(1, 2) == 1 else TimeChasersPlane, 1),
+    "822": (Fingal, 1),
+    "903": (Pumaman, 1),
+    "910": (ZapBeer if random.randint(1, 2) == 1 else TroyCsonka, 1),
+    "912": (ScreamingSkull, 1),
+    "1007": (Meteorite, random.randint(3, 8)),
+    "1304": (Pizza, 1),
+    "1306": (MoodServo, 1),
+    "1307": (Gamera, 1),
+}
+
+
 def get_by_epnum(screen, epnum: str):
     objs = []
 
-    if epnum == "111":
-        print("Fun: MoonBug")
-        objs.append(MoonBug(screen))
-    elif epnum == "301":
-        print("Fun: Ator Glider")
-        objs.append(AtorGlider(screen))
-    elif epnum in ['302', '304', '308', '312', '316', '1307']:
-        print("Fun: Gamera")
-        objs.append(Gamera(screen))
-    elif epnum in ['322', '324']:
-        print("Fun: Shuriken")
-        for _ in range(random.randint(2, 5)):
-            objs.append(Shuriken(screen))
-    elif epnum == "410":
-        print("Fun: Sandstorm")
-        for _ in range(random.randint(5, 10)):
-            objs.append(SandStorm(screen))
-    elif epnum in ["413", "417"]:
-        print("Fun: OrbitJet")
-        objs.append(OrbitJet(screen))
-    elif epnum == "414":
-        print("Fun: ViHead")
-        objs.append(ViHead(screen))
-    elif epnum == "609":
-        print("Fun: Skydiver")
-        objs.append(Skydiver(screen))
-    elif epnum == "611":
-        print("Fun: HorseRunning")
-        objs.append(HorseRunning(screen))
-    elif epnum == "612":
-        print("Fun: Starfighters")
-        for _ in range(random.randint(3, 5)):
-            objs.append(Starfighter(screen))
-    elif epnum == "620":
-        print("Fun: Deathray")
-        objs.append(DeathRay(screen))
-    elif epnum == "624":
-        print("Fun: ElSanto")
-        objs.append(ElSantoFlying(screen))
-    elif epnum == "821":
-        print("Fun: TimeChasers")
-        objs.append(TimeChasersPlane(screen))
-        if random.randint(1, 2) == 1:
-            print("Fun: TimeChasersOther")
-            objs.append(TimeChasersPlaneOther(screen))
-    elif epnum == "822":
-        print("Fun: Fingal")
-        objs.append(Fingal(screen))
-    elif epnum == "903":
-        print("Fun: Pumaman")
-        objs.append(Pumaman(screen))
-    elif epnum == "910":
-        if random.randint(1, 2) == 1:
-            print("Fun: Troy")
-            objs.append(TroyCsonka(screen))
-        else:
-            print("Fun: Zap")
-            objs.append(ZapBeer(screen))
-    elif epnum == "912":
-        print("Fun: ScreamingSkull")
-        objs.append(ScreamingSkull(screen))
-    elif epnum == "1007":
-        print("Fun: Meteorite")
-        for _ in range(random.randint(3, 8)):
-            objs.append(Meteorite(screen))
-    elif epnum == "1304":
-        print("Fun: Pizza")
-        objs.append(Pizza(screen))
-    elif epnum == "1306":
-        print("Fun: MoodServo")
-        objs.append(MoodServo(screen))
+    if epnum in ANIMS_BY_EPNUM.keys():
+        anims, num = ANIMS_BY_EPNUM[epnum]
+        print("Fun: " + str(anims))
+        for i in range(num):
+            if type(anims) is list:
+                for a in anims:
+                    objs.append(a(screen))
+            else:
+                objs.append(anims(screen))
 
     return objs
 
 
 def get(screen, title: str, epnum: str) -> []:
-    anim_list = ['111', '301', '302', '304', '308', '312', '316', '322', '324', '410', '413', '414', '417',
-                 '609', '611', '612', '620', '624', '812', '821', '822', '903', '910', '912', '1007', '1304',
-                 '1306', '1307']
-
     # If the episode has a specific animation, choose it 50% of the time
-    if epnum in anim_list and random.randint(1, 2) == 1:
+    if epnum in ANIMS_BY_EPNUM.keys() and random.randint(1, 2) == 1:
         # Choose the specific animation for this episode
         return get_by_epnum(screen, epnum)
     else:
@@ -126,7 +91,7 @@ def get(screen, title: str, epnum: str) -> []:
 
         else:
             return get_by_epnum(screen, random.choice(
-                ['111', '301' '302', '322', '410', '413', '414', '609', '611', '612', '620', '624', '812', '821', '822',
+                ['111', '301' '302', '322', '410', '413', '414', '609', '611', '612', '620', '624', '821', '822',
                  '903', '910', '912', '1007', '1304', '1306', '1307']))
 
 
