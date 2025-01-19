@@ -44,12 +44,13 @@ class HorseRunning(FunBase):
                 img_sheet.set_clip(pygame.Rect(16 + XOFFSET * 2, 32 + YOFFSET * 2, IW, IH))
             elif i == 11:
                 img_sheet.set_clip(pygame.Rect(16 + XOFFSET * 3, 32 + YOFFSET * 2, IW, IH))
-            self.frames.append(img_sheet.subsurface(img_sheet.get_clip()))
+            self.frames.append(pygame.transform.smoothscale_by(img_sheet.subsurface(img_sheet.get_clip()), 1.5))
 
         self.img = self.frames[0]
         self.x = 0
-        self.y = screen.get_height() // 2 - IH
-        self.vel_x = 6
+        self.y = screen.get_height() // 2 - (IH * 1.5)
+        self.vel_x = 10
+        # self.vel_x = 6
         self.vel_y = 0
         self.frame_index = 0
 
