@@ -17,8 +17,8 @@ import funfactory
 import gradient
 import scroller
 import summaries
+from anims.candy_heart_snow import CandyHeartSnow
 from anims.clover_snow import CloverSnow
-from anims.heart_snow import HeartSnow
 from anims.snow import SnowFlake
 from colors import *
 from constants import *
@@ -359,7 +359,7 @@ class TriviaVox(commands.Bot):
                 if len(scroller.snow_flakes) == 0:
                     for _ in range(scroller.NUM_SNOWFLAKES):
                         if DATE_YYYY == VALENTINES_DAY:
-                            scroller.snow_flakes.append(HeartSnow(self.screen))
+                            scroller.snow_flakes.append(CandyHeartSnow(self.screen))
                         elif DATE_YYYY == ST_PATRICKS_DAY:
                             scroller.snow_flakes.append(CloverSnow(self.screen))
                         else:

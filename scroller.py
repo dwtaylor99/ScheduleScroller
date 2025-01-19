@@ -4,6 +4,7 @@ import pygame.display
 
 import funfactory
 import schedule
+from anims.candy_heart_snow import CandyHeartSnow
 from anims.clover_snow import CloverSnow
 from anims.heart_snow import HeartSnow
 from anims.snow import SnowFlake
@@ -363,7 +364,7 @@ def snow(screen):
         flake.animate()
         if flake.anim_step == 0:
             if DATE_YYYY == VALENTINES_DAY:
-                snow_flakes.append(HeartSnow(screen))
+                snow_flakes.append(CandyHeartSnow(screen))
             elif DATE_YYYY == ST_PATRICKS_DAY:
                 snow_flakes.append(CloverSnow(screen))
             else:
