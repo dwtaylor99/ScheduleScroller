@@ -488,18 +488,19 @@ if __name__ == '__main__':
 """
 TODO:
 add support for missing emoji:
-102 - Robot vs Aztec Mummy (Mexico flag) [1]
-322 - Master Ninja I (ninja) [36]
-324 - Master Ninja II (ninja twice) [38]
-420 - Human Duplicators (verify the equal sign) [53]
-602 - Invasion USA (USA flag) [76]
-619 - Red Zone Cuba (Cuba flag) [90]
-704 - Incredible Melting Man (melting face) [96]
-1008 - Final Justice (Malta flag) [133]
+102 - Robot vs Aztec Mummy (Mexico flag) [1]            🤖🆚🇲🇽⚰️🧟‍♂️
+322 - Master Ninja I (ninja) [36]                       👨‍🏫🥷
+324 - Master Ninja II (ninja twice) [38]                👨‍🏫🥷🥷
+420 - Human Duplicators (verify the equal sign) [53]    👨➕🤖=♾️👨
+602 - Invasion USA (USA flag) [76]                      ⚔️➡️🇺🇸🗽
+619 - Red Zone Cuba (Cuba flag) [90]                    🟥🚧🇨🇺
+704 - Incredible Melting Man (melting face) [96]        😲🫠👨
+1008 - Final Justice (Malta flag) [133]                 ⏮️⚖️🇲🇹
 
 # Test these:
-[89]
-[110]
-[125]
-[142]
+[82]  ⚔️📅❌12
+[89]  📈🏫🗚💉
+[110] ⚔️➡️♆👨👨
+[125] 📜🔺♞♞
+[142] 👀✖️500,000
 """
