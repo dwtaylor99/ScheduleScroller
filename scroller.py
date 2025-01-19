@@ -4,6 +4,7 @@ import pygame.display
 
 import funfactory
 import schedule
+from anims.clover_snow import CloverSnow
 from anims.heart_snow import HeartSnow
 from anims.snow import SnowFlake
 from colors import *
@@ -78,7 +79,8 @@ fun_objs = []
 header_color = pygame.Color(192, 192, 0, 0)
 title_color = pygame.Color(192, 192, 192, 0)
 
-NUM_SNOWFLAKES = 100
+# NUM_SNOWFLAKES = 100
+NUM_SNOWFLAKES = 50
 snow_flakes = []
 
 
@@ -360,8 +362,10 @@ def snow(screen):
     for flake in snow_flakes:
         flake.animate()
         if flake.anim_step == 0:
-            if datetime.strftime(datetime.now(), "%Y-%m-%d") == VALENTINES_DAY:
+            if DATE_YYYY == VALENTINES_DAY:
                 snow_flakes.append(HeartSnow(screen))
+            elif DATE_YYYY == ST_PATRICKS_DAY:
+                snow_flakes.append(CloverSnow(screen))
             else:
                 snow_flakes.append(SnowFlake(screen))
 
@@ -381,6 +385,7 @@ def draw_gizmoplex(screen):
 
 def main_loop(screen):
     """This is called from TriviaVox now."""
+    """
     global running, dt, timer_tick, is_loading_fun, fun_objs
 
     # while running:
@@ -439,6 +444,8 @@ def main_loop(screen):
         # timer_tick += dt
         # if timer_tick >= 7200:  # Reset every two hours
         #     timer_tick = 0
+    """
+    pass
 
 
 if __name__ == '__main__':

@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 import platform
 import random
 import re
@@ -18,6 +17,7 @@ import funfactory
 import gradient
 import scroller
 import summaries
+from anims.clover_snow import CloverSnow
 from anims.heart_snow import HeartSnow
 from anims.snow import SnowFlake
 from colors import *
@@ -358,8 +358,10 @@ class TriviaVox(commands.Bot):
             if scroller.sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
                 if len(scroller.snow_flakes) == 0:
                     for _ in range(scroller.NUM_SNOWFLAKES):
-                        if datetime.strftime(datetime.now(), "%Y-%m-%d") == VALENTINES_DAY:
+                        if DATE_YYYY == VALENTINES_DAY:
                             scroller.snow_flakes.append(HeartSnow(self.screen))
+                        elif DATE_YYYY == ST_PATRICKS_DAY:
+                            scroller.snow_flakes.append(CloverSnow(self.screen))
                         else:
                             scroller.snow_flakes.append(SnowFlake(self.screen))
                 scroller.snow(self.screen)

@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pygame
 
-from constants import VALENTINES_DAY
+from constants import VALENTINES_DAY, ST_PATRICKS_DAY
 
 BLACK = pygame.Color(0, 0, 0)
 WHITE = pygame.Color(192, 192, 192)
@@ -29,11 +29,16 @@ GROUP_GREEN = pygame.Color(33, 130, 0)  # "218200"
 
 # Color schemes [dark, medium, light]:
 SCHEME_DEFAULT = [BLUE, MED_BLUE, LT_BLUE]
-SCHEME_RED_PINK = [(140, 35, 35), MED_RED, LT_RED]
+SCHEME_PINK = [(140, 35, 35), MED_RED, LT_RED]
+SCHEME_GREEN = [GREEN, (25, 100, 25), (70, 150, 80)]
 
+# Set the color scheme
 COLOR_SCHEME = SCHEME_DEFAULT
-if datetime.strftime(datetime.now(), "%Y-%m-%d") == VALENTINES_DAY:
-    COLOR_SCHEME = SCHEME_RED_PINK
+DATE_YYYY = datetime.strftime(datetime.now(), "%Y-%m-%d")
+if DATE_YYYY == VALENTINES_DAY:
+    COLOR_SCHEME = SCHEME_PINK
+elif DATE_YYYY == ST_PATRICKS_DAY:
+    COLOR_SCHEME = SCHEME_GREEN
 
 
 def get_host_color(epnum):
