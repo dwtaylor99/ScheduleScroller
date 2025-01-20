@@ -5,6 +5,7 @@ from anims.deathray import DeathRay
 from anims.elsanto_flying import ElSantoFlying
 from anims.exeter import Exeter
 from anims.fingal import Fingal
+from anims.forklift import Forklift
 from anims.gamera import Gamera
 from anims.horse_running import HorseRunning
 from anims.meteorite import Meteorite
@@ -77,6 +78,7 @@ def get_by_epnum(screen, epnum: str):
 
 
 def get(screen, title: str, epnum: str) -> []:
+
     # If the episode has a specific animation, choose it 50% of the time
     if epnum in ANIMS_BY_EPNUM.keys() and random.randint(1, 2) == 1:
         # Choose the specific animation for this episode
