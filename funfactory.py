@@ -3,6 +3,7 @@ import random
 from anims.ator_glider import AtorGlider
 from anims.deathray import DeathRay
 from anims.elsanto_flying import ElSantoFlying
+from anims.exeter import Exeter
 from anims.fingal import Fingal
 from anims.gamera import Gamera
 from anims.horse_running import HorseRunning
@@ -87,7 +88,8 @@ def get(screen, title: str, epnum: str) -> []:
             return random.choice([[SOL(screen)],
                                   [SOL(screen), Widowmaker(screen)],
                                   [MST3KMoon(screen)],
-                                  [WhiteDot(screen)]])
+                                  [WhiteDot(screen)],
+                                  [Exeter(screen)]])
 
         else:
             return get_by_epnum(screen, random.choice(
