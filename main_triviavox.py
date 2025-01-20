@@ -365,6 +365,13 @@ class TriviaVox(commands.Bot):
                         else:
                             scroller.snow_flakes.append(SnowFlake(self.screen))
                 scroller.snow(self.screen)
+
+            elif scroller.sched[0]['epnum'] == '501':
+                if len(scroller.snow_flakes) == 0:
+                    for _ in range(scroller.NUM_SNOWFLAKES):
+                        scroller.snow_flakes.append(CandyHeartSnow(self.screen))
+                scroller.snow(self.screen)
+
             else:
                 scroller.snow_flakes.clear()
 

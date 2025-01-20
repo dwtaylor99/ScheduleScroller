@@ -363,7 +363,7 @@ def snow(screen):
     for flake in snow_flakes:
         flake.animate()
         if flake.anim_step == 0:
-            if DATE_YYYY == VALENTINES_DAY:
+            if DATE_YYYY == VALENTINES_DAY or sched[0]['epnum'] == '501':
                 snow_flakes.append(CandyHeartSnow(screen))
             elif DATE_YYYY == ST_PATRICKS_DAY:
                 snow_flakes.append(CloverSnow(screen))
