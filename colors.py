@@ -9,7 +9,9 @@ WHITE = pygame.Color(192, 192, 192)
 DK_GRAY = pygame.Color(32, 32, 32)
 GRAY = pygame.Color(128, 128, 128)
 YELLOW = pygame.Color(192, 192, 0)
+
 GREEN = pygame.Color(0, 128, 0)
+LT_GREEN = pygame.Color(70, 150, 80)
 
 BLUE = pygame.Color(0, 0, 120)
 LT_BLUE = pygame.Color(0, 0, 200)

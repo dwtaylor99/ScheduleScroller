@@ -1,11 +1,12 @@
 import random
 
 from anims.ator_glider import AtorGlider
+from anims.bloodbeast import BloodBeast
 from anims.deathray import DeathRay
+from anims.deathray_crow import DeathRayCrow
 from anims.elsanto_flying import ElSantoFlying
 from anims.exeter import Exeter
 from anims.fingal import Fingal
-from anims.forklift import Forklift
 from anims.gamera import Gamera
 from anims.horse_running import HorseRunning
 from anims.meteorite import Meteorite
@@ -29,7 +30,6 @@ from anims.whitedot import WhiteDot
 from anims.widowmaker import Widowmaker
 from anims.zap_beer import ZapBeer
 
-
 ANIMS_BY_EPNUM = {
     "111": (MoonBug, 1),
     "301": (AtorGlider, 1),
@@ -47,8 +47,10 @@ ANIMS_BY_EPNUM = {
     "609": (Skydiver, 1),
     "611": (HorseRunning, 1),
     "612": (Starfighter, random.randint(3, 5)),
-    "620": (DeathRay, 1),
+    "620": (DeathRay if random.randint(1, 2) == 1 else DeathRayCrow, 1),
     "624": (ElSantoFlying, 1),
+    "701": (BloodBeast, random.randint(6, 10)),
+    "701T": (BloodBeast, random.randint(6, 10)),
     "821": ([TimeChasersPlane, TimeChasersPlaneOther] if random.randint(1, 2) == 1 else TimeChasersPlane, 1),
     "822": (Fingal, 1),
     "903": (Pumaman, 1),
@@ -66,7 +68,7 @@ def get_by_epnum(screen, epnum: str):
 
     if epnum in ANIMS_BY_EPNUM.keys():
         anims, num = ANIMS_BY_EPNUM[epnum]
-        print("Fun: " + str(anims))
+        # print("Fun: " + str(anims))
         for i in range(num):
             if type(anims) is list:
                 for a in anims:
@@ -78,7 +80,6 @@ def get_by_epnum(screen, epnum: str):
 
 
 def get(screen, title: str, epnum: str) -> []:
-
     # If the episode has a specific animation, choose it 50% of the time
     if epnum in ANIMS_BY_EPNUM.keys() and random.randint(1, 2) == 1:
         # Choose the specific animation for this episode
@@ -95,7 +96,7 @@ def get(screen, title: str, epnum: str) -> []:
 
         else:
             return get_by_epnum(screen, random.choice(
-                ['111', '301' '302', '322', '410', '413', '414', '609', '611', '612', '620', '624', '821', '822',
+                ['111', '301' '302', '322', '410', '413', '414', '701', '609', '611', '612', '620', '624', '821', '822',
                  '903', '910', '912', '1007', '1304', '1306', '1307']))
 
 
