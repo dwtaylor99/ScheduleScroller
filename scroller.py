@@ -2,11 +2,9 @@ import os.path
 
 import pygame.display
 
-import funfactory
 import schedule
 from anims.candy_heart_snow import CandyHeartSnow
 from anims.clover_snow import CloverSnow
-from anims.heart_snow import HeartSnow
 from anims.snow import SnowFlake
 from colors import *
 from constants import VALENTINES_DAY
@@ -341,13 +339,6 @@ def setup(screen):
     start_time = datetime.now()
     schedule.refresh()
     sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
-    # print(sched)
-    # sched[0]['title'] = "Rocketship X-M"
-    # sched[0]['epnum'] = "201"
-    # sched[0]['image'] = "201.png"
-    sched[0]['title'] = "Incredible Melting Man"
-    sched[0]['epnum'] = "704"
-    sched[0]['image'] = "704.png"
 
     stop_time = datetime.now()
     print("Loading finished in " + str(stop_time - start_time))

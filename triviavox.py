@@ -63,7 +63,7 @@ FONT_MST3K_LG = pygame.font.Font("fonts/SimianText_Orangutan.otf", 36)
 FONT_MST3K_XL = pygame.font.Font("fonts/SimianText_Orangutan.otf", 52)
 
 # Font used to render emoji
-FONT_EMOJI_LG = pygame.font.Font("fonts/seguiemj.ttf", 48)
+FONT_EMOJI_LG = pygame.font.Font("fonts/seguiemj.ttf", 44)
 
 STR_STINGER = "Name the MST3K movie this stinger is from:"
 TXT_STINGER = FONT_MST3K_LG.render(STR_STINGER, True, YELLOW)
@@ -495,7 +495,7 @@ if __name__ == '__main__':
     bot.run()
 
 """
-TODO:
+Troublesome emoji:
 add support for missing emoji:
 102 - Robot vs Aztec Mummy (Mexico flag) [1]            🤖🆚🇲🇽⚰️🧟‍♂️
 322 - Master Ninja I (ninja) [36]                       👨‍🏫🥷
@@ -512,4 +512,7 @@ add support for missing emoji:
 [110] ⚔️➡️♆👨👨
 [125] 📜🔺♞♞
 [142] 👀✖️500,000
+
+# Longest emoji question:
+[11] Untamed Youth: 👮🏊‍♀️🏊‍♀️⏩👩‍⚖️⚖️⏩🌾🌾🚜⏩🎥💃🏼🎵📺👱‍♀️
 """
