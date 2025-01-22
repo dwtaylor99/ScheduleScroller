@@ -13,6 +13,7 @@ from anims.meteorite import Meteorite
 from anims.mood_servo import MoodServo
 from anims.moonbug import MoonBug
 from anims.mst3k_moon import MST3KMoon
+from anims.oh_wow import OhWow
 from anims.orbit_jet import OrbitJet
 from anims.pizza import Pizza
 from anims.pumaman import Pumaman
@@ -56,7 +57,7 @@ ANIMS_BY_EPNUM = {
     "903": (Pumaman, 1),
     "910": (ZapBeer if random.randint(1, 2) == 1 else TroyCsonka, 1),
     "912": (ScreamingSkull, 1),
-    "1007": (Meteorite, random.randint(3, 8)),
+    "1007": ([OhWow, Meteorite], random.randint(3, 8)),
     "1304": (Pizza, 1),
     "1306": (MoodServo, 1),
     "1307": (Gamera, 1),
@@ -80,6 +81,8 @@ def get_by_epnum(screen, epnum: str):
 
 
 def get(screen, title: str, epnum: str) -> []:
+    return get_by_epnum(screen, "1007")
+
     # If the episode has a specific animation, choose it 50% of the time
     if epnum in ANIMS_BY_EPNUM.keys() and random.randint(1, 2) == 1:
         # Choose the specific animation for this episode
