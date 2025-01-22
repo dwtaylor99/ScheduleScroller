@@ -100,6 +100,17 @@ def draw_episode_number(screen, epnum: str):
     # Who is the host?
     host_color = get_host_color(epnum)
 
+    # Is this a Joel or Mike ep?
+    num = int(epnum)
+    host_file = ""
+    if num <= 512:
+        host_file = "images/hosts/joel_header.png"
+    elif 512 < num <= 1013:
+        host_file = "images/hosts/mike_header.png"
+    if host_file != "":
+        host_img = pygame.image.load(host_file).convert_alpha()
+        screen.blit(host_img, (0, 359))
+
     # Extend the rectangle to cover the bottom curve
     pygame.draw.rect(screen, host_color, (0, 470, 85, 45), 0, 0, 0, 0, 0, 20)
 
@@ -315,7 +326,7 @@ def draw_vertical_separators(screen):
 
 def draw_loading(screen):
     screen.fill(BLACK)
-    img = pygame.image.load('images/fun/seven_years_later2.png').convert_alpha()
+    img = pygame.image.load('images/fun/seven_years_later.png').convert_alpha()
     screen.blit(img, ((WIDTH - img.get_width()) // 2, (HEIGHT - img.get_height()) // 2))
     screen.blit(TXT_LOADING, (100, HEIGHT - 100))
     pygame.display.flip()
@@ -330,6 +341,14 @@ def setup(screen):
     start_time = datetime.now()
     schedule.refresh()
     sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
+    # print(sched)
+    # sched[0]['title'] = "Rocketship X-M"
+    # sched[0]['epnum'] = "201"
+    # sched[0]['image'] = "201.png"
+    sched[0]['title'] = "Incredible Melting Man"
+    sched[0]['epnum'] = "704"
+    sched[0]['image'] = "704.png"
+
     stop_time = datetime.now()
     print("Loading finished in " + str(stop_time - start_time))
 
