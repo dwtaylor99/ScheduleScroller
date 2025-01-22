@@ -25,6 +25,7 @@ from anims.sol import SOL
 from anims.starfighter import Starfighter
 from anims.time_chasers_plane import TimeChasersPlane
 from anims.time_chasers_plane_other import TimeChasersPlaneOther
+from anims.torgo import Torgo
 from anims.troy_csonka import TroyCsonka
 from anims.vi_head import ViHead
 from anims.whitedot import WhiteDot
@@ -45,6 +46,7 @@ ANIMS_BY_EPNUM = {
     "413": (OrbitJet, 1),
     "414": (ViHead, 1),
     "417": (OrbitJet, 1),
+    "424": (Torgo, 1),
     "609": (Skydiver, 1),
     "611": (HorseRunning, 1),
     "612": (Starfighter, random.randint(3, 5)),
@@ -97,8 +99,8 @@ def get(screen, title: str, epnum: str) -> []:
 
         else:
             return get_by_epnum(screen, random.choice(
-                ['111', '301' '302', '322', '410', '413', '414', '701', '609', '611', '612', '620', '624', '821', '822',
-                 '903', '910', '912', '1007', '1304', '1306', '1307']))
+                ['111', '301' '302', '322', '410', '413', '414', '424' '701', '609', '611', '612', '620', '624', '821',
+                 '822', '903', '910', '912', '1007', '1304', '1306', '1307']))
 
 
 class FunFactory:
