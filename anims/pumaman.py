@@ -12,7 +12,7 @@ class Pumaman(FunBase):
         super().__init__(screen)
         self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/pumaman.png').convert_alpha(), 0.5)
         self.x = -400
-        self.y = random.randrange(100, screen.get_height() // 2 - 100)
+        self.y = random.randrange(40, screen.get_height() // 2 - 100)
         self.vel_x = 7
         self.vel_y = 0
         self.angle = 0

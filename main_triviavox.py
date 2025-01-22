@@ -233,7 +233,7 @@ class TriviaVox(commands.Bot):
 
     @routines.routine(minutes=15)
     async def auto_message(self):
-        output = ("MST3K Trivia every 5 minutes (yes, it counts toward MST3K channel trivia points). " 
+        output = ("MST3K trivia every 5 minutes. " 
                   "Watch on 'Source' mode to reduce latency between screen and chat (!latency for more).")
         await self.bot_print(output)
 

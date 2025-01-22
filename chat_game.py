@@ -65,10 +65,10 @@ TREE_04 = IMG_TREES.subsurface(IMG_TREES.get_clip())
 tree_list = [TREE_01, TREE_02, TREE_03, TREE_04]
 tree_pos_list = []
 
-txt_fight = FONT.render("(F)ight", True, WHITE)
-txt_item = FONT.render("(I)tem", True, WHITE)
-txt_ability = FONT.render("(A)bility", True, WHITE)
-txt_run = FONT.render("(R)un", True, WHITE)
+txt_fight = FONT.render("F)ight", True, WHITE)
+txt_item = FONT.render("I)tem", True, WHITE)
+txt_ability = FONT.render("A)bility", True, WHITE)
+txt_run = FONT.render("R)un", True, WHITE)
 
 
 class Action(Enum):
@@ -143,7 +143,7 @@ class Hero(GridItem):
         self.attack = 1
         self.weapon = Fists()
         self.hit_chance = 50
-        self.run_chance = 80
+        self.run_chance = 20
         self.anim_step = 1
         self.max_inventory = 10
         self.inventory = [FirstAid(), FirstAid(), FirstAid()]
@@ -159,7 +159,7 @@ class Zombie(GridItem):
         self.health = 5
         self.damage = 1
         self.hit_chance = 60
-        self.run_chance = 0
+        self.run_chance = 80
         self.anim_step = 1
 
         self.hurt_cycle = [
@@ -366,9 +366,8 @@ def draw_event_window():
 
 
 def attack(attacker, target):
-    global action, game_mode, grid, hero_turn
+    global action, game_mode, grid, hero_turn, is_running
 
-    # target = grid[hero.y][hero.x]
     if hero_turn:
         if random.randint(1, 100) <= target.hit_chance:
             print("target hit")
@@ -390,7 +389,7 @@ def attack(attacker, target):
             print("target missed")
             t = FONT.render("MISS", True, BLACK)
             acc = 0
-            while acc <= 480:
+            while acc <= 960:
                 pygame.draw.rect(screen, WHITE, (350, 240, t.get_width() + 40, t.get_height() + 20), 0, 10)
                 screen.blit(t, (370, 250))
                 pygame.display.flip()
@@ -402,6 +401,14 @@ def attack(attacker, target):
             grid[attacker.y][attacker.x].revealed = True
             game_mode = GameMode.MAP
 
+            # add a small delay
+            acc = 0
+            while acc <= 960:
+                for ev in pygame.event.get():
+                    if ev.type == pygame.QUIT:
+                        is_running = False
+                acc += clock.tick(FPS)
+
         hero_turn = False
 
     else:
@@ -410,9 +417,24 @@ def attack(attacker, target):
             attacker.health -= target.damage
         else:
             print("Hero not hit")
+            t = FONT.render("MISS", True, BLACK)
+            acc = 0
+            while acc <= 960:
+                pygame.draw.rect(screen, WHITE, (150, 240, t.get_width() + 40, t.get_height() + 20), 0, 10)
+                screen.blit(t, (170, 250))
+                pygame.display.flip()
+                acc += clock.tick(FPS)
 
         if hero.health <= 0:
             game_mode = GameMode.GAME_OVER
+
+            # add a small delay
+            acc = 0
+            while acc <= 960:
+                for ev in pygame.event.get():
+                    if ev.type == pygame.QUIT:
+                        is_running = False
+                acc += clock.tick(FPS)
 
         hero_turn = True
 
@@ -472,8 +494,12 @@ def choose_ability(hero_user):
     print("Ability")
 
 
-def run():
+def run(hero_user, target):
     print("Run away!")
+    if random.randint(1, 100) <= target.run_chance:
+        print("Run successful")
+    else:
+        print("Run failed")
 
 
 def draw_event():
@@ -495,7 +521,7 @@ def draw_event():
         elif action == Action.ITEM:
             choose_item(hero)
         elif action == Action.RUN:
-            pass
+            run(hero, zombie)
 
         action = Action.NONE
 
@@ -536,7 +562,7 @@ if __name__ == '__main__':
                             hero.x += 1
 
                 elif game_mode == GameMode.BATTLE:
-                    print("(F)ight, (I)tem, (A)bility, (R)un")
+                    print("F)ight, I)tem, A)bility, R)un")
                     if event.key == pygame.K_f:
                         action = Action.FIGHT
                     elif event.key == pygame.K_i:
