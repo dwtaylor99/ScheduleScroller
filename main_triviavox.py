@@ -265,7 +265,7 @@ class TriviaVox(commands.Bot):
 
         output = ("Make sure you are watching on Source mode to have the least amount "
                   "of latency between what is on screen and what is in chat. Click the gear on the "
-                  "video and under Settings, choose 'Source'. Under the 'Advanced' setting make sure 'Low Latency' is on.")
+                  "video and under Settings, choose 'Source'. Also, under the 'Advanced' setting make sure 'Low Latency' is on.")
         await self.bot_print(output)
 
     @commands.command(name="rank", aliases=['Rank', 'RANK', 'points', 'Points', 'POINTS', "triviarank", "triviapoints"])
