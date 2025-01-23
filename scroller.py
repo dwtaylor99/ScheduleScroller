@@ -94,31 +94,44 @@ def drop_shadow(screen, font, text, color: pygame.Color, x, y):
     screen.blit(hilite, (x, y))
 
 
-def draw_episode_number(screen, epnum: str):
+def draw_episode_number(screen):
     """Overwrite the weird episode numbers on the main_img if this is a MST3K episode"""
-    # Who is the host?
-    host_color = get_host_color(epnum)
+    epnum = sched[0]['epnum']
 
     # Is this a Joel or Mike ep?
-    num = int(epnum)
-    host_file = ""
-    if num <= 512:
-        host_file = "images/hosts/joel_header.png"
-    elif 512 < num <= 1013:
-        host_file = "images/hosts/mike_header.png"
-    if host_file != "":
-        host_img = pygame.image.load(host_file).convert_alpha()
+    if epnum != "":
+        # Who is the host?
+        host_color = get_host_color(epnum)
+
+        num = int(epnum)
+        host_file = ""
+        if num <= 512:
+            host_file = "images/hosts/joel_header.png"
+        elif 512 < num <= 1013:
+            host_file = "images/hosts/mike_header.png"
+        if host_file != "":
+            host_img = pygame.image.load(host_file).convert_alpha()
+            screen.blit(host_img, (0, 359))
+
+        # Extend the rectangle to cover the bottom curve
+        pygame.draw.rect(screen, host_color, (0, 470, 85, 45), 0, 0, 0, 0, 0, 20)
+
+        # Draw the experiment number
+        FONT.set_bold(True)
+        text = FONT.render(epnum, True, (252, 252, 252), host_color)
+        xpos = (85 - text.get_size()[0]) // 2
+        screen.blit(text, (xpos, 470))
+        FONT.set_bold(False)
+
+    elif sched[0]['title'].lower().startswith("rifftrax"):
+        host_img = pygame.transform.smoothscale_by(pygame.image.load('images/hosts/RiffTrax.png'), 0.1).convert_alpha()
         screen.blit(host_img, (0, 359))
-
-    # Extend the rectangle to cover the bottom curve
-    pygame.draw.rect(screen, host_color, (0, 470, 85, 45), 0, 0, 0, 0, 0, 20)
-
-    # Draw the experiment number
-    FONT.set_bold(True)
-    text = FONT.render(epnum, True, (252, 252, 252), host_color)
-    xpos = (85 - text.get_size()[0]) // 2
-    screen.blit(text, (xpos, 470))
-    FONT.set_bold(False)
+    elif sched[0]['title'].lower().startswith("ct"):
+        host_img = pygame.transform.smoothscale_by(pygame.image.load('images/hosts/Cinematic_Titanic.png'), 0.4).convert_alpha()
+        screen.blit(host_img, (0, 359))
+    elif sched[0]['title'].lower().startswith("fc"):
+        host_img = pygame.transform.smoothscale_by(pygame.image.load('images/hosts/film_crew.png'), 1.0).convert_alpha()
+        screen.blit(host_img, (0, 359))
 
 
 def draw_image(screen):
@@ -133,9 +146,7 @@ def draw_image(screen):
         img_scaled = pygame.transform.smoothscale_by(main_img, min(new_w, new_h))
         screen.blit(img_scaled, ((WIDTH_HALF - img_scaled.get_width()) // 2, 0))
 
-    epnum = sched[0]['epnum']
-    if epnum != "":
-        draw_episode_number(screen, epnum)
+        draw_episode_number(screen)
 
 
 def draw_year(screen):
@@ -340,6 +351,7 @@ def setup(screen):
     summaries.refresh()
     schedule.refresh()
     sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
+    print(sched[0])
 
     stop_time = datetime.now()
     print("Loading finished in " + str(stop_time - start_time))
