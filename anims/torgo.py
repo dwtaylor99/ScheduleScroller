@@ -18,11 +18,10 @@ class Torgo(FunBase):
             pygame.image.load('images/fun/torgo04.png').convert_alpha(),
             pygame.image.load('images/fun/torgo03.png').convert_alpha(),
             pygame.image.load('images/fun/torgo02.png').convert_alpha()
-            # pygame.image.load('images/fun/torgo01.png').convert_alpha()
         ]
         self.x = screen.get_width()
         self.y = screen.get_height() // 2 - self.img.get_height()
-        self.vel_x = -0.3
+        self.vel_x = -0.5
         self.vel_y = 0
         self.img_index = 0
 
