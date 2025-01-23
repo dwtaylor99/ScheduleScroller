@@ -3,6 +3,7 @@ import os.path
 import pygame.display
 
 import schedule
+import summaries
 from anims.candy_heart_snow import CandyHeartSnow
 from anims.clover_snow import CloverSnow
 from anims.snow import SnowFlake
@@ -337,6 +338,7 @@ def setup(screen):
 
     is_reloading = True
     start_time = datetime.now()
+    summaries.refresh()
     schedule.refresh()
     sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
 

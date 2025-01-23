@@ -21,7 +21,7 @@ class Torgo(FunBase):
         ]
         self.x = screen.get_width()
         self.y = screen.get_height() // 2 - self.img.get_height()
-        self.vel_x = -0.5
+        self.vel_x = -0.6
         self.vel_y = 0
         self.img_index = 0
 

@@ -489,7 +489,7 @@ if __name__ == '__main__':
     EMJ_MEXICO = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-mexico_1f1f2-1f1fd.png'), 0.11).convert_alpha()
     EMJ_USA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-united-states_1f1fa-1f1f8.png'), 0.11).convert_alpha()
 
-    summaries.refresh()
+    # summaries.refresh()
     scroller.setup(scr)
 
     bot = TriviaVox(scr, clk)
