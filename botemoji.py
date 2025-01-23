@@ -13,6 +13,8 @@ from bottrivia import Trivia, TriviaCollection
 
 EMOJI_GAME_ON = True
 EMOJI_MINUTE = 13  # Minute of the hour to start emoji game (13 means XX:13, or minute 13 of every hour)
+FILE_NAME = "data/emoji.csv"
+FILE_NAME_LAST = "data/emoji_last.csv"
 QUESTION_HISTORY = []
 QUESTION_HISTORY_SIZE = 10
 PERCENTS = [1.0, 1.0, 1.0, 1.0, 0.75, 0.9, 0.8]
@@ -34,13 +36,13 @@ def convert_time_str(time):
 
 
 def check_date(username: str) -> str:
-    if not os.path.exists("emoji_last.json"):
-        with open("emoji_last.json", "w+") as jsf:
+    if not os.path.exists(FILE_NAME_LAST):
+        with open(FILE_NAME_LAST, "w+") as jsf:
             json.dump([], jsf)
             jsf.close()
 
     # Check if the user played today:
-    with open("emoji_last.json", "r+") as jsf:
+    with open(FILE_NAME_LAST, "r+") as jsf:
         winners = json.load(jsf)
         jsf.close()
 
@@ -67,7 +69,7 @@ def check_date(username: str) -> str:
 
 
 def save_last(username: str):
-    with open("emoji_last.json", "r+") as jsf:
+    with open(FILE_NAME_LAST, "r+") as jsf:
         winners = json.load(jsf)
         jsf.close()
 
@@ -92,7 +94,7 @@ def save_last(username: str):
 
     # json.dump(winners, sys.stdout, indent=2)
 
-    with open("emoji_last.json", "w") as jsf:
+    with open(FILE_NAME_LAST, "w") as jsf:
         json.dump(winners, jsf, indent=2)
         jsf.close()
 
@@ -134,7 +136,7 @@ def get() -> Trivia:
 def load() -> TriviaCollection:
     """Load all emoji questions and answers into a TriviaCollection object."""
     emoji_coll = TriviaCollection()
-    with open("emoji.csv", "r", encoding="utf-8") as csvfile:
+    with open(FILE_NAME, "r", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=",")
         for line in reader:
             if reader.line_num < 5 and len(line) > 0 and line[0].lower() == "<!doctype html>":
@@ -153,7 +155,7 @@ def load() -> TriviaCollection:
 def load_as_array() -> [Trivia]:
     """Load all emoji questions and answers into an array."""
     emoji_coll = []
-    with open("emoji.csv", "r", encoding="utf-8") as csvfile:
+    with open(FILE_NAME, "r", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=",")
         for line in reader:
             if reader.line_num < 5 and len(line) > 0 and line[0].lower() == "<!doctype html>":
@@ -173,7 +175,7 @@ def update():
     """Download the emoji trivia from the Internet."""
     try:
         url = "https://docs.google.com/spreadsheets/d/1sgw2WNNbE_TAILNNdmfAh-1V9ZKHSz0QhVx2SqAjFI8/gviz/tq?tqx=out:csv&sheet=Emoji "
-        urllib.request.urlretrieve(url, "emoji.csv")
+        urllib.request.urlretrieve(url, FILE_NAME)
     except urllib.error.HTTPError:
         print("HTTPError trying to download Emoji spreadsheet")
 

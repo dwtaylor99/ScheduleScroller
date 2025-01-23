@@ -181,6 +181,7 @@ class TriviaVox(commands.Bot):
 
         elif self.game_type == GameType.EMOJI:
             self.trivia_question = random.choice(self.emoji_questions)
+
             while self.trivia_question in self.prev_emoji:
                 self.trivia_question = random.choice(self.emoji_questions)
 

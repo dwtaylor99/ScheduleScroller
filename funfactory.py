@@ -32,7 +32,13 @@ from anims.whitedot import WhiteDot
 from anims.widowmaker import Widowmaker
 from anims.zap_beer import ZapBeer
 
+
 ANIMS_BY_EPNUM = {
+    "001": (SOL, 1),
+    "002": ([SOL, Widowmaker], 1),
+    "003": (MST3KMoon, 1),
+    "004": (WhiteDot, 1),
+    "005": (Exeter, 1),
     "111": (MoonBug, 1),
     "301": (AtorGlider, 1),
     "302": (Gamera, 1),
@@ -70,9 +76,9 @@ def get_by_epnum(screen, epnum: str):
     objs = []
 
     if epnum in ANIMS_BY_EPNUM.keys():
-        anims, num = ANIMS_BY_EPNUM[epnum]
+        anims, count = ANIMS_BY_EPNUM[epnum]
         # print("Fun: " + str(anims))
-        for i in range(num):
+        for i in range(count):
             if type(anims) is list:
                 for a in anims:
                     objs.append(a(screen))
@@ -85,22 +91,13 @@ def get_by_epnum(screen, epnum: str):
 def get(screen, title: str, epnum: str) -> []:
     # If the episode has a specific animation, choose it 50% of the time
     if epnum in ANIMS_BY_EPNUM.keys() and random.randint(1, 2) == 1:
-        # Choose the specific animation for this episode
         return get_by_epnum(screen, epnum)
     else:
         # Choose a random animation
-        if random.randint(1, 10) == 1:
-            # Generic animation
-            return random.choice([[SOL(screen)],
-                                  [SOL(screen), Widowmaker(screen)],
-                                  [MST3KMoon(screen)],
-                                  [WhiteDot(screen)],
-                                  [Exeter(screen)]])
-
-        else:
-            return get_by_epnum(screen, random.choice(
-                ['111', '301' '302', '322', '410', '413', '414', '424' '701', '609', '611', '612', '620', '624', '821',
-                 '822', '903', '910', '912', '1007', '1304', '1306', '1307']))
+        return get_by_epnum(screen, random.choice(
+            ['001', '002', '003', '004', '005',
+             '111', '301' '302', '322', '410', '413', '414', '424', '609', '611', '612', '620', '624', '701',
+             '821', '822', '903', '910', '912', '1007', '1304', '1306', '1307']))
 
 
 class FunFactory:

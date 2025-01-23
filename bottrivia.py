@@ -12,7 +12,9 @@ MAX_RESULTS: int = 5  # Default number of top players to display
 TRIVIA_MINUTE: int = 10  # Minute of the hour to start Triva
 TRIVIA_GAUNTLET: bool = False  # Are we currently in a Trivia Gauntlet?
 TRIVIA_WINNERS = "/me Congratulations to trivia winners "
-TRIVIA_FILE = "../../MovieVox/trivia_winners.json"
+TRIVIA_FILE = "data/trivia.csv"
+TRIVIA_ORDER_FILE = "data/trivia_order.txt"
+TRIVIA_WINNERS_FILE = "../../MovieVox/trivia_winners.json"
 
 
 class Trivia:
@@ -118,7 +120,7 @@ def get_trivia_points(name):
     """Get the trivia points for a user."""
     points = 0
 
-    with open(TRIVIA_FILE, "r", encoding='utf-8') as jsonfile:
+    with open(TRIVIA_WINNERS_FILE, "r", encoding='utf-8') as jsonfile:
         winners = json.load(jsonfile)
         jsonfile.close()
         for w in winners:
@@ -131,7 +133,7 @@ def get_trivia_points(name):
 
 def load_sorted_list():
     """Load the trivia winners and sort the list from most points to least."""
-    with open(TRIVIA_FILE, "r") as jsonfile:
+    with open(TRIVIA_WINNERS_FILE, "r") as jsonfile:
         data = json.load(jsonfile)
         jsonfile.close()
 
@@ -142,7 +144,7 @@ def load_sorted_list():
 def load() -> TriviaCollection:
     """Load all trivia questions and answers into a TriviaCollection object."""
     trivia_coll = TriviaCollection()
-    with open("trivia.csv", "r", encoding="utf-8") as csvfile:
+    with open(TRIVIA_FILE, "r", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=",")
         for line in reader:
             if reader.line_num < 5 and len(line) > 0 and line[0].lower() == "<!doctype html>":
@@ -161,7 +163,7 @@ def load() -> TriviaCollection:
 def load_as_array() -> [Trivia]:
     """Load all trivia questions and answers into an array (not a TriviaCollection)."""
     trivia_coll = []
-    with open("trivia.csv", "r", encoding="utf-8") as csvfile:
+    with open(TRIVIA_FILE, "r", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=",")
         for line in reader:
             if reader.line_num < 5 and len(line) > 0 and line[0].lower() == "<!doctype html>":
@@ -197,7 +199,7 @@ def refresh():
 
 
 def save_trivia_user_with_points(username: str, points: int):
-    with open(TRIVIA_FILE, "r") as jsonfile:
+    with open(TRIVIA_WINNERS_FILE, "r") as jsonfile:
         winners = json.load(jsonfile)
         jsonfile.close()
 
@@ -221,15 +223,15 @@ def save_trivia_user_with_points(username: str, points: int):
     if IS_DEBUG:
         print(winners)
     else:
-        with open(TRIVIA_FILE, "w") as jsonfile:
+        with open(TRIVIA_WINNERS_FILE, "w") as jsonfile:
             json.dump(winners, jsonfile, indent=2)
             jsonfile.close()
 
 
 def save_trivia_winners(winner_list: [str]):
     """Save winner and number of wins to file."""
-    if not os.path.exists(TRIVIA_FILE):
-        with open(TRIVIA_FILE, "w") as jsonfile:
+    if not os.path.exists(TRIVIA_WINNERS_FILE):
+        with open(TRIVIA_WINNERS_FILE, "w") as jsonfile:
             json.dump({}, jsonfile)
             jsonfile.close()
 
@@ -238,7 +240,7 @@ def save_trivia_winners(winner_list: [str]):
     #         json.dump({}, monthlyjson)
     #         monthlyjson.close()
 
-    with open(TRIVIA_FILE, "r") as jsonfile:
+    with open(TRIVIA_WINNERS_FILE, "r") as jsonfile:
         winners = json.load(jsonfile)
         jsonfile.close()
 
@@ -266,7 +268,7 @@ def save_trivia_winners(winner_list: [str]):
         if not found:
             winners.append({"name": author, "points": 1})
 
-    with open(TRIVIA_FILE, "w") as jsonfile:
+    with open(TRIVIA_WINNERS_FILE, "w") as jsonfile:
         json.dump(winners, jsonfile, indent=2)
         jsonfile.close()
 
@@ -312,7 +314,7 @@ def trivia_order_update(lines, index):
     """Increment the index of the trivia_order file."""
     lines[1] = "index=" + str(index + 1) + "\n"
 
-    with open("trivia_order.txt", "w") as trivia_order_file:
+    with open(TRIVIA_ORDER_FILE, "w") as trivia_order_file:
         trivia_order_file.writelines(lines)
         trivia_order_file.close()
 
@@ -320,7 +322,7 @@ def trivia_order_update(lines, index):
 def trivia_order_shuffle():
     """Randomize the indexes of the trivia questions and store the list in a file. This eliminates repeats."""
     lines = []
-    with open("trivia.csv", "r", encoding="utf-8") as csvfile:
+    with open(TRIVIA_FILE, "r", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=",")
         for line in reader:
             if reader.line_num > 1 and len(line) > 1:
@@ -331,7 +333,7 @@ def trivia_order_shuffle():
     lines.insert(0, "count=" + str(len(lines)) + "\n")
     lines.insert(1, "index=0\n")
 
-    with open("trivia_order.txt", "w+") as t:
+    with open(TRIVIA_ORDER_FILE, "w+") as t:
         t.writelines(lines)
         t.close()
 
@@ -341,7 +343,7 @@ def update():
     try:
         url = "https://docs.google.com/spreadsheets/d/1sgw2WNNbE_TAILNNdmfAh-1V9ZKHSz0QhVx2SqAjFI8/gviz/tq" \
               "?tqx=out:csv&sheet=Trivia "
-        urllib.request.urlretrieve(url, "trivia.csv")
+        urllib.request.urlretrieve(url, TRIVIA_FILE)
     except urllib.error.HTTPError:
         print("HTTPError trying to download Trivia spreadsheet")
 
