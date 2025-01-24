@@ -10,7 +10,7 @@ class Shuriken(FunBase):
 
     def __init__(self, screen: Surface):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/shuriken.png').convert_alpha(), 0.5)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/shuriken.png'), 0.5).convert_alpha()
         self.x = random.randrange(-500, -150)
         self.y = random.randrange(50, screen.get_height() // 2 - 200)
         self.vel_x = 10 + (random.randrange(0, 3))
@@ -28,18 +28,17 @@ class Shuriken(FunBase):
             new_rect.center = old_center
             new_rect.x += self.x
             new_rect.y += self.y
-
             self.screen.blit(new_image, new_rect)
-            self.x += self.vel_x
-            self.y += self.vel_y
 
-            if self.x >= self.screen.get_width() - 150:
-                self.x = self.screen.get_width() - 150
+            if self.x >= self.screen.get_width() - 90:
+                self.x = self.screen.get_width() - 90
                 self.vel_x = 0
                 self.vel_y = 0
-                new_image.set_clip(pygame.Rect(0, 0, new_image.get_width() * 0.6, new_image.get_height()))
                 self.img = new_image.subsurface(new_image.get_clip())
                 self.anim_step += 1
+
+            self.x += self.vel_x
+            self.y += self.vel_y
 
         elif self.anim_step == 2:
             self.img.set_alpha(self.alpha)

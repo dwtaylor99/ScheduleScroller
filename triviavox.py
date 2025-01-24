@@ -436,7 +436,7 @@ def choose_stinger() -> str:
 def load_stinger_image(file_path) -> pygame.Surface:
     img = pygame.image.load(file_path)
 
-    # scale the image to fit inside the TV borders
+    # scale the image
     if img.get_width() < 1600:
         new_w = 580 / img.get_width()
         new_h = 440 / img.get_height()
