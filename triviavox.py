@@ -16,7 +16,6 @@ import bottrivia
 import funfactory
 import gradient
 import scroller
-import summaries
 from anims.candy_heart_snow import CandyHeartSnow
 from anims.clover_snow import CloverSnow
 from anims.snow import SnowFlake
@@ -501,13 +500,13 @@ if __name__ == '__main__':
 """
 Troublesome emoji:
 add support for missing emoji:
-102 - Robot vs Aztec Mummy (Mexico flag) [1]            🤖🆚🇲🇽⚰️🧟‍♂️
-322 - Master Ninja I (ninja) [36]                       👨‍🏫🥷
-324 - Master Ninja II (ninja twice) [38]                👨‍🏫🥷🥷
-602 - Invasion USA (USA flag) [76]                      ⚔️➡️🇺🇸🗽
-619 - Red Zone Cuba (Cuba flag) [90]                    🟥🚧🇨🇺
-704 - Incredible Melting Man (melting face) [96]        😲🫠👨
-1008 - Final Justice (Malta flag) [133]                 ⏮️⚖️🇲🇹
+[1]    102 - Robot vs Aztec Mummy (Mexico flag) [1]            🤖🆚🇲🇽⚰️🧟‍♂️
+[36]   322 - Master Ninja I (ninja) [36]                       👨‍🏫🥷
+[38]   324 - Master Ninja II (ninja twice) [38]                👨‍🏫🥷🥷
+[76]   602 - Invasion USA (USA flag) [76]                      ⚔️➡️🇺🇸🗽
+[90]   619 - Red Zone Cuba (Cuba flag) [90]                    🟥🚧🇨🇺
+[96]   704 - Incredible Melting Man (melting face) [96]        😲🫠👨
+[133] 1008 - Final Justice (Malta flag) [133]                 ⏮️⚖️🇲🇹
 
 # Test these:
 [53]  👨➕🤖=♾️👨 420 - Human Duplicators (verify the equal sign)    
