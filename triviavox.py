@@ -164,6 +164,8 @@ class TriviaVox(commands.Bot):
         else:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
 
+        self.game_type = GameType.EMOJI
+
         if self.game_type == GameType.TRIVIA:
             self.trivia_question = random.choice(self.trivia_questions)
             while self.trivia_question in self.prev_trivia:
@@ -181,6 +183,7 @@ class TriviaVox(commands.Bot):
 
         elif self.game_type == GameType.EMOJI:
             self.trivia_question = random.choice(self.emoji_questions)
+            self.trivia_question = self.emoji_questions[142]
 
             while self.trivia_question in self.prev_emoji:
                 self.trivia_question = random.choice(self.emoji_questions)
@@ -322,12 +325,12 @@ class TriviaVox(commands.Bot):
                 elif "🥷" in self.trivia_question.question:
                     alt_screen.blit(EMJ_NINJA, (488, 263))
                 if "🫠" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_MELT_FACE, (457, 270))
+                    alt_screen.blit(EMJ_MELT_FACE, (459, 270))
                 if "♞" in self.trivia_question.question:
                     alt_screen.blit(EMJ_BKNIGHT, (510, 270))
-                    alt_screen.blit(EMJ_BKNIGHT, (565, 270))
+                    alt_screen.blit(EMJ_BKNIGHT, (550, 270))
                 if "🗚" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_INCREASE, (490, 270))
+                    alt_screen.blit(EMJ_INCREASE, (488, 270))
                 if "🇨🇺" in self.trivia_question.question:
                     alt_screen.blit(EMJ_CUBA, (530, 270))
                 if "🇲🇽" in self.trivia_question.question:
@@ -479,15 +482,15 @@ if __name__ == '__main__':
     clk = pygame.time.Clock()
 
     # Images used to fix missing emoji and flags (they need to be loaded after setting the screen mode)
-    EMJ_NINJA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/ninja_1f977.png'), 0.12).convert_alpha()
-    EMJ_MELT_FACE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/melting-face_1fae0.png'), 0.12).convert_alpha()
-    EMJ_BKNIGHT = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/black-knight-2692.png'), 0.5).convert_alpha()
-    EMJ_INCREASE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/increase-font-size-symbol_1f5da.png'), 0.4).convert_alpha()
+    EMJ_NINJA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/ninja_1f977.png'), 0.115).convert_alpha()
+    EMJ_MELT_FACE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/melting-face_1fae0.png'), 0.11).convert_alpha()
+    EMJ_BKNIGHT = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/black-knight-2692.png'), 0.4).convert_alpha()
+    EMJ_INCREASE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/increase-font-size-symbol_1f5da.png'), 0.375).convert_alpha()
 
     EMJ_CUBA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-cuba_1f1e8-1f1fa.png'), 0.11).convert_alpha()
     EMJ_MALTA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-malta_1f1f2-1f1f9.png'), 0.11).convert_alpha()
     EMJ_MEXICO = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-mexico_1f1f2-1f1fd.png'), 0.11).convert_alpha()
-    EMJ_USA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-united-states_1f1fa-1f1f8.png'), 0.11).convert_alpha()
+    EMJ_USA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-united-states_1f1fa-1f1f8.png'), 0.10).convert_alpha()
 
     # summaries.refresh()
     scroller.setup(scr)
@@ -501,13 +504,13 @@ add support for missing emoji:
 102 - Robot vs Aztec Mummy (Mexico flag) [1]            🤖🆚🇲🇽⚰️🧟‍♂️
 322 - Master Ninja I (ninja) [36]                       👨‍🏫🥷
 324 - Master Ninja II (ninja twice) [38]                👨‍🏫🥷🥷
-420 - Human Duplicators (verify the equal sign) [53]    👨➕🤖=♾️👨
 602 - Invasion USA (USA flag) [76]                      ⚔️➡️🇺🇸🗽
 619 - Red Zone Cuba (Cuba flag) [90]                    🟥🚧🇨🇺
 704 - Incredible Melting Man (melting face) [96]        😲🫠👨
 1008 - Final Justice (Malta flag) [133]                 ⏮️⚖️🇲🇹
 
 # Test these:
+[53]  👨➕🤖=♾️👨 420 - Human Duplicators (verify the equal sign)    
 [82]  ⚔️📅❌12
 [89]  📈🏫🗚💉
 [110] ⚔️➡️♆👨👨
