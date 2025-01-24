@@ -160,7 +160,7 @@ class TriviaVox(commands.Bot):
         await self.check_if_live()
         now_mm = int(datetime.strftime(datetime.now(), "%M"))
 
-        # Ads run right before the new hour so don't choose Emoji trivia during that time.
+        # Ads run right before the new hour so don't choose Stinger trivia during that time.
         if self.is_live and now_mm < 55:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER])
         else:
