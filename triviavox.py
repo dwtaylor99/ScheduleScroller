@@ -357,22 +357,24 @@ class TriviaVox(commands.Bot):
             scroller.fun()
             # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus,
             # 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
-            if scroller.sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
-                if len(scroller.snow_flakes) == 0:
-                    for _ in range(scroller.NUM_SNOWFLAKES):
-                        if DATE_YYYY == VALENTINES_DAY:
-                            scroller.snow_flakes.append(CandyHeartSnow(self.screen))
-                        elif DATE_YYYY == ST_PATRICKS_DAY:
-                            scroller.snow_flakes.append(CloverSnow(self.screen))
-                        else:
-                            scroller.snow_flakes.append(SnowFlake(self.screen))
-                scroller.snow(self.screen)
+            now_mm = int(datetime.strftime(datetime.now(), "%M"))
+            if 0 < now_mm < 2 or 15 < now_mm < 17 or 30 < now_mm < 36 or 45 < now_mm < 47:
+                if scroller.sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
+                    if len(scroller.snow_flakes) == 0:
+                        for _ in range(scroller.NUM_SNOWFLAKES):
+                            if DATE_YYYY == VALENTINES_DAY:
+                                scroller.snow_flakes.append(CandyHeartSnow(self.screen))
+                            elif DATE_YYYY == ST_PATRICKS_DAY:
+                                scroller.snow_flakes.append(CloverSnow(self.screen))
+                            else:
+                                scroller.snow_flakes.append(SnowFlake(self.screen))
+                    scroller.snow(self.screen)
 
-            elif scroller.sched[0]['epnum'] == '501':
-                if len(scroller.snow_flakes) == 0:
-                    for _ in range(scroller.NUM_SNOWFLAKES):
-                        scroller.snow_flakes.append(CandyHeartSnow(self.screen))
-                scroller.snow(self.screen)
+                elif scroller.sched[0]['epnum'] == '501':
+                    if len(scroller.snow_flakes) == 0:
+                        for _ in range(scroller.NUM_SNOWFLAKES):
+                            scroller.snow_flakes.append(CandyHeartSnow(self.screen))
+                    scroller.snow(self.screen)
 
             else:
                 scroller.snow_flakes.clear()
