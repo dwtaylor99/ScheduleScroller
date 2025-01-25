@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import platform
 import random
 import re
@@ -82,13 +83,15 @@ class GameType(Enum):
 
 class TriviaVox(commands.Bot):
     def __init__(self, screen, clock):
-        super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
+        # super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
+        super().__init__(token=botsecrets.ACCESS_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
         self.screen = screen
         self.clock = clock
 
         self.channel = super().get_channel(CHANNEL_NAME)
         self.is_connecting = True
         self.is_live = True
+        self.next_ad_at = 0
 
         self.game_type = GameType.TRIVIA
         self.trivia_questions = []
@@ -126,6 +129,8 @@ class TriviaVox(commands.Bot):
         botemoji.update()
         self.emoji_questions = botemoji.load_as_array()
 
+        # self.auto_ad_check.start()
+        self.auto_ad_update.start()
         self.auto_trivia.start()
         self.auto_trivia_stop.start()
         self.auto_message.start()
@@ -158,17 +163,34 @@ class TriviaVox(commands.Bot):
         if msg_id in ["sub", "resub", "subgift", "submysterygift", "giftpaidupgrade", "rewardgift", "anongiftpaidupgrade"]:
             await self.bot_print("Thank you for supporting the channel, {}!".format(tags["display-name"]))
 
+    # @routines.routine(seconds=1)
+    # async def auto_ad_check(self):
+    #     ts = int(datetime.now().timestamp())
+    #     if ts == self.next_ad_at - 60:
+    #         print("Ads in 1 minute")
+
+    @routines.routine(minutes=10)
+    async def auto_ad_update(self):
+        user = await self.channel.user()
+        ad_sched = await user.fetch_ad_schedule(botsecrets.ACCESS_TOKEN)
+        ad_date = datetime.fromtimestamp(ad_sched.next_ad_at)
+        print("Ads scheduled to run at {}".format(ad_date))
+        self.next_ad_at = ad_sched.next_ad_at
+
     @routines.routine(minutes=5)
     async def auto_trivia(self):
         """Run a trivia question every few minutes."""
         # Choose a game type
         await self.check_if_live()
-        now_mm = int(datetime.strftime(datetime.now(), "%M"))
+        ts = int(datetime.now().timestamp())
 
-        # Ads run right before the new hour so don't choose Stinger trivia during that time.
-        if self.is_live and now_mm < 55:
+        print(self.next_ad_at - ts)
+
+        # If ads are running soon, don't start a Stinger game
+        if self.is_live and self.next_ad_at - ts > 300:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER])
         else:
+            print("Not choosing a Stinger because of the time.")
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
 
         if self.game_type == GameType.TRIVIA:
@@ -261,6 +283,15 @@ class TriviaVox(commands.Bot):
             # Format the list of winners
             output = bottrivia.format_round_winners(name_and_points)
             await self.bot_print(output)
+
+            # Check for special achievements
+            for n_p in name_and_points:
+                parts = n_p.rstrip(")").split(" (")
+                name = parts[0]
+                points = parts[1]
+                print(name, points)
+                if int(points) % 100 == 0:
+                    await self.bot_print("Special congrats to {} on reaching {} points!".format(name, str(points)))
 
             # Save the new number of points for the winners
             bottrivia.save_trivia_winners(winners)
