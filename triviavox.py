@@ -7,7 +7,7 @@ from enum import Enum
 from os import listdir
 from os.path import isfile, join
 
-from twitchio import Message
+from twitchio import Message, Channel
 from twitchio.ext import commands, routines
 
 import botemoji
@@ -151,7 +151,13 @@ class TriviaVox(commands.Bot):
         await self.handle_commands(message)
 
     async def event_command_error(self, ctx: commands.Context, error):
+        """Ignore command errors"""
         pass
+
+    async def event_raw_usernotice(self, channel: Channel, tags: dict):
+        msg_id = tags['msg-id'].strip().lower()
+        if msg_id in ["sub", "resub", "subgift", "submysterygift", "giftpaidupgrade", "rewardgift", "anongiftpaidupgrade"]:
+            await self.bot_print("Thank you for supporting the channel, {}!".format(tags["display-name"]))
 
     @routines.routine(minutes=5)
     async def auto_trivia(self):
