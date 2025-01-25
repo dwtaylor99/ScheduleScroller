@@ -351,7 +351,6 @@ def setup(screen):
     summaries.refresh()
     schedule.refresh()
     sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
-    print(sched[0])
 
     stop_time = datetime.now()
     print("Loading finished in " + str(stop_time - start_time))

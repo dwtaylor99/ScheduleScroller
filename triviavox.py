@@ -86,7 +86,6 @@ class TriviaVox(commands.Bot):
         self.screen = screen
         self.clock = clock
 
-        self.stream = None
         self.channel = super().get_channel(CHANNEL_NAME)
         self.is_connecting = True
         self.is_live = True
@@ -111,6 +110,11 @@ class TriviaVox(commands.Bot):
         streams = await self.fetch_streams(user_ids=[CHANNEL_ID])
         self.is_live = len(streams) > 0
 
+    async def bot_print(self, txt):
+        print(txt)
+        if not IS_DEBUG and self.channel is not None:
+            await self.channel.send(txt)
+
     async def event_ready(self):
         await self.check_if_live()
 
@@ -128,11 +132,6 @@ class TriviaVox(commands.Bot):
         self.auto_update_game.start()
 
         print("TriviaVox ready, channel is live={}".format(self.is_live))
-
-    async def bot_print(self, txt):
-        print(txt)
-        if not IS_DEBUG and self.channel is not None:
-            await self.channel.send(txt)
 
     async def event_message(self, message: Message) -> None:
         if message.echo:
