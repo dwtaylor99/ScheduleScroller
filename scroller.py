@@ -123,15 +123,15 @@ def draw_episode_number(screen):
         screen.blit(text, (xpos, 470))
         FONT.set_bold(False)
 
-    elif sched[0]['title'].lower().startswith("rifftrax"):
-        host_img = pygame.transform.smoothscale_by(pygame.image.load('images/hosts/RiffTrax.png'), 0.1).convert_alpha()
-        screen.blit(host_img, (0, 359))
-    elif sched[0]['title'].lower().startswith("ct"):
-        host_img = pygame.transform.smoothscale_by(pygame.image.load('images/hosts/Cinematic_Titanic.png'), 0.4).convert_alpha()
-        screen.blit(host_img, (0, 359))
-    elif sched[0]['title'].lower().startswith("fc"):
-        host_img = pygame.transform.smoothscale_by(pygame.image.load('images/hosts/film_crew.png'), 1.0).convert_alpha()
-        screen.blit(host_img, (0, 359))
+    # elif sched[0]['title'].lower().startswith("rifftrax"):
+    #     host_img = pygame.transform.smoothscale_by(pygame.image.load('images/hosts/RiffTrax.png'), 0.1).convert_alpha()
+    #     screen.blit(host_img, (0, 359))
+    # elif sched[0]['title'].lower().startswith("ct"):
+    #     host_img = pygame.transform.smoothscale_by(pygame.image.load('images/hosts/Cinematic_Titanic.png'), 0.4).convert_alpha()
+    #     screen.blit(host_img, (0, 359))
+    # elif sched[0]['title'].lower().startswith("fc"):
+    #     host_img = pygame.transform.smoothscale_by(pygame.image.load('images/hosts/film_crew.png'), 1.0).convert_alpha()
+    #     screen.blit(host_img, (0, 359))
 
 
 def draw_image(screen):
