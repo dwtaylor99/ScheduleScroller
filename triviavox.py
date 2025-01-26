@@ -83,8 +83,8 @@ class GameType(Enum):
 
 class TriviaVox(commands.Bot):
     def __init__(self, screen, clock):
-        super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
-        # super().__init__(token=botsecrets.ACCESS_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
+        # super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
+        super().__init__(token=botsecrets.ACCESS_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
         self.screen = screen
         self.clock = clock
 
