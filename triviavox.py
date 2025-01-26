@@ -20,6 +20,7 @@ import scroller
 from anims.candy_heart_snow import CandyHeartSnow
 from anims.clover_snow import CloverSnow
 from anims.snow import SnowFlake
+from character_game import CHARACTERS, CHARACTER_PATH
 from colors import *
 from constants import *
 from movie_names import MOVIE_NAMES
@@ -69,6 +70,9 @@ FONT_EMOJI_LG = pygame.font.Font("fonts/seguiemj.ttf", 44)
 STR_STINGER = "Name the MST3K movie this stinger is from:"
 TXT_STINGER = FONT_MST3K_LG.render(STR_STINGER, True, YELLOW)
 
+STR_CHARACTER = "Name the character:"
+TXT_CHARACTER = FONT_MST3K_LG.render(STR_CHARACTER, True, YELLOW)
+
 STR_EMOJI = "Name the MST3K movie described by these emoji:"
 TXT_EMOJI = FONT_MST3K_LG.render(STR_EMOJI, True, YELLOW)
 
@@ -80,15 +84,13 @@ class GameType(Enum):
     TRIVIA = "Trivia"
     EMOJI = "Emoji"
     STINGER = "Stinger"
+    CHARACTER = "Character"
 
 
 class TriviaVox(commands.Bot):
     def __init__(self, screen, clock):
         super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
-        # if IS_DEBUG:
-        #     super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
-        # else:
-        #     super().__init__(token=botsecrets.ACCESS_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
+
         self.screen = screen
         self.clock = clock
 
@@ -115,6 +117,9 @@ class TriviaVox(commands.Bot):
         self.stinger_num = 0
         self.prev_stingers = []
 
+        self.character_img = None
+        self.prev_characters = []
+
     async def check_if_live(self):
         streams = await self.fetch_streams(user_ids=[CHANNEL_ID])
         self.is_live = len(streams) > 0
@@ -135,14 +140,30 @@ class TriviaVox(commands.Bot):
         botemoji.update()
         self.emoji_questions = botemoji.load_as_array()
 
-        # self.auto_ad_update.start()
-        # self.auto_trivia_scheduler.start()
-        self.auto_trivia.start()
         self.auto_trivia_stop.start()
         self.auto_message.start()
         self.auto_update_game.start()
 
+        ts = int(datetime.now().timestamp())
+        self.next_ad_at = ts + 3600
+        ad_date = datetime.strftime(datetime.fromtimestamp(self.next_ad_at), "%I:%M:%S %p")
+        await self.bot_print("Ad time has been set. Next ads at {} (Eastern).".format(ad_date))
+
+        # Don't start trivia unless the minutes are divisible by 5
+        delay_sec = 0
+        for i in range(300):
+            if (ts + i) % 300 == 0:
+                self.start_trivia_time = ts + i
+                delay_sec = i
+                break
+
         print("TriviaVox ready, channel is live={}".format(self.is_live))
+
+        if IS_DEBUG:
+            delay_sec = 1
+        print("Waiting {} seconds to start trivia.".format(str(delay_sec)))
+        await asyncio.sleep(delay_sec)
+        self.auto_trivia.start()
 
     async def event_message(self, message: Message) -> None:
         if message.echo:
@@ -169,25 +190,6 @@ class TriviaVox(commands.Bot):
         if msg_id in ["sub", "resub", "subgift", "submysterygift", "giftpaidupgrade", "rewardgift", "anongiftpaidupgrade"]:
             await self.bot_print("Thank you for supporting the channel, {}!".format(tags["display-name"]))
 
-    """
-    @routines.routine(minutes=10)
-    async def auto_ad_update(self):
-        if not IS_DEBUG:
-            user = await self.channel.user()
-            ad_sched = await user.fetch_ad_schedule(botsecrets.ACCESS_TOKEN)
-            ad_date = datetime.fromtimestamp(ad_sched.next_ad_at)
-            print("Ads scheduled to run at {}".format(ad_date))
-            self.next_ad_at = ad_sched.next_ad_at
-    """
-
-    """
-    @routines.routine(seconds=1)
-    async def auto_trivia_scheduler(self):
-        if int(datetime.now().timestamp()) == self.start_trivia_time:
-            self.auto_trivia.start()
-            self.auto_trivia_scheduler.stop()
-    """
-
     @routines.routine(minutes=5)
     async def auto_trivia(self):
         """Run a trivia question every few minutes."""
@@ -196,13 +198,15 @@ class TriviaVox(commands.Bot):
         await self.check_if_live()
         ts = int(datetime.now().timestamp())
 
-        # If ads are running in the next 5 minutes (300 seconds), don't start a Stinger game
-        # if self.is_live:
+        # If ads are running in the next 5 minutes (300 seconds), don't start a game that needs the screen
         if self.is_live and self.next_ad_at - ts > 300:
-            self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER])
+            self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER, GameType.CHARACTER])
         else:
-            print("Not choosing a Stinger because of the time.")
+            print("Not choosing a Stinger/Character game because of the time.")
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
+
+        if IS_DEBUG:
+            self.game_type = GameType.CHARACTER
 
         if self.game_type == GameType.TRIVIA:
             self.trivia_question = random.choice(self.trivia_questions)
@@ -254,7 +258,26 @@ class TriviaVox(commands.Bot):
             self.game_end_time = time.time() + 60
 
             await self.bot_print("/me Name the stinger seen on screen.")
-            self.stinger_img = load_stinger_image(STINGER_PATH + '/' + stinger_file)
+            self.stinger_img = load_scaled_image(STINGER_PATH + '/' + stinger_file)
+
+        elif self.game_type == GameType.CHARACTER:
+            character = random.choice(CHARACTERS)
+            while character in self.prev_characters:
+                character = random.choice(CHARACTERS)
+
+            answers = character.names
+            self.trivia_question = bottrivia.Trivia(STR_STINGER, answers)
+
+            self.preserved_answer = self.trivia_question.answers[0]
+            self.trivia_question.answers = normalize_answers(self.trivia_question.answers)
+            self.prev_characters.append(character)
+            if len(self.prev_characters) > 20:
+                self.prev_characters.pop(0)
+            self.trivia_winners.clear()
+            self.game_end_time = time.time() + 60
+
+            await self.bot_print("/me Name the character seen on screen.")
+            self.character_img = load_scaled_image(CHARACTER_PATH + character.img_file)
 
         print(self.trivia_question.answers)
 
@@ -311,11 +334,11 @@ class TriviaVox(commands.Bot):
     @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
     @commands.command(name="ads", aliases=['Ads', 'ADS'])
     async def cmd_ads(self, ctx: commands.Context):
-        privs = ctx.author.is_broadcaster or ctx.author.is_mod or ctx.author.is_vip or ctx.author.is_subscriber
+        privs = ctx.author.is_broadcaster or ctx.author.is_mod  # or ctx.author.is_vip or ctx.author.is_subscriber
 
         if privs:
             self.next_ad_at = datetime.now().timestamp() + 3600
-            ad_date = datetime.strftime(datetime.fromtimestamp(self.next_ad_at), "%I:%M:%S")
+            ad_date = datetime.strftime(datetime.fromtimestamp(self.next_ad_at), "%I:%M:%S %p")
             await self.bot_print("Ad time has been set. Next ads at {} (Eastern).".format(ad_date))
 
         else:
@@ -354,6 +377,29 @@ class TriviaVox(commands.Bot):
         else:
             await self.bot_print(bottrivia.format_winners(bottrivia.top()))
 
+    def fix_emoji(self):
+        # Cover missing emoji with images of the emoji
+        if "🥷🥷" in self.trivia_question.question:
+            alt_screen.blit(EMJ_NINJA, (470, 263))
+            alt_screen.blit(EMJ_NINJA, (510, 263))
+        elif "🥷" in self.trivia_question.question:
+            alt_screen.blit(EMJ_NINJA, (488, 263))
+        if "🫠" in self.trivia_question.question:
+            alt_screen.blit(EMJ_MELT_FACE, (459, 270))
+        if "♞" in self.trivia_question.question:
+            alt_screen.blit(EMJ_BKNIGHT, (510, 270))
+            alt_screen.blit(EMJ_BKNIGHT, (550, 270))
+        if "🗚" in self.trivia_question.question:
+            alt_screen.blit(EMJ_INCREASE, (488, 270))
+        if "🇨🇺" in self.trivia_question.question:
+            alt_screen.blit(EMJ_CUBA, (530, 270))
+        if "🇲🇽" in self.trivia_question.question:
+            alt_screen.blit(EMJ_MEXICO, (463, 270))
+        if "🇲🇹" in self.trivia_question.question:
+            alt_screen.blit(EMJ_MALTA, (522, 270))
+        if "🇺🇸" in self.trivia_question.question:
+            alt_screen.blit(EMJ_USA, (500, 270))
+
     def draw_screen(self):
         if self.trivia_question is not None:
             gradient.rect_gradient_h(alt_screen, DK_GRAY, BLACK, pygame.Rect(0, 0, W2, H2))
@@ -375,28 +421,12 @@ class TriviaVox(commands.Bot):
                 txt = FONT_EMOJI_LG.render(self.trivia_question.question.split(":")[1], True,
                                            pick_color(self.trivia_question.question))
                 alt_screen.blit(txt, ((W2 - txt.get_width()) // 2, H2 // 2))
+                self.fix_emoji()
 
-                # Cover missing emoji with images of the emoji
-                if "🥷🥷" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_NINJA, (470, 263))
-                    alt_screen.blit(EMJ_NINJA, (510, 263))
-                elif "🥷" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_NINJA, (488, 263))
-                if "🫠" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_MELT_FACE, (459, 270))
-                if "♞" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_BKNIGHT, (510, 270))
-                    alt_screen.blit(EMJ_BKNIGHT, (550, 270))
-                if "🗚" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_INCREASE, (488, 270))
-                if "🇨🇺" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_CUBA, (530, 270))
-                if "🇲🇽" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_MEXICO, (463, 270))
-                if "🇲🇹" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_MALTA, (522, 270))
-                if "🇺🇸" in self.trivia_question.question:
-                    alt_screen.blit(EMJ_USA, (500, 270))
+            elif self.game_type == GameType.CHARACTER:
+                alt_screen.blit(TXT_CHARACTER, ((W2 - TXT_CHARACTER.get_width()) // 2, 10))
+                alt_screen.blit(self.character_img, ((W2 - self.character_img.get_width()) // 2,
+                                                     (H2 - self.character_img.get_height()) // 2))
 
         # Blit the internal alt_screen (Surface) on the main screen
         self.screen.blit(alt_screen, (WIDTH // 2, 0))
@@ -496,7 +526,7 @@ def choose_stinger() -> str:
     return random.choice(file_list)
 
 
-def load_stinger_image(file_path) -> pygame.Surface:
+def load_scaled_image(file_path) -> pygame.Surface:
     img = pygame.image.load(file_path)
 
     # scale the image
@@ -507,7 +537,7 @@ def load_stinger_image(file_path) -> pygame.Surface:
         new_w = 580 / img.get_width()
         new_h = 325 / img.get_height()
 
-    return pygame.transform.smoothscale_by(img, min(new_w, new_h)).convert()
+    return pygame.transform.smoothscale_by(img, min(new_w, new_h)).convert_alpha()
 
 
 def normalize_answers(answer_list):
