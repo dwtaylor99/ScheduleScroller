@@ -21,6 +21,7 @@ CHARACTERS = [
     Character("donna.png", ["Donna", "Donna Bixby"]),
     Character("EmilyConnor.png", ["Emily", "Emily Connor"]),
     Character("erhardt.png", ["Erhardt", "Larry", "Dr Erhardt", "Dr Larry Erhardt"]),
+    Character("fingal.png", ["Fingal", "Aram Fingal", "Aram"]),
     Character("forrester.png", ["Forrester", "Dr Forrester", "Clayton Forrester"]),
     Character("goosio.png", ["Goosio"]),
     Character("Growler.png", ["Growler"]),
@@ -56,6 +57,42 @@ CHARACTERS = [
     Character("Yuri.png", ["Yuri"]),
     Character("ZapRowsdower.png", ["Rowsdower", "Zap", "Zap Rowsdower"]),
 
+    Character("barugon.png", ["Barugon"]),
+    Character("gamera.png", ["Gamera"]),
+    Character("gaos.png", ["Gaos", "Gyaos"]),
+    Character("guiron.png", ["Guiron"]),
+    Character("zigra.png", ["Zigra"]),
+    Character("jiger.png", ["Jiger"]),
+
+    Character("geronimo.png", ["Geronimo", "Thomas Jefferson Geronimo", "Thomas Jefferson Geronimo III", "Deputy Sheriff Thomas Jefferson Geronimo III"]),
+    Character("mitchell.png", ["Mitchell"]),
+    Character("ortega.png", ["Ortega"]),
+    Character("pumaman.png", ["Pumaman", "Puma Man"]),
+    Character("godzilla.png", ["Godzilla"]),
+    Character("gorgo.png", ["Gorgo"]),
+    Character("trumpy.png", ["Trumpy"]),
+    Character("derek.png", ["Derek"]),
+    Character("betty.png", ["Betty", "Betty Morgan"]),
+    Character("captjoe.png", ["Captain Joe", "Capt Joe", "Cap Joe"]),
+    Character("daddy-o.png", ["Daddy-O", "DaddyO", "Phil", "Phil Sandifer"]),
+    Character("pepe.png", ["Pepe"]),
+    Character("godo.png", ["Godo"]),
+    Character("johnny_longbow.png", ["Johnny Longbow", "Johnny Long Bow", "Johnny Longbone", "Johnny Long Bone"]),
+    Character("frost.png", ["Morozko", "Father Frost", "Jack Frost", "Frost", "Frosty"]),
+    Character("hercules.png", ["Hercules"]),
+
+    Character("tom_stewart.png", ["Tom Stewart", "Tom"]),
+    Character("vi.png", ["Vi"]),
+    Character("Cleolanta.png", ["Cleolanta", "Cleolanthe"]),
+    Character("winky.png", ["Winky"]),
+    Character("rocky_jones.png", ["Rocky Jones"]),
+    Character("Vena.png", ["Vena", "Vena Ray"]),
+    Character("kolos.png", ["Kolos", "Dr Kolos"]),
+    Character("lisa.png", ["Lisa", "Lisa Dornheimer"]),
+    Character("bart_fargo.png", ["Bart Fargo", "Bart", "Fargo"]),
+    Character("Eegah.png", ["Eegah"]),
+
+    # Character("", [""]),
     # Character("", [""]),
     # Character("", [""]),
 ]
@@ -69,5 +106,7 @@ if __name__ == '__main__':
 
 """
 TODO:
-
+Johnny (Time of Apes)
+Godo (Time of Apes)
+Krankor
 """
