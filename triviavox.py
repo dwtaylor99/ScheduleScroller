@@ -25,6 +25,7 @@ from constants import *
 from movie_names import MOVIE_NAMES
 from util_text import wrap_text
 
+# This gets set to True on Windows platforms
 IS_DEBUG = False
 
 # CHANNEL_ID = 105623158
@@ -94,8 +95,9 @@ class TriviaVox(commands.Bot):
         self.channel = super().get_channel(CHANNEL_NAME)
         self.is_connecting = True
         self.is_live = True
-        self.next_ad_at = 0
+
         self.start_trivia_time = 0
+        self.next_ad_at = 0
 
         self.game_type = GameType.TRIVIA
         self.trivia_questions = []
@@ -133,21 +135,6 @@ class TriviaVox(commands.Bot):
         botemoji.update()
         self.emoji_questions = botemoji.load_as_array()
 
-        # 7:45pm is 1737852300
-        # 7:50pm is 1737852600
-        # 7:55pm is 1737852900
-        # 8:00pm is 1737853200
-        # 8:15pm is 1737854100
-        # 8:20pm is 1737854400 / 300 = 5,792,848
-        # 8:30pm is 1737855000 / 300 = 5,792,850
-        ts = int(datetime.now().timestamp())
-        for i in range(300):
-            if (ts + i) % 300 == 0:
-                self.start_trivia_time = ts + i
-                break
-        print("Start trivia at " + str(self.start_trivia_time))
-        print(datetime.fromtimestamp(self.start_trivia_time))
-
         # self.auto_ad_update.start()
         # self.auto_trivia_scheduler.start()
         self.auto_trivia.start()
@@ -182,6 +169,7 @@ class TriviaVox(commands.Bot):
         if msg_id in ["sub", "resub", "subgift", "submysterygift", "giftpaidupgrade", "rewardgift", "anongiftpaidupgrade"]:
             await self.bot_print("Thank you for supporting the channel, {}!".format(tags["display-name"]))
 
+    """
     @routines.routine(minutes=10)
     async def auto_ad_update(self):
         if not IS_DEBUG:
@@ -190,12 +178,15 @@ class TriviaVox(commands.Bot):
             ad_date = datetime.fromtimestamp(ad_sched.next_ad_at)
             print("Ads scheduled to run at {}".format(ad_date))
             self.next_ad_at = ad_sched.next_ad_at
+    """
 
+    """
     @routines.routine(seconds=1)
     async def auto_trivia_scheduler(self):
         if int(datetime.now().timestamp()) == self.start_trivia_time:
             self.auto_trivia.start()
             self.auto_trivia_scheduler.stop()
+    """
 
     @routines.routine(minutes=5)
     async def auto_trivia(self):
@@ -206,8 +197,8 @@ class TriviaVox(commands.Bot):
         ts = int(datetime.now().timestamp())
 
         # If ads are running in the next 5 minutes (300 seconds), don't start a Stinger game
-        # if self.is_live and self.next_ad_at - ts > 300:
-        if self.is_live:
+        # if self.is_live:
+        if self.is_live and self.next_ad_at - ts > 300:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER])
         else:
             print("Not choosing a Stinger because of the time.")
@@ -316,6 +307,19 @@ class TriviaVox(commands.Bot):
             # Save the new number of points for the winners
             bottrivia.save_trivia_winners(winners)
             self.trivia_winners.clear()
+
+    @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
+    @commands.command(name="ads", aliases=['Ads', 'ADS'])
+    async def cmd_ads(self, ctx: commands.Context):
+        privs = ctx.author.is_broadcaster or ctx.author.is_mod or ctx.author.is_vip or ctx.author.is_subscriber
+
+        if privs:
+            self.next_ad_at = datetime.now().timestamp() + 3600
+            ad_date = datetime.strftime(datetime.fromtimestamp(self.next_ad_at), "%I:%M:%S")
+            await self.bot_print("Ad time has been set. Next ads at {} (Eastern).".format(ad_date))
+
+        else:
+            await self.bot_print("Sorry, you do not have permission to run this command.")
 
     @commands.command(name="latency", aliases=['Latency', 'LATENCY'])
     async def cmd_latency(self, ctx: commands.Context):
