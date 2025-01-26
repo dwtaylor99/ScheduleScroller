@@ -83,10 +83,11 @@ class GameType(Enum):
 
 class TriviaVox(commands.Bot):
     def __init__(self, screen, clock):
-        if IS_DEBUG:
-            super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
-        else:
-            super().__init__(token=botsecrets.ACCESS_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
+        super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
+        # if IS_DEBUG:
+        #     super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
+        # else:
+        #     super().__init__(token=botsecrets.ACCESS_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
         self.screen = screen
         self.clock = clock
 
@@ -144,12 +145,12 @@ class TriviaVox(commands.Bot):
             if (ts + i) % 300 == 0:
                 self.start_trivia_time = ts + i
                 break
-        # print("Start trivia at " + str(self.start_trivia_time))
-        # print(datetime.fromtimestamp(self.start_trivia_time))
+        print("Start trivia at " + str(self.start_trivia_time))
+        print(datetime.fromtimestamp(self.start_trivia_time))
 
-        self.auto_ad_update.start()
-        self.auto_trivia_scheduler.start()
-        # self.auto_trivia.start()
+        # self.auto_ad_update.start()
+        # self.auto_trivia_scheduler.start()
+        self.auto_trivia.start()
         self.auto_trivia_stop.start()
         self.auto_message.start()
         self.auto_update_game.start()
@@ -205,7 +206,8 @@ class TriviaVox(commands.Bot):
         ts = int(datetime.now().timestamp())
 
         # If ads are running in the next 5 minutes (300 seconds), don't start a Stinger game
-        if self.is_live and self.next_ad_at - ts > 300:
+        # if self.is_live and self.next_ad_at - ts > 300:
+        if self.is_live:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER])
         else:
             print("Not choosing a Stinger because of the time.")
@@ -307,7 +309,7 @@ class TriviaVox(commands.Bot):
                 parts = n_p.rstrip(")").split(" (")
                 name = parts[0]
                 points = parts[1]
-                print(name, points)
+                # print(name, points)
                 if int(points) % 100 == 0:
                     await self.bot_print("Special congrats to {} on reaching {} points!".format(name, str(points)))
 
