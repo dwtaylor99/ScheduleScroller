@@ -181,11 +181,12 @@ class TriviaVox(commands.Bot):
 
     @routines.routine(minutes=10)
     async def auto_ad_update(self):
-        user = await self.channel.user()
-        ad_sched = await user.fetch_ad_schedule(botsecrets.ACCESS_TOKEN)
-        ad_date = datetime.fromtimestamp(ad_sched.next_ad_at)
-        print("Ads scheduled to run at {}".format(ad_date))
-        self.next_ad_at = ad_sched.next_ad_at
+        if not IS_DEBUG:
+            user = await self.channel.user()
+            ad_sched = await user.fetch_ad_schedule(botsecrets.ACCESS_TOKEN)
+            ad_date = datetime.fromtimestamp(ad_sched.next_ad_at)
+            print("Ads scheduled to run at {}".format(ad_date))
+            self.next_ad_at = ad_sched.next_ad_at
 
     @routines.routine(seconds=1)
     async def auto_trivia_scheduler(self):
