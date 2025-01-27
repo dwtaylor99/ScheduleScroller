@@ -1,4 +1,6 @@
 import os.path
+from os import listdir
+from os.path import isfile, join
 
 CHARACTER_PATH = "images/characters/"
 
@@ -41,6 +43,7 @@ CHARACTERS = [
     Character("Mike.png", ["Mike", "Mike Nelson"]),
     Character("mrb.png", ["Mr B Natural", "Mr B"]),
     Character("MWaverly.png", ["M Waverly"]),
+    Character("Nanites.png", ["Nanites"]),
     Character("Natalie.png", ["Natalie", "Natalie Burke"]),
     Character("observer.png", ["Observer", "Brain Guy", "Brainguy"]),
     Character("Pearl.png", ["Pearl", "Pearl Forrester"]),
@@ -91,7 +94,39 @@ CHARACTERS = [
     Character("lisa.png", ["Lisa", "Lisa Dornheimer"]),
     Character("bart_fargo.png", ["Bart Fargo", "Bart", "Fargo"]),
     Character("Eegah.png", ["Eegah"]),
+    Character("bix.png", ["Bix Dugan", "Big Stupid", "Bix"]),
+    Character("carrie.png", ["Carrie", "Carrie Anders"]),
+    Character("mikey.png", ["Mikey"]),
 
+    Character("Batwoman.png", ["Batwoman", "Bat Woman"]),
+    Character("cabot.png", ["Cabot"]),
+    Character("watney.png", ["Watney", "Whatney"]),
+    Character("xenos.png", ["Xenos"]),
+    Character("lara.png", ["Lara"]),
+
+    Character("gloria.png", ["Gloria", "Gloria Henderson"]),
+    Character("dirk.png", ["Dirk", "Dirk Williams"]),
+    Character("marv.png", ["Marv", "Marv Grant"]),
+
+    Character("cherokee_jack.png", ["Cherokee Jack"]),
+    Character("exeter.png", ["Exeter"]),
+    Character("hal_moffat.png", ["Hal Moffat", "The Creeper", "Hal", "Creeper"]),
+
+    Character("billy.png", ["Billy", "Billy Duncan"]),
+    Character("froggy.png", ["Froggy"]),
+    Character("trash.png", ["Trash"]),
+    Character("dablone.png", ["Dablone", "Toblerone"]),
+    Character("deathstalker.png", ["Deathstalker", "Death Stalker"]),
+    Character("Princeofspace.png", ["Prince of Space"]),
+    Character("vance.png", ["Vance", "Dr Vance"]),
+
+    Character("Vorelli.png", ["Vorelli", "The Great Vorelli"]),
+
+    # Character("", [""]),
+    # Character("", [""]),
+    # Character("", [""]),
+    # Character("", [""]),
+    # Character("", [""]),
     # Character("", [""]),
     # Character("", [""]),
     # Character("", [""]),
@@ -103,6 +138,16 @@ if __name__ == '__main__':
     for c in CHARACTERS:
         if not os.path.exists(CHARACTER_PATH + c.img_file):
             print(c.img_file + " is missing")
+
+    allfiles = [f for f in listdir(CHARACTER_PATH) if isfile(join(CHARACTER_PATH, f))]
+    for file in allfiles:
+        found = False
+        for c in CHARACTERS:
+            if c.img_file == file:
+                found = True
+                break
+        if not found:
+            print("File " + file + " has no Character")
 
 """
 TODO:
