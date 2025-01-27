@@ -71,7 +71,7 @@ CHARACTERS = [
     Character("mitchell.png", ["Mitchell"]),
     Character("ortega.png", ["Ortega"]),
     Character("pumaman.png", ["Puma Man", "Pumaman"]),
-    Character("godzilla.png", ["Godzilla"]),
+    Character("godzilla.png", ["Godzilla", "Gojira"]),
     Character("gorgo.png", ["Gorgo"]),
     Character("trumpy.png", ["Trumpy"]),
     Character("derek.png", ["Derek"]),
