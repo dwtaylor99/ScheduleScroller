@@ -151,7 +151,7 @@ class TriviaVox(commands.Bot):
         self.emoji_questions = botemoji.load_as_array()
 
         self.auto_trivia_stop.start()
-        self.auto_message.start()
+        # self.auto_message.start()
         self.auto_update_game.start()
 
         ts = int(datetime.now().timestamp())

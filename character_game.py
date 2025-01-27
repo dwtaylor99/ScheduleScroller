@@ -160,17 +160,40 @@ CHARACTERS = [
     Character("megaweapon.png", ["Megaweapon", "Mega Weapon"]),
     Character("Minsky.png", ["Minsky"]),
     Character("nuveena.png", ["Nuveena"]),
-    Character("big_jake.png", ["Big Jake"]),
+    Character("big_jake.png", ["Big Jake", "Jake"]),
     Character("steffi.png", ["Steffi", "Steffi the Babysitter"]),
     Character("tibby.png", ["Tibby"]),
     Character("timmy.png", ["Timmy", "mst3kSilhouetteCrow"]),
     Character("Scooter.png", ["Scooter"]),
-    Character("valeria.png", ["Valeria"]),
+    Character("valaria.png", ["Valaria"]),
     Character("mooney.png", ["Mooney", "Moon", "Bob Mooney"]),
     Character("Gooch.png", ["Gooch", "Cooch"]),
     Character("monad.png", ["Monad"]),
     Character("mothra.png", ["Mothra"]),
     Character("mac.png", ["Mac"]),
+
+    Character("linda.png", ["Linda"]),
+    Character("tang.png", ["Tang"]),
+    Character("Lt_Red_Bradley.png", ["Bradley", "Red Bradley", "Lt Bradley", "Lt Red Bradley"]),
+    Character("cody.png", ["Commando Cody", "Cody"]),
+    Character("Ro-Man.png", ["Ro-Man", "RoMan"]),
+    Character("briteis.png", ["Col Briteis", "Briteis", "Brighteyes", "Bright Eyes", "Col Brighteyes", "Col Bright Eyes", "Brite Eyes", "Col Brite Eyes"]),
+    Character("kemp.png", ["Kemp", "Bill Kemp"]),
+    Character("rommel.png", ["Rommel"]),
+    Character("jc.png", ["JC", "J C"]),
+    Character("zorka.png", ["Dr Zorka", "Dr Alex Zorka", "Zorka", "Alex Zorka"]),
+    Character("wanama.png", ["Wanama"]),
+    Character("ator.png", ["Ator"]),
+    Character("thong.png", ["Thong"]),
+    Character("ken.png", ["Ken"]),
+    Character("yogi.png", ["Yogi"]),
+    Character("dropo.png", ["Dropo", "Droppo"]),
+    Character("Max_Keller.png", ["Max Keller", "Max", "Keller"]),
+    Character("fumanchu.png", ["Fu Manchu", "Fumanchu", "Fu Man Chu"]),
+    Character("liz_walker.png", ["Liz", "Liz Walker"]),
+    Character("dave_walker.png", ["Dave", "Dave Walker"]),
+
+    # Character("", [""]),
 
     # Character("", [""]),
 ]
@@ -191,3 +214,9 @@ if __name__ == '__main__':
                 break
         if not found:
             print("File " + file + " has no Character")
+
+"""
+TODO:
+Mistretta, Gallano, Cummings
+Vic, Logan, Manuel
+"""
