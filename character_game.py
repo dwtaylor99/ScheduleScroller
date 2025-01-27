@@ -35,7 +35,7 @@ CHARACTERS = [
     Character("JonahHeston.png", ["Jonah", "Jonah Heston", "mst3kJonah"]),
     Character("judy.png", ["Judy"]),
     Character("kinga.png", ["Kinga", "Kinga Forrester", "mst3kKinga"]),
-    Character("lobo.png", ["Lobo", "mst3kTor"]),
+    Character("lobo.png", ["Lobo", "Lobo II", "Lobo 2", "mst3kTor"]),
     Character("Margaret.png", ["Margaret", "mst3kScream"]),
     Character("master.png", ["The Master", "Master", "mst3kMaster"]),
     Character("max.png", ["Max", "TV's Max", "TV's Son of TV's Frank"]),
@@ -192,9 +192,12 @@ CHARACTERS = [
     Character("fumanchu.png", ["Fu Manchu", "Fumanchu", "Fu Man Chu"]),
     Character("liz_walker.png", ["Liz", "Liz Walker"]),
     Character("dave_walker.png", ["Dave", "Dave Walker"]),
+    Character("sybil.png", ["Sybil"]),
 
     # Character("", [""]),
-
+    # Character("", [""]),
+    # Character("", [""]),
+    # Character("", [""]),
     # Character("", [""]),
 ]
 
