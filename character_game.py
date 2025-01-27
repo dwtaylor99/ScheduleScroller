@@ -151,11 +151,9 @@ CHARACTERS = [
     Character("boong.png", ["Boong", "President Boong"]),
     Character("sumuru.png", ["Sumuru"]),
     Character("omus.png", ["Omus"]),
-
     Character("gpc2.png", ["GPC 2", "GPC2"]),
     Character("Cambot.png", ["Cambot"]),
     Character("Sorri_Andropoli.png", ["Sorri", "Sorri Andropoli"]),
-
     Character("Leonard_Maltin.png", ["Leonard Maltin", "Maltin"]),
     Character("glennmanning.png", ["Glenn Manning", "Glen Manning"]),
     Character("megaweapon.png", ["Megaweapon", "Mega Weapon"]),
@@ -171,6 +169,7 @@ CHARACTERS = [
     Character("Gooch.png", ["Gooch", "Cooch"]),
     Character("monad.png", ["Monad"]),
     Character("mothra.png", ["Mothra"]),
+    Character("mac.png", ["Mac"]),
 
     # Character("", [""]),
 ]
