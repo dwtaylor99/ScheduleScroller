@@ -159,8 +159,6 @@ class TriviaVox(commands.Bot):
 
         print("TriviaVox ready, channel is live={}".format(self.is_live))
 
-        if IS_DEBUG:
-            delay_sec = 1
         print("Waiting {} seconds to start trivia.".format(str(delay_sec)))
         await asyncio.sleep(delay_sec)
         self.auto_trivia.start()
@@ -204,9 +202,6 @@ class TriviaVox(commands.Bot):
         else:
             print("Not choosing a Stinger/Character game because of the time.")
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
-
-        if IS_DEBUG:
-            self.game_type = GameType.CHARACTER
 
         if self.game_type == GameType.TRIVIA:
             self.trivia_question = random.choice(self.trivia_questions)
