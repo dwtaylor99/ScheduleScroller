@@ -144,13 +144,14 @@ CHARACTERS = [
     Character("nereus.png", ["Nereus"]),
     Character("syrene.png", ["Syrene"]),
     Character("munchie.png", ["Munchie"]),
+    Character("drmordrid.png", ["Dr Mordrid", "Doctor Mordrid", "Anton Mordrid", "Dr Anton Mordrid", "Mordrid"]),
+    Character("cabal.png", ["Cabal"]),
+    Character("nickmoon.png", ["Nick Moon"]),
+    Character("Batwoman2.png", ["Batwoman"]),
+    Character("boong.png", ["Boong", "President Boong"]),
+    Character("sumuru.png", ["Sumuru"]),
+    Character("omus.png", ["Omus"]),
 
-    # Character("", [""]),
-    # Character("", [""]),
-    # Character("", [""]),
-    # Character("", [""]),
-    # Character("", [""]),
-    # Character("", [""]),
     # Character("", [""]),
 ]
 
