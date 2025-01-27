@@ -95,7 +95,7 @@ class TriviaVox(commands.Bot):
         self.clock = clock
 
         self.channel = super().get_channel(CHANNEL_NAME)
-        self.is_connecting = True
+        self.is_connecting = False
         self.is_live = True
 
         self.start_trivia_time = 0
@@ -127,9 +127,16 @@ class TriviaVox(commands.Bot):
     async def bot_print(self, txt):
         print(txt)
         if not IS_DEBUG and self.channel is not None:
-            await self.channel.send(txt)
+            try:
+                await self.channel.send(txt)
+            except ConnectionResetError:
+                if not self.is_connecting:
+                    self.is_connecting = True
+                    await self.connect()
 
     async def event_ready(self):
+        self.is_connecting = False
+
         await self.check_if_live()
 
         self.channel = super().get_channel(CHANNEL_NAME)
@@ -147,7 +154,7 @@ class TriviaVox(commands.Bot):
         ts = int(datetime.now().timestamp())
         self.next_ad_at = ts + 3600
         ad_date = datetime.strftime(datetime.fromtimestamp(self.next_ad_at), "%I:%M:%S %p")
-        await self.bot_print("Ad time has been set. Next ads at {} (Eastern).".format(ad_date))
+        print("Ad time has been set. Next ads at {} (Eastern).".format(ad_date))
 
         # Don't start trivia unless the minutes are divisible by 5
         delay_sec = 0
@@ -585,8 +592,6 @@ if __name__ == '__main__':
 
 """
 TODO:
-Can the trivia run at certain minutes of the hour?
-:00, :05, :10, ..., :45, :50, :55
 
 Troublesome emoji:
 [1]    102 - Robot vs Aztec Mummy (Mexico flag) [1]            🤖🆚🇲🇽⚰️🧟‍♂️

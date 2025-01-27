@@ -16,15 +16,15 @@ CHARACTERS = [
     Character("beeper.png", ["Beeper"]),
     Character("Bobo.png", ["Bobo", "Professor Bobo"]),
     Character("crenshaw.png", ["Crenshaw"]),
-    Character("crow.png", ["Crow", "Crow T Robot"]),
+    Character("crow.png", ["Crow", "Crow T Robot", "Art"]),
     Character("dave.png", ["Dave", "Dave Randall"]),
     Character("debbie.png", ["Debbie"]),
     Character("DoctorKabahl.png", ["Dr Kabahl", "Kabahl"]),
     Character("donna.png", ["Donna", "Donna Bixby"]),
     Character("EmilyConnor.png", ["Emily", "Emily Connor"]),
-    Character("erhardt.png", ["Erhardt", "Larry", "Dr Erhardt", "Dr Larry Erhardt"]),
+    Character("erhardt.png", ["Erhardt", "Larry", "Dr Erhardt", "Dr Larry Erhardt", "Dr Laurence Erhardt"]),
     Character("fingal.png", ["Fingal", "Aram Fingal", "Aram"]),
-    Character("forrester.png", ["Forrester", "Dr Forrester", "Clayton Forrester"]),
+    Character("forrester.png", ["Forrester", "Dr Forrester", "Clayton Forrester", "Dr Clayton Forrester"]),
     Character("goosio.png", ["Goosio"]),
     Character("Growler.png", ["Growler"]),
     Character("Gypsy_mst3k.png", ["Gypsy", "GPC"]),
@@ -37,7 +37,7 @@ CHARACTERS = [
     Character("kinga.png", ["Kinga", "Kinga Forrester"]),
     Character("Margaret.png", ["Margaret"]),
     Character("master.png", ["The Master", "Master"]),
-    Character("max.png", ["Max", "TV's Max"]),
+    Character("max.png", ["Max", "TV's Max", "TV's Son of TV's Frank"]),
     Character("MegaSynthia.png", ["Mega Synthia", "MegaSynthia"]),
     Character("MichaelManos.png", ["Michael"]),
     Character("Mike.png", ["Mike", "Mike Nelson"]),
@@ -47,15 +47,15 @@ CHARACTERS = [
     Character("Natalie.png", ["Natalie", "Natalie Burke"]),
     Character("observer.png", ["Observer", "Brain Guy", "Brainguy"]),
     Character("Pearl.png", ["Pearl", "Pearl Forrester"]),
-    Character("phipps.png", ["Phipps", "Alex", "Alexander", "Alex Phipps", "Alexander Phipps"]),
-    Character("pipper.png", ["Pipper"]),
+    Character("phipps.png", ["Alexander Phipps", "Alex", "Alexander", "Alex Phipps", "Phipps"]),
+    Character("pipper.png", ["Pipper", "Mike Pipper"]),
     Character("pitch.png", ["Pitch"]),
     Character("sam_the_keeper.png", ["Sam", "Sam the Keeper"]),
     Character("steve.png", ["Steve", "Steve Dunlap"]),
     Character("Synthia.png", ["Synthia"]),
     Character("Tom_Servo.png", ["Servo", "Tom Servo", "Htom Sirveaux"]),
     Character("torgo.png", ["Torgo"]),
-    Character("troy.png", ["Troy"]),
+    Character("troy.png", ["Troy", "Troy McGreggor"]),
     Character("TVs_Frank.png", ["Frank", "TV's Frank"]),
     Character("Yuri.png", ["Yuri"]),
     Character("ZapRowsdower.png", ["Rowsdower", "Zap", "Zap Rowsdower"]),
@@ -70,7 +70,7 @@ CHARACTERS = [
     Character("geronimo.png", ["Geronimo", "Thomas Jefferson Geronimo", "Thomas Jefferson Geronimo III", "Deputy Sheriff Thomas Jefferson Geronimo III"]),
     Character("mitchell.png", ["Mitchell"]),
     Character("ortega.png", ["Ortega"]),
-    Character("pumaman.png", ["Pumaman", "Puma Man"]),
+    Character("pumaman.png", ["Puma Man", "Pumaman"]),
     Character("godzilla.png", ["Godzilla"]),
     Character("gorgo.png", ["Gorgo"]),
     Character("trumpy.png", ["Trumpy"]),
@@ -85,7 +85,7 @@ CHARACTERS = [
     Character("hercules.png", ["Hercules"]),
 
     Character("tom_stewart.png", ["Tom Stewart", "Tom"]),
-    Character("vi.png", ["Vi"]),
+    Character("vi.png", ["Vi", "movievVi"]),
     Character("Cleolanta.png", ["Cleolanta", "Cleolanthe"]),
     Character("winky.png", ["Winky"]),
     Character("rocky_jones.png", ["Rocky Jones"]),
@@ -147,10 +147,30 @@ CHARACTERS = [
     Character("drmordrid.png", ["Dr Mordrid", "Doctor Mordrid", "Anton Mordrid", "Dr Anton Mordrid", "Mordrid"]),
     Character("cabal.png", ["Cabal"]),
     Character("nickmoon.png", ["Nick Moon"]),
-    Character("Batwoman2.png", ["Batwoman"]),
+    Character("Batwoman2.png", ["Batwoman", "Bat Woman"]),
     Character("boong.png", ["Boong", "President Boong"]),
     Character("sumuru.png", ["Sumuru"]),
     Character("omus.png", ["Omus"]),
+
+    Character("gpc2.png", ["GPC 2", "GPC2"]),
+    Character("Cambot.png", ["Cambot"]),
+    Character("Sorri_Andropoli.png", ["Sorri", "Sorri Andropoli"]),
+
+    Character("Leonard_Maltin.png", ["Leonard Maltin", "Maltin"]),
+    Character("glennmanning.png", ["Glenn Manning", "Glen Manning"]),
+    Character("megaweapon.png", ["Megaweapon", "Mega Weapon"]),
+    Character("Minsky.png", ["Minsky"]),
+    Character("nuveena.png", ["Nuveena"]),
+    Character("big_jake.png", ["Big Jake"]),
+    Character("steffi.png", ["Steffi", "Steffi the Babysitter"]),
+    Character("tibby.png", ["Tibby"]),
+    Character("timmy.png", ["Timmy"]),
+    Character("Scooter.png", ["Scooter"]),
+    Character("valeria.png", ["Valeria"]),
+    Character("mooney.png", ["Mooney", "Moon", "Bob Mooney"]),
+    Character("Gooch.png", ["Gooch", "Cooch"]),
+    Character("monad.png", ["Monad"]),
+    Character("mothra.png", ["Mothra"]),
 
     # Character("", [""]),
 ]
@@ -171,10 +191,3 @@ if __name__ == '__main__':
                 break
         if not found:
             print("File " + file + " has no Character")
-
-"""
-TODO:
-Johnny (Time of Apes)
-Godo (Time of Apes)
-Krankor
-"""
