@@ -5,7 +5,7 @@ Find the ScheduleScroller in action at [twitch.tv/MovieVox](http://www.twitch.tv
 
 ### Dependencies
 * pygame (v2.6.1, used to render all the graphics)
-* twitchio
+* twitchio (2.10.0)
 
 ### About
 Generates a scrolling schedule of times and movies 

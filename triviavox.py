@@ -158,11 +158,14 @@ class TriviaVox(commands.Bot):
 
         # Don't start trivia unless the minutes are divisible by 5
         delay_sec = 0
-        for i in range(300):
-            if (ts + i) % 300 == 0:
-                self.start_trivia_time = ts + i
-                delay_sec = i
-                break
+        if not IS_DEBUG:
+            for i in range(300):
+                if (ts + i) % 300 == 0:
+                    self.start_trivia_time = ts + i
+                    delay_sec = i
+                    break
+        else:
+            delay_sec = 1
 
         print("TriviaVox ready, channel is live={}".format(self.is_live))
 
@@ -203,12 +206,18 @@ class TriviaVox(commands.Bot):
         await self.check_if_live()
         ts = int(datetime.now().timestamp())
 
+        if self.next_ad_at < ts:
+            self.next_ad_at += 3600
+
         # If ads are running in the next 5 minutes (300 seconds), don't start a game that needs the screen
         if self.is_live and self.next_ad_at - ts > 300:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER, GameType.CHARACTER])
         else:
             print("Not choosing a Stinger/Character game because of the time.")
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
+
+        if IS_DEBUG:
+            self.game_type = GameType.CHARACTER
 
         if self.game_type == GameType.TRIVIA:
             self.trivia_question = random.choice(self.trivia_questions)
