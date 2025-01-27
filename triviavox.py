@@ -8,6 +8,7 @@ from enum import Enum
 from os import listdir
 from os.path import isfile, join
 
+import pygame
 from twitchio import Message, Channel
 from twitchio.ext import commands, routines
 
@@ -75,6 +76,8 @@ TXT_CHARACTER = FONT_MST3K_LG.render(STR_CHARACTER, True, YELLOW)
 
 STR_EMOJI = "Name the MST3K movie described by these emoji:"
 TXT_EMOJI = FONT_MST3K_LG.render(STR_EMOJI, True, YELLOW)
+
+EMJ_NINJA = EMJ_MELT_FACE = EMJ_BKNIGHT = EMJ_INCREASE = EMJ_CUBA = EMJ_MALTA = EMJ_MEXICO = EMJ_USA = pygame.Surface((1, 1))
 
 is_running = True
 dt = 0
@@ -575,6 +578,21 @@ def normalize_answers(answer_list):
     return new_ans
 
 
+def load_emoji_replacements():
+    """Images used to fix missing emoji and flags (they need to be loaded after setting the screen mode)"""
+
+    global EMJ_NINJA, EMJ_MELT_FACE, EMJ_BKNIGHT, EMJ_INCREASE, EMJ_CUBA, EMJ_MALTA, EMJ_MEXICO, EMJ_USA
+
+    EMJ_NINJA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/ninja_1f977.png'), 0.115).convert_alpha()
+    EMJ_MELT_FACE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/melting-face_1fae0.png'), 0.11).convert_alpha()
+    EMJ_BKNIGHT = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/black-knight-2692.png'), 0.4).convert_alpha()
+    EMJ_INCREASE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/increase-font-size-symbol_1f5da.png'), 0.375).convert_alpha()
+    EMJ_CUBA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-cuba_1f1e8-1f1fa.png'), 0.11).convert_alpha()
+    EMJ_MALTA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-malta_1f1f2-1f1f9.png'), 0.11).convert_alpha()
+    EMJ_MEXICO = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-mexico_1f1f2-1f1fd.png'), 0.11).convert_alpha()
+    EMJ_USA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-united-states_1f1fa-1f1f8.png'), 0.10).convert_alpha()
+
+
 if __name__ == '__main__':
     if platform.system().lower() == "windows":
         IS_DEBUG = True
@@ -582,18 +600,7 @@ if __name__ == '__main__':
     scr = pygame.display.set_mode((WIDTH, HEIGHT))
     clk = pygame.time.Clock()
 
-    # Images used to fix missing emoji and flags (they need to be loaded after setting the screen mode)
-    EMJ_NINJA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/ninja_1f977.png'), 0.115).convert_alpha()
-    EMJ_MELT_FACE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/melting-face_1fae0.png'), 0.11).convert_alpha()
-    EMJ_BKNIGHT = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/black-knight-2692.png'), 0.4).convert_alpha()
-    EMJ_INCREASE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/increase-font-size-symbol_1f5da.png'), 0.375).convert_alpha()
-
-    EMJ_CUBA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-cuba_1f1e8-1f1fa.png'), 0.11).convert_alpha()
-    EMJ_MALTA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-malta_1f1f2-1f1f9.png'), 0.11).convert_alpha()
-    EMJ_MEXICO = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-mexico_1f1f2-1f1fd.png'), 0.11).convert_alpha()
-    EMJ_USA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-united-states_1f1fa-1f1f8.png'), 0.10).convert_alpha()
-
-    # summaries.refresh()
+    load_emoji_replacements()
     scroller.setup(scr)
 
     bot = TriviaVox(scr, clk)
