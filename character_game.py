@@ -193,8 +193,9 @@ CHARACTERS = [
     Character("liz_walker.png", ["Liz", "Liz Walker"]),
     Character("dave_walker.png", ["Dave", "Dave Walker"]),
     Character("sybil.png", ["Sybil"]),
+    Character("sparks.png", ["Sparks"]),
+    Character("hugo.png", ["Hugo", "Devil Doll"]),
 
-    # Character("", [""]),
     # Character("", [""]),
     # Character("", [""]),
     # Character("", [""]),

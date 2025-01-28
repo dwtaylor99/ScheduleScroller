@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 import platform
 import random
 import re
@@ -8,11 +7,11 @@ from enum import Enum
 from os import listdir
 from os.path import isfile, join
 
-import pygame
 from twitchio import Message, Channel
 from twitchio.ext import commands, routines
 
 import botemoji
+import botquote
 import botsecrets
 import bottrivia
 import funfactory
@@ -123,6 +122,9 @@ class TriviaVox(commands.Bot):
         self.character_img = None
         self.prev_characters = []
 
+        botquote.update()
+        self.quotes = botquote.load()
+
     async def check_if_live(self):
         streams = await self.fetch_streams(user_ids=[CHANNEL_ID])
         self.is_live = len(streams) > 0
@@ -180,6 +182,31 @@ class TriviaVox(commands.Bot):
         if message.echo:
             return
 
+        # Check if this is a command to display a quote
+        output = ""
+        msg = str(message.content).strip()
+        if msg[0] == "!" and len(msg) > 1:
+            parts = msg[1:].lower().split()
+            command = parts[0]
+
+            try:
+                specific_num = int(parts[1]) if len(parts) > 1 else 0
+            except ValueError:
+                specific_num = 0
+
+            if command in self.quotes.keys():
+                if specific_num == 0:
+                    output = self.quotes[command].random()
+                else:
+                    if len(self.quotes[command].quotes) >= specific_num:
+                        output = self.quotes[command].quotes[specific_num - 1]
+                    else:
+                        output = self.quotes[command].quote()
+            # output = botquote.apply_params(output, msg, message.author.display_name, self._current_movie.title)
+            print(scroller.sched[0])
+            output = botquote.apply_params(output, msg, message.author.display_name, scroller.sched[0]['title'])
+            await self.bot_print(output)
+
         if self.trivia_question is not None:
             guess = normalize_answers([message.content])[0]
             if guess in self.trivia_question.answers:
@@ -187,7 +214,7 @@ class TriviaVox(commands.Bot):
 
                 # Only start the timer after the first winner is detected.
                 if len(self.trivia_winners) == 1:
-                    await asyncio.sleep(12)
+                    await asyncio.sleep(10)
                     await self.stop_trivia()
 
         await self.handle_commands(message)
