@@ -185,7 +185,7 @@ CHARACTERS = [
     Character("zorka.png", ["Dr Zorka", "Dr Alex Zorka", "Zorka", "Alex Zorka"]),
     Character("wanama.png", ["Wanama"]),
     Character("ator.png", ["Ator"]),
-    Character("thong.png", ["Thong"]),
+    Character("thong.png", ["Thong", "Dong"]),
     Character("ken.png", ["Ken"]),
     Character("yogi.png", ["Yogi"]),
     Character("dropo.png", ["Dropo", "Droppo"]),
