@@ -7,6 +7,7 @@ from enum import Enum
 from os import listdir
 from os.path import isfile, join
 
+import pygame.image
 from twitchio import Message, Channel
 from twitchio.ext import commands, routines
 
