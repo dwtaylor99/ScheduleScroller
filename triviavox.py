@@ -11,6 +11,7 @@ import pygame.image
 from twitchio import Message, Channel
 from twitchio.ext import commands, routines
 
+import botads
 import botemoji
 import botquote
 import botsecrets
@@ -158,9 +159,16 @@ class TriviaVox(commands.Bot):
         self.auto_update_game.start()
 
         ts = int(datetime.now().timestamp())
-        self.next_ad_at = ts + 3600
-        ad_date = datetime.strftime(datetime.fromtimestamp(self.next_ad_at), "%I:%M:%S %p")
-        print("Ad time has been set. Next ads at {} (Eastern).".format(ad_date))
+        times = botads.load_ads_time()
+        if len(times) == 2:
+            self.next_ad_at = int(times[0])
+            ad_date = times[1]
+            print("Ad time has been set from file. Next ads at {} (Eastern).".format(ad_date))
+        else:
+            self.next_ad_at = ts + 3600
+            ad_date = datetime.strftime(datetime.fromtimestamp(self.next_ad_at), "%I:%M:%S %p")
+            botads.save_ads_time(self.next_ad_at, ad_date)
+            print("Ad time has been set. Next ads at {} (Eastern).".format(ad_date))
 
         # Don't start trivia unless the minutes are divisible by 5
         delay_sec = 0
@@ -379,6 +387,7 @@ class TriviaVox(commands.Bot):
         if privs:
             self.next_ad_at = datetime.now().timestamp() + 3600
             ad_date = datetime.strftime(datetime.fromtimestamp(self.next_ad_at), "%I:%M:%S %p")
+            botads.save_ads_time(self.next_ad_at, ad_date)
             await self.bot_print("Ad time has been set. Next ads at {} (Eastern).".format(ad_date))
 
         else:
