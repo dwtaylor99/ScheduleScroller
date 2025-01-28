@@ -182,7 +182,7 @@ CHARACTERS = [
     Character("kemp.png", ["Kemp", "Bill Kemp"]),
     Character("rommel.png", ["Rommel"]),
     Character("jc.png", ["JC", "J C"]),
-    Character("zorka.png", ["Dr Zorka", "Dr Alex Zorka", "Zorka", "Alex Zorka"]),
+    Character("zorka.png", ["Dr Zorka", "Doctor Zorka", "Dr Alex Zorka", "Zorka", "Alex Zorka"]),
     Character("wanama.png", ["Wanama"]),
     Character("ator.png", ["Ator"]),
     Character("thong.png", ["Thong", "Dong"]),
@@ -196,6 +196,7 @@ CHARACTERS = [
     Character("sybil.png", ["Sybil"]),
     Character("sparks.png", ["Sparks"]),
     Character("hugo.png", ["Hugo", "Devil Doll"]),
+    Character("timmy_bobby_rusty.png", ["Timmy Bobby Rusty"]),
 
     # Character("", [""]),
     # Character("", [""]),

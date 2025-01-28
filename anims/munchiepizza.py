@@ -6,7 +6,7 @@ from pygame import Surface
 from funbase import FunBase
 
 
-class Pizza(FunBase):
+class MunchiePizza(FunBase):
 
     def __init__(self, screen: Surface):
         super().__init__(screen)

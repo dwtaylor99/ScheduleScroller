@@ -15,7 +15,7 @@ from anims.moonbug import MoonBug
 from anims.mst3k_moon import MST3KMoon
 from anims.oh_wow import OhWow
 from anims.orbit_jet import OrbitJet
-from anims.pizza import Pizza
+from anims.munchiepizza import MunchiePizza
 from anims.pumaman import Pumaman
 from anims.sandstorm import SandStorm
 from anims.shuriken import Shuriken
@@ -66,7 +66,7 @@ ANIMS_BY_EPNUM = {
     "910": (ZapBeer if random.randint(1, 2) == 1 else TroyCsonka, 1),
     "912": (ScreamingSkull, 1),
     "1007": ([OhWow, Meteorite], random.randint(3, 8)),
-    "1304": (Pizza, 1),
+    "1304": (MunchiePizza, 1),
     "1306": (MoodServo, 1),
     "1307": (Gamera, 1),
 }
