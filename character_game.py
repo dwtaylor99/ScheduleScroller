@@ -27,7 +27,7 @@ CHARACTERS = [
     Character("forrester.png", ["Forrester", "Dr Forrester", "Clayton Forrester", "Dr Clayton Forrester", "mst3kHurt", "mst3kFor"]),
     Character("goosio.png", ["Goosio", "mst3kGoosio"]),
     Character("Growler.png", ["Growler"]),
-    Character("Gypsy_mst3k.png", ["Gypsy", "GPC", "mst3kGypsy", "mst3kGPC"]),
+    Character("gypsy.png", ["Gypsy", "GPC", "mst3kGypsy", "mst3kGPC"]),
     Character("hobgoblins.png", ["Hobgoblins", "Hobgoblin"]),
     Character("jack_perkins.png", ["Jack Perkins", "Perkins", "mst3kPerk"]),
     Character("jan.png", ["Jan in the Pan", "Jan"]),
