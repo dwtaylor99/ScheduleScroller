@@ -203,8 +203,6 @@ class TriviaVox(commands.Bot):
                         output = self.quotes[command].quotes[specific_num - 1]
                     else:
                         output = self.quotes[command].quote()
-            # output = botquote.apply_params(output, msg, message.author.display_name, self._current_movie.title)
-            print(scroller.sched[0])
             output = botquote.apply_params(output, msg, message.author.display_name, scroller.sched[0]['title'])
             await self.bot_print(output)
 
