@@ -10,16 +10,16 @@ class Forklift(FunBase):
 
     def __init__(self, screen: Surface):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/forklift.png'), 0.75).convert_alpha()
-        self.x = -self.img.get_width()
+        self.img = pygame.transform.flip(pygame.transform.smoothscale_by(pygame.image.load('images/fun/forklift.png'), 0.75), True, False).convert_alpha()
+        self.x = self.screen.get_width()
         self.y = random.randrange(50, screen.get_height() // 2 - 200)
-        self.vel_x = 5
+        self.vel_x = -5
         self.vel_y = (2 - (random.randrange(0, 4))) * 0.2
         self.angle = 0
 
     def animate(self):
         if self.anim_step == 1:
-            self.angle -= 5 % 360
+            self.angle += 1 % 360
 
             old_center = self.img.get_rect().center
             new_image = pygame.transform.rotate(self.img, self.angle)
