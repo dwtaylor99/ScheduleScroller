@@ -539,7 +539,7 @@ class TriviaVox(commands.Bot):
             # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus,
             # 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
             now_mm = int(datetime.strftime(datetime.now(), "%M"))
-            if 0 < now_mm < 2 or 15 < now_mm < 17 or 30 < now_mm < 36 or 45 < now_mm < 47:
+            if now_mm in [0, 1, 15, 16, 30, 31, 45, 46]:
                 if scroller.sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
                     if len(scroller.snow_flakes) == 0:
                         for _ in range(scroller.NUM_SNOWFLAKES):

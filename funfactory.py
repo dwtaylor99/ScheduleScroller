@@ -81,7 +81,6 @@ def get_by_epnum(screen, epnum: str):
 
     if epnum in ANIMS_BY_EPNUM.keys():
         anims, count = ANIMS_BY_EPNUM[epnum]
-        # print("Fun: " + str(anims))
         for i in range(count):
             if type(anims) is list:
                 for a in anims:
