@@ -102,6 +102,7 @@ class TriviaVox(commands.Bot):
                          client_secret=botsecrets.CLIENT_SECRET)
         # super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
 
+        self.access_token = access_token
         self.screen = screen
         self.clock = clock
 
@@ -150,7 +151,7 @@ class TriviaVox(commands.Bot):
 
     async def get_ads_schedule(self):
         u = await self.channel.user()
-        ads = await u.fetch_ad_schedule(botsecrets.ACCESS_TOKEN)
+        ads = await u.fetch_ad_schedule(self.access_token)
         next_at = int(ads.next_ad_at)
         print("Next ad at:", next_at, botads.convert_int_to_datetime(next_at))
         self.next_ad_at = next_at
@@ -705,7 +706,7 @@ Troublesome emoji:
 [76]   602 - Invasion USA (USA flag) [76]                      ⚔️➡️🇺🇸🗽
 [90]   619 - Red Zone Cuba (Cuba flag) [90]                    🟥🚧🇨🇺
 [96]   704 - Incredible Melting Man (melting face) [96]        😲🫠👨
-[133] 1008 - Final Justice (Malta flag) [133]                 ⏮️⚖️🇲🇹
+[133] 1008 - Final Justice (Malta flag) [133]                  ⏮️⚖️🇲🇹
 
 # Test these:
 [53]  👨➕🤖=♾️👨 420 - Human Duplicators (verify the equal sign)    
