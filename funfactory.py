@@ -5,6 +5,7 @@ from anims.bloodbeast import BloodBeast
 from anims.deathray import DeathRay
 from anims.deathray_crow import DeathRayCrow
 from anims.elsanto_flying import ElSantoFlying
+from anims.enforcer import Enforcer
 from anims.exeter import Exeter
 from anims.fingal import Fingal
 from anims.gamera import Gamera
@@ -60,6 +61,7 @@ ANIMS_BY_EPNUM = {
     "624": (ElSantoFlying, 1),
     "701": (BloodBeast, random.randint(6, 10)),
     "701T": (BloodBeast, random.randint(6, 10)),
+    "820": (Enforcer, 1),
     "821": ([TimeChasersPlane, TimeChasersPlaneOther] if random.randint(1, 2) == 1 else TimeChasersPlane, 1),
     "822": (Fingal, 1),
     "903": (Pumaman, 1),
@@ -89,6 +91,8 @@ def get_by_epnum(screen, epnum: str):
 
 
 def get(screen, title: str, epnum: str) -> []:
+    return [Enforcer(screen)]
+
     # If the episode has a specific animation, choose it 50% of the time
     if epnum in ANIMS_BY_EPNUM.keys() and random.randint(1, 2) == 1:
         return get_by_epnum(screen, epnum)

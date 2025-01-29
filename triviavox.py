@@ -150,11 +150,12 @@ class TriviaVox(commands.Bot):
                     await self.connect()
 
     async def get_ads_schedule(self):
-        u = await self.channel.user()
-        ads = await u.fetch_ad_schedule(self.access_token)
-        next_at = int(ads.next_ad_at)
-        print("Next ad at:", next_at, botads.convert_int_to_datetime(next_at))
-        self.next_ad_at = next_at
+        if self.access_token != botsecrets.OAUTH_TOKEN:
+            u = await self.channel.user()
+            ads = await u.fetch_ad_schedule(self.access_token)
+            next_at = int(ads.next_ad_at)
+            print("Next ad at:", next_at, botads.convert_int_to_datetime(next_at))
+            self.next_ad_at = next_at
 
     async def event_ready(self):
         self.is_connecting = False
@@ -694,7 +695,11 @@ if __name__ == '__main__':
     load_emoji_replacements()
     scroller.setup(scr)
 
-    bot = TriviaVox(scr, clk, refresh_token())
+    token = botsecrets.OAUTH_TOKEN
+    if not IS_DEBUG:
+        token = refresh_token()
+
+    bot = TriviaVox(scr, clk, token)
     bot.run()
 
 """
