@@ -1,4 +1,5 @@
 import asyncio
+import os.path
 import platform
 import random
 import re
@@ -8,6 +9,7 @@ from os import listdir
 from os.path import isfile, join
 
 import pygame.image
+import requests
 from twitchio import Message, Channel, AuthenticationError, Unauthorized
 from twitchio.ext import commands, routines
 
@@ -80,6 +82,9 @@ TXT_EMOJI = FONT_MST3K_LG.render(STR_EMOJI, True, YELLOW)
 
 EMJ_NINJA = EMJ_MELT_FACE = EMJ_BKNIGHT = EMJ_INCREASE = EMJ_CUBA = EMJ_MALTA = EMJ_MEXICO = EMJ_USA = pygame.Surface((1, 1))
 
+REFRESH_URL = "https://id.twitch.tv/oauth2/token"
+REFRESH_FILE = "data/refresh_token.txt"
+
 is_running = True
 dt = 0
 
@@ -92,9 +97,10 @@ class GameType(Enum):
 
 
 class TriviaVox(commands.Bot):
-    def __init__(self, screen, clock):
-        # super().__init__(token=botsecrets.ACCESS_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!", client_secret=botsecrets.CLIENT_SECRET)
-        super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
+    def __init__(self, screen, clock, access_token):
+        super().__init__(token=access_token, initial_channels=[CHANNEL_NAME], prefix="!",
+                         client_secret=botsecrets.CLIENT_SECRET)
+        # super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
 
         self.screen = screen
         self.clock = clock
@@ -166,10 +172,10 @@ class TriviaVox(commands.Bot):
         self.auto_update_game.start()
 
         ts = int(datetime.now().timestamp())
+        await self.get_ads_schedule()
         try:
-            await self.get_ads_schedule()
             botads.save_ads_time(self.next_ad_at, botads.convert_int_to_date(self.next_ad_at))
-        except Unauthorized:
+        except (AuthenticationError, Unauthorized):
             print("ERROR: Could not get ad schedule from Twitch; using file.")
 
             times = botads.load_ads_time()
@@ -640,6 +646,42 @@ def load_emoji_replacements():
     EMJ_USA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-united-states_1f1fa-1f1f8.png'), 0.10).convert_alpha()
 
 
+def refresh_token():
+    if not os.path.exists(REFRESH_FILE):
+        with open(REFRESH_FILE, 'w+') as f:
+            f.write(botsecrets.REFRESH_TOKEN)
+            f.close()
+
+    with open(REFRESH_FILE, 'r') as f:
+        refresh_token_from_file = f.readlines()[0]
+        f.close()
+
+    data = {
+        'grant_type': 'refresh_token',
+        'refresh_token': refresh_token_from_file,
+        'client_id': botsecrets.CLIENT_ID,
+        'client_secret': botsecrets.CLIENT_SECRET
+    }
+
+    response = requests.post(REFRESH_URL, data=data)
+    json_resp = response.json()
+
+    new_access_token = ""
+    new_refresh_token = ""
+    try:
+        new_access_token = json_resp['access_token']
+        new_refresh_token = json_resp['refresh_token']
+    except KeyError:
+        print("Error reading JSON response:")
+        print(response.json())
+
+    with open(REFRESH_FILE, 'w') as f:
+        f.write(new_refresh_token)
+        f.close()
+
+    return new_access_token
+
+
 if __name__ == '__main__':
     if platform.system().lower() == "windows":
         IS_DEBUG = True
@@ -650,7 +692,7 @@ if __name__ == '__main__':
     load_emoji_replacements()
     scroller.setup(scr)
 
-    bot = TriviaVox(scr, clk)
+    bot = TriviaVox(scr, clk, refresh_token())
     bot.run()
 
 """
