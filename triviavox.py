@@ -268,9 +268,10 @@ class TriviaVox(commands.Bot):
         if self.next_ad_at < ts:
             try:
                 await self.get_ads_schedule()
-            except AuthenticationError:
+            except (AuthenticationError, Unauthorized):
                 print("ERROR loading ad schedule in routine 'auto_trivia'.")
                 self.next_ad_at += 3600
+                print("Manually setting next ad time to " + str(self.next_ad_at))
 
             botads.save_ads_time(self.next_ad_at)
 
