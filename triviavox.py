@@ -176,7 +176,7 @@ class TriviaVox(commands.Bot):
         ts = int(datetime.now().timestamp())
         await self.get_ads_schedule()
         try:
-            botads.save_ads_time(self.next_ad_at, botads.convert_int_to_date(self.next_ad_at))
+            botads.save_ads_time(self.next_ad_at, botads.convert_int_to_time(self.next_ad_at))
         except (AuthenticationError, Unauthorized):
             print("ERROR: Could not get ad schedule from Twitch; using file.")
 
@@ -189,7 +189,7 @@ class TriviaVox(commands.Bot):
                 print("Ad time has been set from file. Next ads at {} (Eastern).".format(ad_date))
             else:
                 self.next_ad_at = ts + 3600
-                next_time = botads.convert_int_to_date(self.next_ad_at)
+                next_time = botads.convert_int_to_time(self.next_ad_at)
                 botads.save_ads_time(self.next_ad_at, next_time)
                 print("Ad time has been set. Next ads at {} (Eastern).".format(next_time))
 

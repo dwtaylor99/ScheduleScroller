@@ -1,22 +1,20 @@
-import random
 from math import floor
 
 import pygame
 
 from funbase import FunBase
 
-SCALE = 1.0
-XOFFSET = 142 * SCALE
-YOFFSET = 120 * SCALE
-IW = 142 * SCALE
-IH = 80 * SCALE
+XOFFSET = 142
+YOFFSET = 120
+IW = 142
+IH = 80
 
 
 class HorseRunning(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
 
-        img_sheet = pygame.transform.smoothscale_by(pygame.image.load('images/fun/horse_running.png'), SCALE).convert_alpha()
+        img_sheet = pygame.image.load('images/fun/horse_running.png').convert_alpha()
         self.frames = []
 
         for i in range(12):
@@ -44,13 +42,12 @@ class HorseRunning(FunBase):
                 img_sheet.set_clip(pygame.Rect(16 + XOFFSET * 2, 32 + YOFFSET * 2, IW, IH))
             elif i == 11:
                 img_sheet.set_clip(pygame.Rect(16 + XOFFSET * 3, 32 + YOFFSET * 2, IW, IH))
-            self.frames.append(pygame.transform.smoothscale_by(img_sheet.subsurface(img_sheet.get_clip()), 1.5))
+            self.frames.append(pygame.transform.smoothscale_by(img_sheet.subsurface(img_sheet.get_clip()), 1.5).convert_alpha())
 
         self.img = self.frames[0]
         self.x = 0
         self.y = screen.get_height() // 2 - (IH * 1.5)
         self.vel_x = 10
-        # self.vel_x = 6
         self.vel_y = 0
         self.frame_index = 0
 

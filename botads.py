@@ -4,7 +4,7 @@ import os
 ADS_FILE = "data/ads.txt"
 
 
-def convert_int_to_date(time_int: int):
+def convert_int_to_time(time_int: int):
     return datetime.strftime(datetime.fromtimestamp(time_int), "%I:%M:%S %p")
 
 
@@ -23,7 +23,7 @@ def load_ads_time():
 
 def save_ads_time(time_int: int, time_formatted: str = ""):
     if time_formatted == "":
-        time_formatted = convert_int_to_date(time_int)
+        time_formatted = convert_int_to_time(time_int)
 
     with open(ADS_FILE, "w+", encoding="utf-8") as f:
         f.write(str(time_int) + "\n" + time_formatted)
