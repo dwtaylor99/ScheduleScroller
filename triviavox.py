@@ -8,7 +8,7 @@ from os import listdir
 from os.path import isfile, join
 
 import pygame.image
-from twitchio import Message, Channel
+from twitchio import Message, Channel, AuthenticationError, Unauthorized
 from twitchio.ext import commands, routines
 
 import botads
@@ -93,6 +93,7 @@ class GameType(Enum):
 
 class TriviaVox(commands.Bot):
     def __init__(self, screen, clock):
+        # super().__init__(token=botsecrets.ACCESS_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!", client_secret=botsecrets.CLIENT_SECRET)
         super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
 
         self.screen = screen
@@ -141,6 +142,13 @@ class TriviaVox(commands.Bot):
                     self.is_connecting = True
                     await self.connect()
 
+    async def get_ads_schedule(self):
+        u = await self.channel.user()
+        ads = await u.fetch_ad_schedule(botsecrets.ACCESS_TOKEN)
+        next_at = int(ads.next_ad_at)
+        print("Next ad at:", next_at, botads.convert_int_to_datetime(next_at))
+        self.next_ad_at = next_at
+
     async def event_ready(self):
         self.is_connecting = False
 
@@ -155,20 +163,27 @@ class TriviaVox(commands.Bot):
         self.emoji_questions = botemoji.load_as_array()
 
         self.auto_trivia_stop.start()
-        # self.auto_message.start()
         self.auto_update_game.start()
 
         ts = int(datetime.now().timestamp())
-        times = botads.load_ads_time()
-        if len(times) == 2:
-            self.next_ad_at = int(times[0])
-            ad_date = times[1]
-            print("Ad time has been set from file. Next ads at {} (Eastern).".format(ad_date))
-        else:
-            self.next_ad_at = ts + 3600
-            ad_date = datetime.strftime(datetime.fromtimestamp(self.next_ad_at), "%I:%M:%S %p")
-            botads.save_ads_time(self.next_ad_at, ad_date)
-            print("Ad time has been set. Next ads at {} (Eastern).".format(ad_date))
+        try:
+            await self.get_ads_schedule()
+            botads.save_ads_time(self.next_ad_at, botads.convert_int_to_date(self.next_ad_at))
+        except Unauthorized:
+            print("ERROR: Could not get ad schedule from Twitch; using file.")
+
+            times = botads.load_ads_time()
+            if len(times) == 2:
+                self.next_ad_at = int(times[0])
+                while self.next_ad_at < ts:
+                    self.next_ad_at += 3600
+                ad_date = times[1]
+                print("Ad time has been set from file. Next ads at {} (Eastern).".format(ad_date))
+            else:
+                self.next_ad_at = ts + 3600
+                next_time = botads.convert_int_to_date(self.next_ad_at)
+                botads.save_ads_time(self.next_ad_at, next_time)
+                print("Ad time has been set. Next ads at {} (Eastern).".format(next_time))
 
         # Don't start trivia unless the minutes are divisible by 5
         delay_sec = 0
@@ -238,13 +253,19 @@ class TriviaVox(commands.Bot):
     @routines.routine(minutes=5)
     async def auto_trivia(self):
         """Run a trivia question every few minutes."""
-        print("Starting trivia now")
+        print("Running trivia now")
         # Choose a game type
         await self.check_if_live()
         ts = int(datetime.now().timestamp())
 
         if self.next_ad_at < ts:
-            self.next_ad_at += 3600
+            try:
+                await self.get_ads_schedule()
+            except AuthenticationError:
+                print("ERROR loading ad schedule in routine 'auto_trivia'.")
+                self.next_ad_at += 3600
+
+            botads.save_ads_time(self.next_ad_at)
 
         # If ads are running in the next 5 minutes (300 seconds), don't start a game that needs the screen
         if self.is_live and self.next_ad_at - ts > 300:
@@ -253,8 +274,8 @@ class TriviaVox(commands.Bot):
             print("Not choosing a Stinger/Character game because of the time.")
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
 
-        if IS_DEBUG:
-            self.game_type = GameType.CHARACTER
+        # if IS_DEBUG:
+        #     self.game_type = GameType.EMOJI
 
         if self.game_type == GameType.TRIVIA:
             self.trivia_question = random.choice(self.trivia_questions)
@@ -275,6 +296,18 @@ class TriviaVox(commands.Bot):
             self.trivia_question = random.choice(self.emoji_questions)
             while self.trivia_question in self.prev_emoji:
                 self.trivia_question = random.choice(self.emoji_questions)
+
+            # if IS_DEBUG:
+            #     self.trivia_question = self.emoji_questions[1]
+            #     self.trivia_question = self.emoji_questions[36]
+            #     self.trivia_question = self.emoji_questions[38]
+            #     self.trivia_question = self.emoji_questions[76]
+            #     self.trivia_question = self.emoji_questions[90]
+            #     self.trivia_question = self.emoji_questions[96]
+            #     self.trivia_question = self.emoji_questions[133]
+            #     self.trivia_question = self.emoji_questions[89]
+            #     self.trivia_question = self.emoji_questions[110]
+            #     self.trivia_question = self.emoji_questions[125]
 
             self.preserved_answer = self.trivia_question.answers[0]
             self.trivia_question.answers = normalize_answers(self.trivia_question.answers)
@@ -385,7 +418,7 @@ class TriviaVox(commands.Bot):
         privs = ctx.author.is_broadcaster or ctx.author.is_mod  # or ctx.author.is_vip or ctx.author.is_subscriber
 
         if privs:
-            self.next_ad_at = datetime.now().timestamp() + 3600
+            self.next_ad_at = int(datetime.now().timestamp() + 3600)
             ad_date = datetime.strftime(datetime.fromtimestamp(self.next_ad_at), "%I:%M:%S %p")
             botads.save_ads_time(self.next_ad_at, ad_date)
             await self.bot_print("Ad time has been set. Next ads at {} (Eastern).".format(ad_date))
@@ -467,8 +500,8 @@ class TriviaVox(commands.Bot):
 
             elif self.game_type == GameType.EMOJI:
                 alt_screen.blit(TXT_EMOJI, ((W2 - TXT_EMOJI.get_width()) // 2, H2 // 2 - 70))
-                txt = FONT_EMOJI_LG.render(self.trivia_question.question.split(":")[1], True,
-                                           pick_color(self.trivia_question.question))
+                ques = re.sub("[🥷🫠♞🗚🇲🇽🇺🇸🇨🇺🇲🇹]", "   ", self.trivia_question.question.split(":")[1])
+                txt = FONT_EMOJI_LG.render(ques, True, WHITE)
                 alt_screen.blit(txt, ((W2 - txt.get_width()) // 2, H2 // 2))
                 self.fix_emoji()
 
@@ -546,27 +579,6 @@ class TriviaVox(commands.Bot):
             scroller.timer_tick += dt / 1000
             if scroller.timer_tick >= 7200:  # Reset every two hours
                 scroller.timer_tick = 0
-
-
-def pick_color(question):
-    color = WHITE
-    if "🥷" in question:  # ninja
-        color = BLACK
-    elif "🫠" in question:  # melting face
-        color = BLACK
-    elif "♞" in question:
-        color = DK_GRAY
-    elif "🗚" in question:
-        color = BLACK
-    elif "🇨🇺" in question:
-        color = BLACK
-    elif "🇲🇽" in question:
-        color = BLACK
-    elif "🇲🇹" in question:
-        color = BLACK
-    elif "🇺🇸" in question:
-        color = BLACK
-    return color
 
 
 def choose_stinger() -> str:
