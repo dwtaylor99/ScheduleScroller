@@ -8,7 +8,7 @@ from funbase import FunBase
 class Widowmaker(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/widowmaker.png').convert_alpha(), 0.25)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/widowmaker.png'), 0.25).convert_alpha()
         self.x = -(self.img.get_width()) - 600
         self.y = random.randrange(10, 400)
         self.vel_x = 2.5

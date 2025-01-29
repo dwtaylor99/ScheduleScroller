@@ -8,8 +8,8 @@ from funbase import FunBase
 class TroyCsonka(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/troy.png').convert_alpha(), 0.3)
-        self.img2 = pygame.transform.smoothscale_by(pygame.image.load('images/fun/csonka_dream.png').convert_alpha(), 0.75)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/troy.png'), 0.3).convert_alpha()
+        self.img2 = pygame.transform.smoothscale_by(pygame.image.load('images/fun/csonka_dream.png'), 0.75).convert_alpha()
         self.x = random.randrange(100, self.screen.get_width() - 1000)
         self.y = 539
         self.vel_x = 0

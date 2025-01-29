@@ -16,7 +16,7 @@ class HorseRunning(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
 
-        img_sheet = pygame.transform.smoothscale_by(pygame.image.load('images/fun/horse_running.png').convert_alpha(), SCALE)
+        img_sheet = pygame.transform.smoothscale_by(pygame.image.load('images/fun/horse_running.png'), SCALE).convert_alpha()
         self.frames = []
 
         for i in range(12):

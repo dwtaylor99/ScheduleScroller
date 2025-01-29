@@ -27,8 +27,8 @@ NUM_STEPS = CHANGE_EVERY * 60  # fps=60
 class MoodServo(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/mood_servo.png').convert_alpha(), 0.25)
-        self.img_top = pygame.transform.smoothscale_by(pygame.image.load('images/fun/mood_servo_top.png').convert_alpha(), 0.25)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/mood_servo.png'), 0.25).convert_alpha()
+        self.img_top = pygame.transform.smoothscale_by(pygame.image.load('images/fun/mood_servo_top.png'), 0.25).convert_alpha()
         self.x = random.randrange(screen.get_width() // 2 + 100, screen.get_width() - 600)
         self.y = 400
         self.vel_x = 0

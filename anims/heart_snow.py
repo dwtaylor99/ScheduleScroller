@@ -13,11 +13,11 @@ class HeartSnow(FunBase):
 
         i = random.randint(1, 3)
         if i == 1:
-            self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/heart01.png').convert_alpha(), SCALE)
+            self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/heart01.png'), SCALE).convert_alpha()
         elif i == 2:
-            self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/heart02.png').convert_alpha(), SCALE)
+            self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/heart02.png'), SCALE).convert_alpha()
         elif i == 3:
-            self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/heart03.png').convert_alpha(), SCALE)
+            self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/heart03.png'), SCALE).convert_alpha()
 
         rand_scale = random.randrange(1, 4) * 0.4
         self.img = pygame.transform.smoothscale_by(self.img, rand_scale)

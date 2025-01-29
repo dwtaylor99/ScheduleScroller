@@ -9,7 +9,7 @@ class SandStorm(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
         scale = 0.3 * random.randrange(1, 6)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/sand_storm.png').convert_alpha(), scale)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/sand_storm.png'), scale).convert_alpha()
         self.x = -self.img.get_width() - random.randrange(50, 250)
         self.y = random.randrange(30, 500)
         self.vel_x = random.randrange(4, 6)

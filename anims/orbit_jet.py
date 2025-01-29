@@ -15,7 +15,7 @@ class OrbitJet(FunBase):
 
     def __init__(self, screen: Surface):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/orbit_jet.png').convert_alpha(), 0.1)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/orbit_jet.png'), 0.1).convert_alpha()
         self.x = random.randrange(200, screen.get_width() - 300)
         self.y = -200
         self.vel_x = 0

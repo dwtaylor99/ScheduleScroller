@@ -8,7 +8,7 @@ from funbase import FunBase
 class SOL(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/sol.png').convert_alpha(), 0.4)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/sol.png'), 0.4).convert_alpha()
         self.x = -(self.img.get_width()) - 10
         self.y = random.randrange(10, 300)
         self.vel_x = 3

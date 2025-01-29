@@ -8,7 +8,7 @@ from funbase import FunBase
 class MST3KMoon(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/mst3k_moon.png').convert_alpha(), 0.5)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/mst3k_moon.png'), 0.5).convert_alpha()
         self.x = -(self.img.get_width()) - 10
         self.y = random.randrange(10, 400)
         self.vel_x = 3

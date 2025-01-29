@@ -6,7 +6,7 @@ from funbase import FunBase
 class MoonBug(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/moon_bug.png').convert_alpha(), 2.0)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/moon_bug.png'), 2.0).convert_alpha()
         self.x = -(self.img.get_width()) - 10
         self.y = screen.get_height() // 2 - self.img.get_height()
         self.vel_x = 5

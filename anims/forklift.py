@@ -10,7 +10,7 @@ class Forklift(FunBase):
 
     def __init__(self, screen: Surface):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/forklift.png').convert_alpha(), 0.75)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/forklift.png'), 0.75).convert_alpha()
         self.x = -self.img.get_width()
         self.y = random.randrange(50, screen.get_height() // 2 - 200)
         self.vel_x = 5

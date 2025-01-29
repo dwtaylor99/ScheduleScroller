@@ -15,7 +15,7 @@ class SnowFlake(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
 
-        img_sheet = pygame.transform.smoothscale_by(pygame.image.load('images/fun/snowflakes2.png').convert_alpha(), SCALE)
+        img_sheet = pygame.transform.smoothscale_by(pygame.image.load('images/fun/snowflakes2.png'), SCALE).convert_alpha()
         i = random.randint(1, 9)
         if i == 1:
             img_sheet.set_clip(pygame.Rect(0, 0, IW, IH))

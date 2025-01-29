@@ -10,7 +10,7 @@ class ScreamingSkull(FunBase):
 
     def __init__(self, screen: Surface):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/skull.png').convert_alpha(), 1.0)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/skull.png'), 1.0).convert_alpha()
         self.x = random.randrange(100, screen.get_width() - 300)
         self.y = screen.get_height() // 4
         self.vel_x = 0

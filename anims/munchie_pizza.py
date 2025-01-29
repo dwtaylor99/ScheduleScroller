@@ -10,7 +10,7 @@ class MunchiePizza(FunBase):
 
     def __init__(self, screen: Surface):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/pizza.png').convert_alpha(), 0.5)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/pizza.png'), 0.5).convert_alpha()
         self.img2 = pygame.image.load('images/fun/munchie.png')
         self.x = -700
         self.y = random.randrange(10, 450)

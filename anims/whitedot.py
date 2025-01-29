@@ -8,7 +8,7 @@ from funbase import FunBase
 class WhiteDot(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/white_dot.png').convert_alpha(), 1.0)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/white_dot.png'), 1.0).convert_alpha()
         self.x = -(self.img.get_width()) - 10
         self.y = random.randrange(100, screen.get_height() // 2 - 200)
         self.vel_x = 2

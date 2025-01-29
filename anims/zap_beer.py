@@ -9,7 +9,7 @@ class ZapBeer(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
         self.img = pygame.image.load('images/fun/ZapRowsdower.png').convert_alpha()
-        self.img2 = pygame.transform.smoothscale_by(pygame.image.load('images/fun/beer_on_sun.png').convert_alpha(), 0.75)
+        self.img2 = pygame.transform.smoothscale_by(pygame.image.load('images/fun/beer_on_sun.png'), 0.75).convert_alpha()
         self.x = random.randrange(100, self.screen.get_width() - 1000)
         self.y = 539
         self.vel_x = 0

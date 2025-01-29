@@ -8,6 +8,7 @@ from anims.elsanto_flying import ElSantoFlying
 from anims.enforcer import Enforcer, EnforcerReverse
 from anims.exeter import Exeter
 from anims.fingal import Fingal
+from anims.forklift import Forklift
 from anims.gamera import Gamera
 from anims.horse_running import HorseRunning
 from anims.meteorite import Meteorite
@@ -45,6 +46,7 @@ ANIMS_BY_EPNUM = {
     "302": (Gamera, 1),
     "304": (Gamera, 1),
     "308": (Gamera, 1),
+    "310": (Forklift, 1),
     "312": (Gamera, 1),
     "316": (Gamera, 1),
     "322": (Shuriken, random.randint(2, 5)),
@@ -98,8 +100,8 @@ def get(screen, title: str, epnum: str) -> []:
         # Choose a random animation
         return get_by_epnum(screen, random.choice(
             ['001', '002', '003', '004', '005',
-             '111', '301', '302', '322', '410', '413', '414', '424', '609', '611', '612', '620', '624', '701',
-             '820', '821', '822', '903', '910', '912', '1007', '1304', '1306', '1307']))
+             '111', '301', '302', '310', '322', '410', '413', '414', '424', '609', '611', '612', '620', '624',
+             '701', '820', '821', '822', '903', '910', '912', '1007', '1304', '1306', '1307']))
 
 
 class FunFactory:
