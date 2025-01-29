@@ -10,7 +10,7 @@ class Fingal(FunBase):
 
     def __init__(self, screen: Surface):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/fingal.png').convert_alpha(), 0.5)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/fingal2.png'), 0.5).convert_alpha()
         self.x = random.randrange(1000, screen.get_width())
         self.y = screen.get_height() // 2
         self.vel_x = -4

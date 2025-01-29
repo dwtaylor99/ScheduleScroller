@@ -22,7 +22,7 @@ class CandyHeartSnow(FunBase):
         super().__init__(screen)
 
         filename = PATH + random.choice(HEARTS)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load(filename).convert_alpha(), SCALE)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load(filename), SCALE).convert_alpha()
         phrase = random.choice(PHRASES)
         lines = phrase.split("|")
 

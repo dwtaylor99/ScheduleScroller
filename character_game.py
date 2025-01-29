@@ -150,7 +150,7 @@ CHARACTERS = [
     Character("cabal.png", ["Cabal"]),
     Character("nickmoon.png", ["Nick Moon", "Nick", "Moon"]),
     Character("Batwoman2.png", ["Batwoman", "Bat Woman"]),
-    Character("boong.png", ["Boong", "President Boong"]),
+    Character("boong.png", ["Boong", "President Boong", "Pres Boong", "Prez Boong"]),
     Character("sumuru.png", ["Sumuru"]),
     Character("omus.png", ["Omus"]),
     Character("gpc2.png", ["GPC 2", "GPC2", "GPC", "mst3kGPC"]),

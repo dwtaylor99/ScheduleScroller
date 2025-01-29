@@ -10,7 +10,7 @@ class AtorGlider(FunBase):
 
     def __init__(self, screen: Surface):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/ator_glider.png').convert_alpha(), 0.25)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/ator_glider.png'), 0.25).convert_alpha()
         self.x = -400
         self.y = random.randrange(0, 200)
         self.vel_x = 4

@@ -5,7 +5,7 @@ from anims.bloodbeast import BloodBeast
 from anims.deathray import DeathRay
 from anims.deathray_crow import DeathRayCrow
 from anims.elsanto_flying import ElSantoFlying
-from anims.enforcer import Enforcer
+from anims.enforcer import Enforcer, EnforcerReverse
 from anims.exeter import Exeter
 from anims.fingal import Fingal
 from anims.gamera import Gamera
@@ -16,7 +16,7 @@ from anims.moonbug import MoonBug
 from anims.mst3k_moon import MST3KMoon
 from anims.oh_wow import OhWow
 from anims.orbit_jet import OrbitJet
-from anims.munchiepizza import MunchiePizza
+from anims.munchie_pizza import MunchiePizza
 from anims.pumaman import Pumaman
 from anims.sandstorm import SandStorm
 from anims.shuriken import Shuriken
@@ -61,7 +61,7 @@ ANIMS_BY_EPNUM = {
     "624": (ElSantoFlying, 1),
     "701": (BloodBeast, random.randint(6, 10)),
     "701T": (BloodBeast, random.randint(6, 10)),
-    "820": (Enforcer, 1),
+    "820": (Enforcer if random.randint(1, 2) == 1 else EnforcerReverse, 1),
     "821": ([TimeChasersPlane, TimeChasersPlaneOther] if random.randint(1, 2) == 1 else TimeChasersPlane, 1),
     "822": (Fingal, 1),
     "903": (Pumaman, 1),
@@ -91,8 +91,6 @@ def get_by_epnum(screen, epnum: str):
 
 
 def get(screen, title: str, epnum: str) -> []:
-    return [Enforcer(screen)]
-
     # If the episode has a specific animation, choose it 50% of the time
     if epnum in ANIMS_BY_EPNUM.keys() and random.randint(1, 2) == 1:
         return get_by_epnum(screen, epnum)
@@ -101,7 +99,7 @@ def get(screen, title: str, epnum: str) -> []:
         return get_by_epnum(screen, random.choice(
             ['001', '002', '003', '004', '005',
              '111', '301', '302', '322', '410', '413', '414', '424', '609', '611', '612', '620', '624', '701',
-             '821', '822', '903', '910', '912', '1007', '1304', '1306', '1307']))
+             '820', '821', '822', '903', '910', '912', '1007', '1304', '1306', '1307']))
 
 
 class FunFactory:

@@ -12,7 +12,7 @@ class BloodBeast(FunBase):
         super().__init__(screen)
 
         filename = "images/fun/bloodbeast_xray_0" + str(random.randint(1, 4)) + ".png"
-        self.img = pygame.transform.smoothscale_by(pygame.image.load(filename).convert_alpha(), SCALE)
+        self.img = pygame.transform.smoothscale_by(pygame.image.load(filename), SCALE).convert_alpha()
 
         rand_scale = random.randrange(1, 4) * 0.4
         self.img = pygame.transform.smoothscale_by(self.img, rand_scale)
