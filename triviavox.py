@@ -447,7 +447,12 @@ class TriviaVox(commands.Bot):
         parts = ctx.message.content.split(" ")
         if len(parts) > 1:
             if parts[1].lower().strip() == "redeem":
-                if gems >= botgems.GEM_REDEEM:
+                now_mins = int(datetime.strftime(datetime.now(), "%M"))
+                if self.trivia_question is not None:
+                    await self.bot_print("{}, please wait until trivia is over before redeeming.".format(username))
+                elif (now_mins + 1) % 5 == 0:
+                    await self.bot_print("{}, it's too close to trivia time. Please wait another minute before redeeming.".format(username))
+                elif gems >= botgems.GEM_REDEEM:
                     # Run a trivia question for the user
                     trivia_q = random.choice(self.trivia_questions)
                     self.personal_trivia[username] = trivia_q
