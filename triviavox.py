@@ -444,7 +444,7 @@ class TriviaVox(commands.Bot):
     async def cmd_gems(self, ctx: commands.Context):
         username = ctx.author.display_name
         gems = int(botgems.get_gems(username))
-        parts = ctx.message.content.split(" ")
+        parts = ctx.message.content.strip().split(" ")
         if len(parts) > 1:
             if parts[1].lower().strip() == "redeem":
                 now_mins = int(datetime.strftime(datetime.now(), "%M"))
