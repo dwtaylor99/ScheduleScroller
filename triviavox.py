@@ -27,6 +27,7 @@ from anims.snow import SnowFlake
 from character_game import CHARACTERS, CHARACTER_PATH
 from colors import *
 from constants import *
+from fonts import STR_STINGER, TXT_STINGER, FONT_MST3K_LG, TXT_EMOJI, FONT_EMOJI_LG, TXT_CHARACTER
 from movie_names import MOVIE_NAMES
 from util_text import wrap_text
 
@@ -49,42 +50,15 @@ H2 = HEIGHT // 2
 
 pygame.init()
 
-# Draw the games onto this smaller Surface and blit them to the main screen Surface
-alt_screen = pygame.Surface((W2, H2))
-
 STINGER_PATH = "images/stingers"
-
-FONT_MD = pygame.font.Font("fonts/Inter.ttf", 16)
-FONT_LG = pygame.font.Font("fonts/Inter.ttf", 30)
-FONT_XL = pygame.font.Font("fonts/Inter.ttf", 48)
-
-# Font used in Overdrawn at the Memory Bank
-FONT_FINGAL_MD = pygame.font.Font("fonts/HandelGo.ttf", 16)
-FONT_FINGAL_LG = pygame.font.Font("fonts/HandelGo.ttf", 30)
-FONT_FINGAL_XL = pygame.font.Font("fonts/HandelGo.ttf", 48)
-
-# Font used in modern MST3K stuff
-FONT_MST3K_MD = pygame.font.Font("fonts/SimianText_Orangutan.otf", 20)
-FONT_MST3K_LG = pygame.font.Font("fonts/SimianText_Orangutan.otf", 36)
-FONT_MST3K_XL = pygame.font.Font("fonts/SimianText_Orangutan.otf", 52)
-
-# Font used to render emoji
-FONT_EMOJI_LG = pygame.font.Font("fonts/seguiemj.ttf", 44)
-
-STR_STINGER = "Name the MST3K movie this stinger is from:"
-TXT_STINGER = FONT_MST3K_LG.render(STR_STINGER, True, YELLOW)
-
-STR_CHARACTER = "Name the character:"
-TXT_CHARACTER = FONT_MST3K_LG.render(STR_CHARACTER, True, YELLOW)
-
-STR_EMOJI = "Name the MST3K movie described by these emoji:"
-TXT_EMOJI = FONT_MST3K_LG.render(STR_EMOJI, True, YELLOW)
 
 EMJ_NINJA = EMJ_MELT_FACE = EMJ_BKNIGHT = EMJ_INCREASE = EMJ_CUBA = EMJ_MALTA = EMJ_MEXICO = EMJ_USA = pygame.Surface((1, 1))
 
 REFRESH_URL = "https://id.twitch.tv/oauth2/token"
 REFRESH_FILE = "data/refresh_token.txt"
 
+# Draw the games onto this smaller Surface and blit them to the main screen Surface
+alt_screen = pygame.Surface((W2, H2))
 is_running = True
 dt = 0
 
