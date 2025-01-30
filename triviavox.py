@@ -15,6 +15,7 @@ from twitchio.ext import commands, routines
 
 import botads
 import botemoji
+import botgems
 import botquote
 import botsecrets
 import bottrivia
@@ -86,6 +87,9 @@ class TriviaVox(commands.Bot):
 
         self.start_trivia_time = 0
         self.next_ad_at = 0
+
+        self.sub_list = []
+        self.personal_trivia = {}
 
         self.game_type = GameType.TRIVIA
         self.trivia_questions = []
@@ -221,6 +225,29 @@ class TriviaVox(commands.Bot):
                     await asyncio.sleep(10)
                     await self.stop_trivia()
 
+        username = message.author.display_name
+        if username in self.personal_trivia.keys():
+            if message.author.is_subscriber:
+                self.sub_list.append(username)
+                self.sub_list = list(set(self.sub_list))
+
+            # Now that the user has responded to the personal trivia question, deduct the gems
+            botgems.save_gems(username, botgems.get_gems(username) - botgems.GEM_REDEEM)
+
+            q = self.personal_trivia[username]
+            preserved_answer = q.answers[0]
+            answers = normalize_answers(q.answers)
+            guess = normalize_answers([message.content])[0]
+
+            if guess in answers:
+                bottrivia.save_trivia_user_with_points(username, bottrivia.get_trivia_points(username) + 1)
+            else:
+                await self.bot_print("@{}, sorry, that's incorrect. The answer is: {}"
+                                     .format(message.author.display_name, preserved_answer))
+
+            # remove user from personal_trivia
+            del self.personal_trivia[username]
+
         await self.handle_commands(message)
 
     async def event_command_error(self, ctx: commands.Context, error):
@@ -280,17 +307,18 @@ class TriviaVox(commands.Bot):
             while self.trivia_question in self.prev_emoji:
                 self.trivia_question = random.choice(self.emoji_questions)
 
-            # if IS_DEBUG:
-            #     self.trivia_question = self.emoji_questions[1]
-            #     self.trivia_question = self.emoji_questions[36]
-            #     self.trivia_question = self.emoji_questions[38]
-            #     self.trivia_question = self.emoji_questions[76]
-            #     self.trivia_question = self.emoji_questions[90]
-            #     self.trivia_question = self.emoji_questions[96]
-            #     self.trivia_question = self.emoji_questions[133]
-            #     self.trivia_question = self.emoji_questions[89]
-            #     self.trivia_question = self.emoji_questions[110]
-            #     self.trivia_question = self.emoji_questions[125]
+            if IS_DEBUG:
+                # self.trivia_question = self.emoji_questions[1]
+                # self.trivia_question = self.emoji_questions[36]
+                # self.trivia_question = self.emoji_questions[38]
+                # self.trivia_question = self.emoji_questions[76]
+                # self.trivia_question = self.emoji_questions[90]
+                # self.trivia_question = self.emoji_questions[96]
+                # self.trivia_question = self.emoji_questions[133]
+                # self.trivia_question = self.emoji_questions[89]
+                # self.trivia_question = self.emoji_questions[110]
+                # self.trivia_question = self.emoji_questions[125]
+                pass
 
             self.preserved_answer = self.trivia_question.answers[0]
             self.trivia_question.answers = normalize_answers(self.trivia_question.answers)
@@ -393,6 +421,7 @@ class TriviaVox(commands.Bot):
 
             # Save the new number of points for the winners
             bottrivia.save_trivia_winners(winners)
+            botgems.save_winners(winners, self.sub_list)
             self.trivia_winners.clear()
 
     @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
@@ -408,6 +437,26 @@ class TriviaVox(commands.Bot):
 
         else:
             await self.bot_print("Sorry, you do not have permission to run this command.")
+
+    # @commands.command(name="gems", aliases=['Gems', 'GEMS'])
+    @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.user)
+    @commands.command(name="dev")
+    async def cmd_gems(self, ctx: commands.Context):
+        username = ctx.author.display_name
+        gems = int(botgems.get_gems(username))
+        parts = ctx.message.content.split(" ")
+        if len(parts) > 1:
+            if parts[1].lower().strip() == "redeem":
+                if gems >= botgems.GEM_REDEEM:
+                    # Run a trivia question for the user
+                    trivia_q = random.choice(self.trivia_questions)
+                    self.personal_trivia[username] = trivia_q
+                    await self.bot_print(trivia_q.question)
+            else:
+                await self.bot_print("Usage: !gems [redeem] (need {}{} to redeem)"
+                                     .format(str(botgems.GEM_REDEEM), botgems.GEM))
+        else:
+            await self.bot_print("@{}, you have {}{}.".format(username, str(gems), botgems.GEM))
 
     @commands.command(name="latency", aliases=['Latency', 'LATENCY'])
     async def cmd_latency(self, ctx: commands.Context):

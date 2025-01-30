@@ -9,7 +9,7 @@ class ElSantoFlying(FunBase):
 
     def __init__(self, screen):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/santo_flying.png'), 2.0).convert_alpha()
+        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/santo_flying.png').convert_alpha(), 2.0)
         self.x = random.randrange(500, 1200)
         self.y = -300
 
