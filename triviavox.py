@@ -1,5 +1,4 @@
 import asyncio
-import os.path
 import platform
 import random
 import re
@@ -10,7 +9,6 @@ from os import listdir
 from os.path import isfile, join
 
 import pygame.image
-import requests
 from twitchio import Message, Channel, AuthenticationError, Unauthorized
 from twitchio.ext import commands, routines
 
