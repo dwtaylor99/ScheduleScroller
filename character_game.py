@@ -126,7 +126,7 @@ CHARACTERS = [
     Character("eddie.png", ["Eddie", "Eddie Nelson"]),
     Character("krankor.png", ["Phantom of Krankor", "Krankor", "mst3kHeh"]),
     Character("space_chief.png", ["Space Chief"]),
-    Character("apollonia.png", ["Apollonia", "Apollonia James"]),
+    Character("apollonia.png", ["Apollonia", "Apollonia James", "Appollonia", "Apolonia", "Appolonia"]),
     Character("frank_chapman.png", ["Frank Chapman", "Chapman"]),
     Character("Vadinho.png", ["Vadinho"]),
     Character("Roadrash.png", ["Roadrash", "Road Rash"]),
