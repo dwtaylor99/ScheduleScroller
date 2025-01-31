@@ -54,7 +54,8 @@ pygame.init()
 
 STINGER_PATH = "images/stingers"
 
-EMJ_NINJA = EMJ_MELT_FACE = EMJ_BKNIGHT = EMJ_INCREASE = EMJ_CUBA = EMJ_MALTA = EMJ_MEXICO = EMJ_USA = pygame.Surface((1, 1))
+EMJ_NINJA = EMJ_MELT_FACE = EMJ_BKNIGHT = EMJ_INCREASE = pygame.Surface((1, 1))
+EMJ_CUBA = EMJ_MALTA = EMJ_MEXICO = EMJ_USA = pygame.Surface((1, 1))
 
 # Draw the games onto this smaller Surface and blit them to the main screen Surface
 alt_screen = pygame.Surface((W2, H2))
@@ -73,7 +74,6 @@ class TriviaVox(commands.Bot):
     def __init__(self, screen, clock, access_token):
         super().__init__(token=access_token, initial_channels=[CHANNEL_NAME], prefix="!",
                          client_secret=botsecrets.CLIENT_SECRET)
-        # super().__init__(token=botsecrets.OAUTH_TOKEN, initial_channels=[CHANNEL_NAME], prefix="!")
 
         self.access_token = access_token
         self.screen = screen
