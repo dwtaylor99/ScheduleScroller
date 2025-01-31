@@ -19,6 +19,7 @@ import botemoji
 import botgems
 import botquote
 import botsecrets
+import bottoken
 import bottrivia
 import funfactory
 import gradient
@@ -55,9 +56,6 @@ pygame.init()
 STINGER_PATH = "images/stingers"
 
 EMJ_NINJA = EMJ_MELT_FACE = EMJ_BKNIGHT = EMJ_INCREASE = EMJ_CUBA = EMJ_MALTA = EMJ_MEXICO = EMJ_USA = pygame.Surface((1, 1))
-
-REFRESH_URL = "https://id.twitch.tv/oauth2/token"
-REFRESH_FILE = "data/refresh_token.txt"
 
 # Draw the games onto this smaller Surface and blit them to the main screen Surface
 alt_screen = pygame.Surface((W2, H2))
@@ -680,42 +678,6 @@ def load_emoji_replacements():
     EMJ_USA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-united-states_1f1fa-1f1f8.png'), 0.10).convert_alpha()
 
 
-def refresh_token():
-    if not os.path.exists(REFRESH_FILE):
-        with open(REFRESH_FILE, 'w+') as f:
-            f.write(botsecrets.REFRESH_TOKEN)
-            f.close()
-
-    with open(REFRESH_FILE, 'r') as f:
-        refresh_token_from_file = f.readlines()[0]
-        f.close()
-
-    data = {
-        'grant_type': 'refresh_token',
-        'refresh_token': refresh_token_from_file,
-        'client_id': botsecrets.CLIENT_ID,
-        'client_secret': botsecrets.CLIENT_SECRET
-    }
-
-    response = requests.post(REFRESH_URL, data=data)
-    json_resp = response.json()
-
-    new_access_token = ""
-    new_refresh_token = ""
-    try:
-        new_access_token = json_resp['access_token']
-        new_refresh_token = json_resp['refresh_token']
-    except KeyError:
-        print("Error reading JSON response:")
-        print(response.json())
-
-    with open(REFRESH_FILE, 'w') as f:
-        f.write(new_refresh_token)
-        f.close()
-
-    return new_access_token
-
-
 if __name__ == '__main__':
     if platform.system().lower() == "windows":
         IS_DEBUG = True
@@ -728,7 +690,7 @@ if __name__ == '__main__':
 
     token = botsecrets.OAUTH_TOKEN
     if not IS_DEBUG:
-        token = refresh_token()
+        token = bottoken.refresh_token()
 
     try:
         bot = TriviaVox(scr, clk, token)
