@@ -66,14 +66,8 @@ def save_winners(winner_list: [str], sub_list):
         found = False
         for k in winners:
             if k["name"].lower() == author.lower():
-                wins = k["gems"]
-
                 # add the mixed case version of the name
-                award_points = 2 if author in sub_list else 1
-                winners.append({
-                    "name": author,
-                    "gems": wins + award_points
-                })
+                k["gems"] = k["gems"] + (1 if author not in sub_list else 2)
                 found = True
                 break
 
