@@ -198,6 +198,7 @@ CHARACTERS = [
     Character("hugo.png", ["Hugo", "Devil Doll"]),
     Character("timmy_bobby_rusty.png", ["Timmy Bobby Rusty"]),
     Character("cornjob.png", ["Cornjob", "Corn Job", "Kon-Chan", "Konchan", "Kondo", "Officer Kondo"]),
+    Character("jet_jaguar.png", ["Jet Jaguar", "Jetjaguar"]),
 
     # Character("", [""]),
     # Character("", [""]),
