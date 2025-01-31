@@ -1,4 +1,5 @@
 import os.path
+import urllib.error
 
 import pygame.display
 
@@ -222,6 +223,25 @@ def draw_schedule_header(screen):
     drop_shadow(screen, FONT, update_title(sched[display_index]['title'], sched[display_index]['epnum']),
                 title_color, SCHED_COL3_X + 136, y + FONT_PAD)
 
+    # How much time until next episode?
+    if leading_word == "Up Next:":
+        now = datetime.now()
+        next_start = datetime.strptime(sched[1]['datetime_est'], "%a, %b %d %I:%M%p %Y")
+        delta = next_start - now
+        delta_secs = delta.total_seconds()
+        hours = int(delta_secs // 3600)
+        minutes = int((delta_secs % 3600) // 60)
+        seconds = delta_secs % 60
+        if seconds > 29:
+            minutes += 1
+        time_until = "in {}h {}m".format(str(hours), str(minutes))
+        if hours == 0 and minutes == 0:
+            time_until = "in <1m".format(str(minutes))
+        elif hours == 0:
+            time_until = "in {}m".format(str(minutes))
+        txt = FONT.render(time_until, True, header_color)
+        drop_shadow(screen, FONT, time_until, header_color, screen.get_width() - txt.get_width() - 30, y + FONT_PAD)
+
 
 def draw_scrolling_header(screen):
     """The scrolling header is part of the scrolling list of titles"""
@@ -348,9 +368,24 @@ def setup(screen):
 
     is_reloading = True
     start_time = datetime.now()
-    summaries.refresh()
-    schedule.refresh()
+
+    try:
+        summaries.update()
+    except urllib.error.URLError:
+        print("Error downloading summaries file. Using the existing file.")
+
+    try:
+        schedule.update()
+    except urllib.error.URLError:
+        print("Error downloading schedule file. Using the existing file.")
+
     sched = schedule.get_schedule(schedule.US_PAC, NUM_SCHEDULE)
+    now = datetime.now()
+    next_start = datetime.strptime(sched[1]['datetime_est'], "%a, %b %d %I:%M%p %Y")
+    # If necessary, keep popping the schedule until we catch up to the current time
+    while next_start < now:
+        next_start = datetime.strptime(sched[1]['datetime_est'], "%a, %b %d %I:%M%p %Y")
+        sched.pop(0)
 
     stop_time = datetime.now()
     print("Loading finished in " + str(stop_time - start_time))

@@ -4,6 +4,7 @@ import platform
 import random
 import re
 import time
+import urllib.error
 from enum import Enum
 from os import listdir
 from os.path import isfile, join
@@ -110,7 +111,10 @@ class TriviaVox(commands.Bot):
         self.character_img = None
         self.prev_characters = []
 
-        botquote.update()
+        try:
+            botquote.update()
+        except urllib.error.URLError:
+            print("Error downloading quotes file. Using the existing file.")
         self.quotes = botquote.load()
 
     async def check_if_live(self):
@@ -438,30 +442,29 @@ class TriviaVox(commands.Bot):
         else:
             await self.bot_print("Sorry, you do not have permission to run this command.")
 
+    # @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.user)
     # @commands.command(name="gems", aliases=['Gems', 'GEMS'])
-    @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.user)
-    @commands.command(name="dev")
-    async def cmd_gems(self, ctx: commands.Context):
-        username = ctx.author.display_name
-        gems = int(botgems.get_gems(username))
-        parts = ctx.message.content.strip().split(" ")
-        if len(parts) > 1:
-            if parts[1].lower().strip() == "redeem":
-                now_mins = int(datetime.strftime(datetime.now(), "%M"))
-                if self.trivia_question is not None:
-                    await self.bot_print("{}, please wait until trivia is over before redeeming.".format(username))
-                elif (now_mins + 1) % 5 == 0:
-                    await self.bot_print("{}, it's too close to trivia time. Please wait another minute before redeeming.".format(username))
-                elif gems >= botgems.GEM_REDEEM:
-                    # Run a trivia question for the user
-                    trivia_q = random.choice(self.trivia_questions)
-                    self.personal_trivia[username] = trivia_q
-                    await self.bot_print(trivia_q.question)
-            else:
-                await self.bot_print("Usage: !gems [redeem] (need {}{} to redeem)"
-                                     .format(str(botgems.GEM_REDEEM), botgems.GEM))
-        else:
-            await self.bot_print("@{}, you have {}{}.".format(username, str(gems), botgems.GEM))
+    # async def cmd_gems(self, ctx: commands.Context):
+    #     username = ctx.author.display_name
+    #     gems = int(botgems.get_gems(username))
+    #     parts = ctx.message.content.strip().split(" ")
+    #     if len(parts) > 1:
+    #         if parts[1].lower().strip() == "redeem":
+    #             now_mins = int(datetime.strftime(datetime.now(), "%M"))
+    #             if self.trivia_question is not None:
+    #                 await self.bot_print("{}, please wait until trivia is over before redeeming.".format(username))
+    #             elif (now_mins + 1) % 5 == 0:
+    #                 await self.bot_print("{}, it's too close to trivia time. Please wait another minute before redeeming.".format(username))
+    #             elif gems >= botgems.GEM_REDEEM:
+    #                 # Run a trivia question for the user
+    #                 trivia_q = random.choice(self.trivia_questions)
+    #                 self.personal_trivia[username] = trivia_q
+    #                 await self.bot_print(trivia_q.question)
+    #         else:
+    #             await self.bot_print("Usage: !gems [redeem] (need {}{} to redeem)"
+    #                                  .format(str(botgems.GEM_REDEEM), botgems.GEM))
+    #     else:
+    #         await self.bot_print("@{}, you have {}{}.".format(username, str(gems), botgems.GEM))
 
     @commands.command(name="latency", aliases=['Latency', 'LATENCY'])
     async def cmd_latency(self, ctx: commands.Context):
@@ -727,11 +730,16 @@ if __name__ == '__main__':
     if not IS_DEBUG:
         token = refresh_token()
 
-    bot = TriviaVox(scr, clk, token)
-    bot.run()
+    try:
+        bot = TriviaVox(scr, clk, token)
+        bot.run()
+    except AttributeError:
+        print("Could not start bot.")
 
 """
 TODO:
+* Next (time until start)
+* If downloading schedule fails, use the current sched
 
 Troublesome emoji:
 [1]    102 - Robot vs Aztec Mummy (Mexico flag) [1]            🤖🆚🇲🇽⚰️🧟‍♂️
