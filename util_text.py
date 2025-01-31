@@ -1,3 +1,5 @@
+import re
+
 import pygame
 
 EMDASH = "—"
@@ -25,6 +27,30 @@ def drop_shadow(screen, font, text, color, x, y, drop=1):
 def get_center(surf1: pygame.Surface, surf2: pygame.Surface):
     """Calculate the center of surf2 inside surf1"""
     return (surf1.get_width() - surf2.get_width()) // 2, (surf1.get_height() - surf2.get_height()) // 2
+
+
+def normalize_answers(answer_list):
+    """Normalize the list of answers to help matching"""
+
+    new_ans = []
+    for ans in answer_list:
+        # Convert to lower case and keep only alphanumerics and spaces
+        a = re.sub(r"[^ a-zA-Z0-9]", "", ans.lower())
+
+        # Remove articles (a, an, the)
+        a = re.sub(r"\ba\b", "", a)
+        a = re.sub(r"\ban\b", "", a)
+        a = re.sub(r"\bthe\b", "", a)
+
+        # Normalize "vs"
+        a = re.sub(r"\bversus\b", "", a)
+        a = re.sub(r"\bvs\b", "", a)
+        a = re.sub(r"\bv\b", "", a)
+
+        # Reduce multiple spaces to a single space
+        a = re.sub(r"\s\s+", " ", a)
+        new_ans.append(a.strip())
+    return new_ans
 
 
 def levenshtein_distance(str1: str, str2: str):

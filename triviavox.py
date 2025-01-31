@@ -22,6 +22,7 @@ import bottrivia
 import funfactory
 import gradient
 import scroller
+import util_text
 from anims.candy_heart_snow import CandyHeartSnow
 from anims.clover_snow import CloverSnow
 from anims.snow import SnowFlake
@@ -216,7 +217,7 @@ class TriviaVox(commands.Bot):
             await self.bot_print(output)
 
         if self.trivia_question is not None:
-            guess = normalize_answers([message.content])[0]
+            guess = util_text.normalize_answers([message.content])[0]
             if guess in self.trivia_question.answers:
                 self.trivia_winners.append(message.author.display_name)
 
@@ -236,8 +237,8 @@ class TriviaVox(commands.Bot):
 
             q = self.personal_trivia[username]
             preserved_answer = q.answers[0]
-            answers = normalize_answers(q.answers)
-            guess = normalize_answers([message.content])[0]
+            answers = util_text.normalize_answers(q.answers)
+            guess = util_text.normalize_answers([message.content])[0]
 
             if guess in answers:
                 bottrivia.save_trivia_user_with_points(username, bottrivia.get_trivia_points(username) + 1)
@@ -293,7 +294,7 @@ class TriviaVox(commands.Bot):
                 self.trivia_question = random.choice(self.trivia_questions)
 
             self.preserved_answer = self.trivia_question.answers[0]
-            self.trivia_question.answers = normalize_answers(self.trivia_question.answers)
+            self.trivia_question.answers = util_text.normalize_answers(self.trivia_question.answers)
             self.prev_trivia.append(self.trivia_question)
             if len(self.prev_trivia) > 20:
                 self.prev_trivia.pop(0)
@@ -321,7 +322,7 @@ class TriviaVox(commands.Bot):
                 pass
 
             self.preserved_answer = self.trivia_question.answers[0]
-            self.trivia_question.answers = normalize_answers(self.trivia_question.answers)
+            self.trivia_question.answers = util_text.normalize_answers(self.trivia_question.answers)
             self.prev_trivia.append(self.trivia_question)
             if len(self.prev_emoji) > 20:
                 self.prev_emoji.pop(0)
@@ -342,7 +343,7 @@ class TriviaVox(commands.Bot):
             self.trivia_question = bottrivia.Trivia(STR_STINGER, answers)
 
             self.preserved_answer = self.trivia_question.answers[0]
-            self.trivia_question.answers = normalize_answers(self.trivia_question.answers)
+            self.trivia_question.answers = util_text.normalize_answers(self.trivia_question.answers)
             self.prev_stingers.append(stinger_num)
             if len(self.prev_stingers) > 20:
                 self.prev_stingers.pop(0)
@@ -361,7 +362,7 @@ class TriviaVox(commands.Bot):
             self.trivia_question = bottrivia.Trivia(STR_STINGER, answers)
 
             self.preserved_answer = self.trivia_question.answers[0]
-            self.trivia_question.answers = normalize_answers(self.trivia_question.answers)
+            self.trivia_question.answers = util_text.normalize_answers(self.trivia_question.answers)
             self.prev_characters.append(character)
             if len(self.prev_characters) > 20:
                 self.prev_characters.pop(0)
@@ -637,28 +638,7 @@ def load_scaled_image(file_path) -> pygame.Surface:
     return pygame.transform.smoothscale_by(img, min(new_w, new_h)).convert_alpha()
 
 
-def normalize_answers(answer_list):
-    """Normalize the list of answers to help matching"""
 
-    new_ans = []
-    for ans in answer_list:
-        # Convert to lower case and keep only alphanumerics and spaces
-        a = re.sub(r"[^ a-zA-Z0-9]", "", ans.lower())
-
-        # Remove articles (a, an, the)
-        a = re.sub(r"\ba\b", "", a)
-        a = re.sub(r"\ban\b", "", a)
-        a = re.sub(r"\bthe\b", "", a)
-
-        # Normalize "vs"
-        a = re.sub(r"\bversus\b", "", a)
-        a = re.sub(r"\bvs\b", "", a)
-        a = re.sub(r"\bv\b", "", a)
-
-        # Reduce multiple spaces to a single space
-        a = re.sub(r"\s\s+", " ", a)
-        new_ans.append(a.strip())
-    return new_ans
 
 
 def load_emoji_replacements():
