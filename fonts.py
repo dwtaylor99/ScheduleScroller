@@ -2,6 +2,8 @@ import pygame
 
 from colors import YELLOW
 
+pygame.init()
+
 FONT_MD = pygame.font.Font("fonts/Inter.ttf", 16)
 FONT_LG = pygame.font.Font("fonts/Inter.ttf", 30)
 FONT_XL = pygame.font.Font("fonts/Inter.ttf", 48)
@@ -27,3 +29,6 @@ TXT_CHARACTER = FONT_MST3K_LG.render(STR_CHARACTER, True, YELLOW)
 
 STR_EMOJI = "Name the MST3K movie described by these emoji:"
 TXT_EMOJI = FONT_MST3K_LG.render(STR_EMOJI, True, YELLOW)
+
+STR_SCRAMBLE = "Unscramble the character name:"
+TXT_SCRAMBLE = FONT_MST3K_LG.render(STR_SCRAMBLE, True, YELLOW)

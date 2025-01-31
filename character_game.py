@@ -87,6 +87,7 @@ CHARACTERS = [
     Character("hobgoblins.png", ["Hobgoblins", "Hobgoblin", "Frankie", "Franky", "Sniffles", "Bounce-Bounce", "BounceBounce", "Claw", "The Claw"]),
     Character("hugo.png", ["Hugo", "Devil Doll"]),
     Character("jack_perkins.png", ["Jack Perkins", "Perkins", "mst3kPerk"]),
+    Character("james_arthur_cummings.png", ["Cummings", "James Arthur Cummings", "James Cummings"]),
     Character("jan.png", ["Jan in the Pan", "Jan"]),
     Character("jc.png", ["JC", "J C"]),
     Character("jet_jaguar.png", ["Jet Jaguar", "Jetjaguar"]),
@@ -99,6 +100,7 @@ CHARACTERS = [
     Character("ken.png", ["Ken"]),
     Character("kinga.png", ["Kinga", "Kinga Forrester", "mst3kKinga"]),
     Character("kolos.png", ["Kolos", "Dr Kolos"]),
+    Character("kobras.png", ["Kobras", "Kobra", "Cobras", "Cobra"]),
     Character("krankor.png", ["Phantom of Krankor", "Krankor", "mst3kHeh"]),
     Character("lara.png", ["Lara"]),
     Character("Leonard_Maltin.png", ["Leonard Maltin", "Leonard", "Maltin"]),
@@ -107,8 +109,10 @@ CHARACTERS = [
     Character("lisa.png", ["Lisa", "Lisa Dornheimer"]),
     Character("liz_walker.png", ["Liz", "Liz Walker"]),
     Character("lobo.png", ["Lobo", "Lobo II", "Lobo 2", "mst3kTor"]),
+    Character("logan.png", ["Logan"]),
     Character("Lt_Red_Bradley.png", ["Bradley", "Red Bradley", "Lt Bradley", "Lt Red Bradley"]),
     Character("mac.png", ["Mac"]),
+    Character("manuel.png", ["Manuel"]),
     Character("Margaret.png", ["Margaret", "Maggie", "mst3kScream"]),
     Character("marv.png", ["Marv", "Marv Grant"]),
     Character("master.png", ["The Master", "mst3kMaster"]),
@@ -148,6 +152,7 @@ CHARACTERS = [
     Character("Roadrash.png", ["Roadrash", "Road Rash"]),
     Character("rocky_jones.png", ["Rocky Jones"]),
     Character("rommel.png", ["Rommel"]),
+    Character("salvatore_mistretta.png", ["Mistretta", "Salvatore Mistretta"]),
     Character("sam_the_keeper.png", ["Sam", "Sam the Keeper"]),
     Character("santo.png", ["Santo", "El Santo", "mst3kSanto"]),
     Character("Scooter.png", ["Scooter"]),
@@ -170,6 +175,7 @@ CHARACTERS = [
     Character("timmy_bobby_rusty.png", ["Timmy Bobby Rusty"]),
     Character("Tom_Servo.png", ["Servo", "Tom Servo", "Htom Sirveaux", "mst3kTomServo", "mst3kSilhouetteTom"]),
     Character("tom_stewart.png", ["Tom Stewart", "Tom"]),
+    Character("tony_gallano.png", ["Gallano", "Tony Gallano"]),
     Character("torgo.png", ["Torgo", "mst3kTorgo", "mst3kMTo", "mst3kHitorgo"]),
     Character("trash.png", ["Trash"]),
     Character("troy.png", ["Troy", "Troy McGreggor", "mst3kTroy"]),
@@ -180,6 +186,7 @@ CHARACTERS = [
     Character("vance.png", ["Vance", "Dr Vance"]),
     Character("Vena.png", ["Vena", "Vena Ray"]),
     Character("vi.png", ["Vi", "movievVi", "mst3kTorm"]),
+    Character("vic_mathias.png", ["Vic Mathias", "Vic", "Mathias"]),
     Character("Vorelli.png", ["Vorelli", "The Great Vorelli"]),
     Character("wanama.png", ["Wanama"]),
     Character("watney.png", ["Watney", "Whatney"]),
@@ -212,6 +219,5 @@ if __name__ == '__main__':
 
 """
 TODO:
-Mistretta, Gallano, Cummings
-Vic, Logan, Manuel
+
 """

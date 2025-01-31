@@ -16,6 +16,7 @@ import botads
 import botemoji
 import botgems
 import botquote
+import botscramble
 import botsecrets
 import bottoken
 import bottrivia
@@ -26,10 +27,11 @@ import util_text
 from anims.candy_heart_snow import CandyHeartSnow
 from anims.clover_snow import CloverSnow
 from anims.snow import SnowFlake
+from botscramble import SCRAMBLED_WORDS
 from character_game import CHARACTERS, CHARACTER_PATH
 from colors import *
 from constants import *
-from fonts import STR_STINGER, TXT_STINGER, FONT_MST3K_LG, TXT_EMOJI, FONT_EMOJI_LG, TXT_CHARACTER
+from fonts import STR_STINGER, TXT_STINGER, FONT_MST3K_LG, TXT_EMOJI, FONT_EMOJI_LG, TXT_CHARACTER, TXT_SCRAMBLE
 from movie_names import MOVIE_NAMES
 from util_text import wrap_text
 
@@ -68,6 +70,7 @@ class GameType(Enum):
     EMOJI = "Emoji"
     STINGER = "Stinger"
     CHARACTER = "Character"
+    SCRAMBLE = "Scramble"
 
 
 class TriviaVox(commands.Bot):
@@ -107,6 +110,9 @@ class TriviaVox(commands.Bot):
 
         self.character_img = None
         self.prev_characters = []
+
+        self.scramble_word = ""
+        self.prev_scrambles = []
 
         try:
             botquote.update()
@@ -281,12 +287,14 @@ class TriviaVox(commands.Bot):
         # If ads are running in the next 5 minutes (300 seconds), don't start a game that needs the screen
         if self.is_live and self.next_ad_at - ts > 300:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER, GameType.CHARACTER])
+            # self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER, GameType.CHARACTER,
+            #                                 GameType.SCRAMBLE])
         else:
             print("Not choosing a Stinger/Character game because of the time.")
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
 
-        # if IS_DEBUG:
-        #     self.game_type = GameType.EMOJI
+        if IS_DEBUG:
+            self.game_type = GameType.SCRAMBLE
 
         if self.game_type == GameType.TRIVIA:
             self.trivia_question = random.choice(self.trivia_questions)
@@ -371,6 +379,22 @@ class TriviaVox(commands.Bot):
 
             await self.bot_print("/me Name the character seen on screen.")
             self.character_img = load_scaled_image(CHARACTER_PATH + character.img_file)
+
+        elif self.game_type == GameType.SCRAMBLE:
+            scramble_word = random.choice(SCRAMBLED_WORDS)
+            while scramble_word in self.prev_scrambles:
+                scramble_word = random.choice(SCRAMBLED_WORDS)
+
+            self.trivia_question = bottrivia.Trivia(botscramble.scramble(scramble_word), [scramble_word])
+            self.preserved_answer = self.trivia_question.answers[0]
+            self.trivia_question.answers = util_text.normalize_answers(self.trivia_question.answers)
+            self.prev_scrambles.append(scramble_word)
+            if len(self.prev_scrambles) > 20:
+                self.prev_scrambles.pop(0)
+            self.trivia_winners.clear()
+            self.game_end_time = time.time() + 60
+
+            await self.bot_print("/me Unscramble the character name on screen.")
 
         print(self.trivia_question.answers)
 
@@ -547,6 +571,9 @@ class TriviaVox(commands.Bot):
                 alt_screen.blit(self.character_img, ((W2 - self.character_img.get_width()) // 2,
                                                      (H2 - self.character_img.get_height()) // 2))
 
+            elif self.game_type == GameType.SCRAMBLE:
+                alt_screen.blit(botscramble.draw(alt_screen, self.trivia_question.question), (0, 0))
+
         # Blit the internal alt_screen (Surface) on the main screen
         self.screen.blit(alt_screen, (WIDTH // 2, 0))
 
@@ -638,9 +665,6 @@ def load_scaled_image(file_path) -> pygame.Surface:
     return pygame.transform.smoothscale_by(img, min(new_w, new_h)).convert_alpha()
 
 
-
-
-
 def load_emoji_replacements():
     """Images used to fix missing emoji and flags (they need to be loaded after setting the screen mode)"""
 
@@ -678,8 +702,7 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Next (time until start)
-* If downloading schedule fails, use the current sched
+(nothing)
 
 Troublesome emoji:
 [1]    102 - Robot vs Aztec Mummy (Mexico flag) [1]            🤖🆚🇲🇽⚰️🧟‍♂️
