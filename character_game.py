@@ -60,7 +60,7 @@ CHARACTERS = [
     Character("EmilyConnor.png", ["Emily", "Emily Connor", "Emily Crenshaw", "mst3kEmily"]),
     Character("erhardt.png", ["Dr Erhardt", "Larry", "Erhardt", "Dr Larry Erhardt", "Dr Laurence Erhardt", "mst3kLar"]),
     Character("exeter.png", ["Exeter"]),
-    Character("fat_man.png", ["Fat Man", "FatMan", "Novicorp Chairman"]),
+    Character("fat_man.png", ["Fat Man", "FatMan", "Chairman", "Novicorp Chairman"]),
     Character("fingal.png", ["Fingal", "Aram Fingal", "Aram", "mst3kElec"]),
     Character("forrester.png", ["Forrester", "Dr Forrester", "Clayton Forrester", "Dr Clayton Forrester", "mst3kHurt", "mst3kFor"]),
     Character("frank_chapman.png", ["Frank Chapman", "Chapman"]),
