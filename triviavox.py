@@ -53,11 +53,19 @@ W2 = WIDTH // 2
 H2 = HEIGHT // 2
 
 pygame.init()
+scr = pygame.display.set_mode((WIDTH, HEIGHT))
+clk = pygame.time.Clock()
 
-STINGER_PATH = "images/stingers"
+STINGER_PATH = "images/stingers/"
 
-EMJ_NINJA = EMJ_MELT_FACE = EMJ_BKNIGHT = EMJ_INCREASE = pygame.Surface((1, 1))
-EMJ_CUBA = EMJ_MALTA = EMJ_MEXICO = EMJ_USA = pygame.Surface((1, 1))
+EMJ_NINJA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/ninja_1f977.png'), 0.115).convert_alpha()
+EMJ_MELT_FACE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/melting-face_1fae0.png'), 0.11).convert_alpha()
+EMJ_BKNIGHT = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/black-knight-2692.png'), 0.4).convert_alpha()
+EMJ_INCREASE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/increase-font-size-symbol_1f5da.png'), 0.375).convert_alpha()
+EMJ_CUBA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-cuba_1f1e8-1f1fa.png'), 0.11).convert_alpha()
+EMJ_MALTA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-malta_1f1f2-1f1f9.png'), 0.11).convert_alpha()
+EMJ_MEXICO = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-mexico_1f1f2-1f1fd.png'), 0.11).convert_alpha()
+EMJ_USA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-united-states_1f1fa-1f1f8.png'), 0.10).convert_alpha()
 
 # Draw the games onto this smaller Surface and blit them to the main screen Surface
 alt_screen = pygame.Surface((W2, H2))
@@ -117,7 +125,7 @@ class TriviaVox(commands.Bot):
         try:
             botquote.update()
         except urllib.error.URLError:
-            print("Error downloading quotes file. Using the existing file.")
+            print("ERROR downloading quotes file; using existing file.")
         self.quotes = botquote.load()
 
     async def check_if_live(self):
@@ -149,12 +157,19 @@ class TriviaVox(commands.Bot):
 
         self.channel = super().get_channel(CHANNEL_NAME)
 
-        bottrivia.update()
+        try:
+            bottrivia.update()
+        except (AuthenticationError, Unauthorized):
+            print("ERROR: Could not download trivia; using existing file.")
         self.trivia_questions = bottrivia.load_as_array()
 
-        botemoji.update()
+        try:
+            botemoji.update()
+        except (AuthenticationError, Unauthorized):
+            print("ERROR: Could not download emoji trivia; using existing file.")
         self.emoji_questions = botemoji.load_as_array()
 
+        self.auto_update_time_until.start()
         self.auto_trivia_stop.start()
         self.auto_update_game.start()
 
@@ -294,7 +309,7 @@ class TriviaVox(commands.Bot):
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
 
         if IS_DEBUG:
-            self.game_type = GameType.SCRAMBLE
+            self.game_type = GameType.STINGER
 
         if self.game_type == GameType.TRIVIA:
             self.trivia_question = random.choice(self.trivia_questions)
@@ -359,7 +374,7 @@ class TriviaVox(commands.Bot):
             self.game_end_time = time.time() + 60
 
             await self.bot_print("/me Name the stinger seen on screen.")
-            self.stinger_img = load_scaled_image(STINGER_PATH + '/' + stinger_file)
+            self.stinger_img = load_scaled_image(STINGER_PATH + stinger_file)
 
         elif self.game_type == GameType.CHARACTER:
             character = random.choice(CHARACTERS)
@@ -397,6 +412,24 @@ class TriviaVox(commands.Bot):
             await self.bot_print("/me Unscramble the character name on screen.")
 
         print(self.trivia_question.answers)
+
+    @routines.routine(seconds=15)
+    async def auto_update_time_until(self):
+        now = datetime.now()
+        next_start = datetime.strptime(scroller.sched[1]['datetime_est'], "%a, %b %d %I:%M%p %Y")
+        delta_secs = (next_start - now).total_seconds()
+
+        hours = int(delta_secs // 3600)
+        minutes = int((delta_secs % 3600) // 60)
+        seconds = delta_secs % 60
+
+        minutes += 1 if seconds > 29 else 0  # Round up the minutes
+
+        scroller.time_until = "in {}h {}m".format(str(hours), str(minutes))
+        if hours == 0 and minutes == 0:
+            scroller.time_until = "in <1m".format(str(minutes))
+        elif hours == 0:
+            scroller.time_until = "in {}m".format(str(minutes))
 
     @routines.routine(seconds=2)
     async def auto_trivia_stop(self):
@@ -449,7 +482,6 @@ class TriviaVox(commands.Bot):
             botgems.save_winners(winners, self.sub_list)
             self.trivia_winners.clear()
 
-    @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
     @commands.command(name="ads", aliases=['Ads', 'ADS'])
     async def cmd_ads(self, ctx: commands.Context):
         privs = ctx.author.is_broadcaster or ctx.author.is_mod  # or ctx.author.is_vip or ctx.author.is_subscriber
@@ -464,28 +496,28 @@ class TriviaVox(commands.Bot):
             await self.bot_print("Sorry, you do not have permission to run this command.")
 
     # @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.user)
-    # @commands.command(name="gems", aliases=['Gems', 'GEMS'])
-    # async def cmd_gems(self, ctx: commands.Context):
-    #     username = ctx.author.display_name
-    #     gems = int(botgems.get_gems(username))
-    #     parts = ctx.message.content.strip().split(" ")
-    #     if len(parts) > 1:
-    #         if parts[1].lower().strip() == "redeem":
-    #             now_mins = int(datetime.strftime(datetime.now(), "%M"))
-    #             if self.trivia_question is not None:
-    #                 await self.bot_print("{}, please wait until trivia is over before redeeming.".format(username))
-    #             elif (now_mins + 1) % 5 == 0:
-    #                 await self.bot_print("{}, it's too close to trivia time. Please wait another minute before redeeming.".format(username))
-    #             elif gems >= botgems.GEM_REDEEM:
-    #                 # Run a trivia question for the user
-    #                 trivia_q = random.choice(self.trivia_questions)
-    #                 self.personal_trivia[username] = trivia_q
-    #                 await self.bot_print(trivia_q.question)
-    #         else:
-    #             await self.bot_print("Usage: !gems [redeem] (need {}{} to redeem)"
-    #                                  .format(str(botgems.GEM_REDEEM), botgems.GEM))
-    #     else:
-    #         await self.bot_print("@{}, you have {}{}.".format(username, str(gems), botgems.GEM))
+    @commands.command(name="gems", aliases=['Gems', 'GEMS'])
+    async def cmd_gems(self, ctx: commands.Context):
+        username = ctx.author.display_name
+        gems = int(botgems.get_gems(username))
+        parts = ctx.message.content.strip().split(" ")
+        if len(parts) > 1:
+            if parts[1].lower().strip() == "redeem":
+                now_mins = int(datetime.strftime(datetime.now(), "%M"))
+                if self.trivia_question is not None:
+                    await self.bot_print("{}, please wait until trivia is over before redeeming.".format(username))
+                elif (now_mins + 1) % 5 == 0:
+                    await self.bot_print("{}, it's too close to trivia time. Please wait another minute before redeeming.".format(username))
+                elif gems >= botgems.GEM_REDEEM:
+                    # Run a trivia question for the user
+                    trivia_q = random.choice(self.trivia_questions)
+                    self.personal_trivia[username] = trivia_q
+                    await self.bot_print(trivia_q.question)
+            else:
+                await self.bot_print("Usage: !gems [redeem] (need {}{} to redeem)"
+                                     .format(str(botgems.GEM_REDEEM), botgems.GEM))
+        else:
+            await self.bot_print("@{}, you have {}{}.".format(username, str(gems), botgems.GEM))
 
     @commands.command(name="latency", aliases=['Latency', 'LATENCY'])
     async def cmd_latency(self, ctx: commands.Context):
@@ -588,9 +620,13 @@ class TriviaVox(commands.Bot):
             scroller.draw_year(self.screen)
             if self.trivia_question is None:
                 scroller.draw_summary(self.screen)
-            scroller.draw_gizmoplex(self.screen)
+            scroller.draw_urls(self.screen)
 
-            scroller.fun()
+            # animate fun objects
+            if len(scroller.fun_objs) > 0:
+                for o in scroller.fun_objs:
+                    o.animate()
+
             # Snowy movies: 321=Santa vs Martians, 422=Day Earth Froze, 521=Santa Claus,
             # 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
             now_mm = int(datetime.strftime(datetime.now(), "%M"))
@@ -652,9 +688,8 @@ def choose_stinger() -> str:
 
 
 def load_scaled_image(file_path) -> pygame.Surface:
+    """Load the image given at 'file_path' and scale it to height so it fits the screen"""
     img = pygame.image.load(file_path)
-
-    # scale the image
     if img.get_width() < 1600:
         new_w = 580 / img.get_width()
         new_h = 440 / img.get_height()
@@ -665,29 +700,10 @@ def load_scaled_image(file_path) -> pygame.Surface:
     return pygame.transform.smoothscale_by(img, min(new_w, new_h)).convert_alpha()
 
 
-def load_emoji_replacements():
-    """Images used to fix missing emoji and flags (they need to be loaded after setting the screen mode)"""
-
-    global EMJ_NINJA, EMJ_MELT_FACE, EMJ_BKNIGHT, EMJ_INCREASE, EMJ_CUBA, EMJ_MALTA, EMJ_MEXICO, EMJ_USA
-
-    EMJ_NINJA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/ninja_1f977.png'), 0.115).convert_alpha()
-    EMJ_MELT_FACE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/melting-face_1fae0.png'), 0.11).convert_alpha()
-    EMJ_BKNIGHT = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/black-knight-2692.png'), 0.4).convert_alpha()
-    EMJ_INCREASE = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/increase-font-size-symbol_1f5da.png'), 0.375).convert_alpha()
-    EMJ_CUBA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-cuba_1f1e8-1f1fa.png'), 0.11).convert_alpha()
-    EMJ_MALTA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-malta_1f1f2-1f1f9.png'), 0.11).convert_alpha()
-    EMJ_MEXICO = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-mexico_1f1f2-1f1fd.png'), 0.11).convert_alpha()
-    EMJ_USA = pygame.transform.smoothscale_by(pygame.image.load('images/emoji/flag-united-states_1f1fa-1f1f8.png'), 0.10).convert_alpha()
-
-
 if __name__ == '__main__':
     if platform.system().lower() == "windows":
         IS_DEBUG = True
 
-    scr = pygame.display.set_mode((WIDTH, HEIGHT))
-    clk = pygame.time.Clock()
-
-    load_emoji_replacements()
     scroller.setup(scr)
 
     token = botsecrets.OAUTH_TOKEN

@@ -75,6 +75,7 @@ main_img = pygame.Surface((WIDTH, HEIGHT))
 main_summary = ""
 main_year = ""
 fun_objs = []
+time_until = ""  # Used to display time until next movie
 
 # Used for fading between "Playing" and "Up Next"
 header_color = pygame.Color(192, 192, 0, 0)
@@ -225,20 +226,6 @@ def draw_schedule_header(screen):
 
     # How much time until next episode?
     if leading_word == "Up Next:":
-        now = datetime.now()
-        next_start = datetime.strptime(sched[1]['datetime_est'], "%a, %b %d %I:%M%p %Y")
-        delta = next_start - now
-        delta_secs = delta.total_seconds()
-        hours = int(delta_secs // 3600)
-        minutes = int((delta_secs % 3600) // 60)
-        seconds = delta_secs % 60
-        if seconds > 29:
-            minutes += 1
-        time_until = "in {}h {}m".format(str(hours), str(minutes))
-        if hours == 0 and minutes == 0:
-            time_until = "in <1m".format(str(minutes))
-        elif hours == 0:
-            time_until = "in {}m".format(str(minutes))
         txt = FONT.render(time_until, True, header_color)
         drop_shadow(screen, FONT, time_until, header_color, screen.get_width() - txt.get_width() - 30, y + FONT_PAD)
 
@@ -265,9 +252,6 @@ def draw_scrolling_header(screen):
 
 def split_time(time: str):
     """Separate the DOW and Time into individual columns"""
-    # pos = time.find(" ")
-    # dow = time[:pos]
-    # t = time[pos + 1:]
     parts = time.split(" ")
     dow = parts[0]
     merid = parts[2]
@@ -408,12 +392,6 @@ def setup(screen):
     is_reloading = False
 
 
-def fun():
-    if len(fun_objs) > 0:
-        for o in fun_objs:
-            o.animate()
-
-
 def snow(screen):
     global snow_flakes
 
@@ -436,7 +414,7 @@ def snow(screen):
     snow_flakes = temp_objs
 
 
-def draw_gizmoplex(screen):
+def draw_urls(screen):
     drop_shadow(screen, FONT_XS, STR_TWITCH, WHITE, WIDTH - 130, HEIGHT_HALF - 50)
     drop_shadow(screen, FONT_XS, STR_GIZMO, WHITE, WIDTH - 130, HEIGHT_HALF - 30)
 
