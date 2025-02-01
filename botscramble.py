@@ -9,10 +9,11 @@ LETTER_W = 52
 LETTER_H = 48
 SPACING = 10
 SCRAMBLED_WORDS = ["APOLLONIA", "ARDY", "ATOR", "BARUGON", "BATWOMAN", "BEEPER", "CAMBOT", "CORNJOB", "CLEOLANTA",
-                   "TOBLERONE", "DIABOLIK", "MORDRID", "EXETER", "FINGAL", "FORRESTER", "FRANK", "GAMERA", "GODZILLA",
+                   "DIABOLIK", "MORDRID", "EXETER", "FINGAL", "FORRESTER", "FRANK", "GAMERA", "GODZILLA",
                    "GOOSIO", "GUIRON", "GYPSY", "HAMLET", "HERCULES", "JIGER", "JONAH", "KINGA", "KOLOS", "MEGAWEAPON",
-                   "MUNCHIE", "NUVEENA", "OBSERVER", "ORTEGA", "PEARL", "PIPPER", "SANTO", "SANTA", "SUMURU", "STUMPY",
-                   "SYNTHIA", "SERVO", "TORGO", "VADINHO", "VALARIA", "VORELLI", "ROWSDOWER", "ZIGRA"]
+                   "MUNCHIE", "NUVEENA", "OBSERVER", "ORTEGA", "PEARL", "PITCH", "PIPPER", "SANTO", "SANTA", "SUMURU",
+                   "STUMPY", "SYNTHIA", "SERVO", "TOBLERONE", "TORGO", "VADINHO", "VALARIA", "VORELLI", "ROWSDOWER",
+                   "ZIGRA"]
 
 
 def scramble(word: str) -> str:

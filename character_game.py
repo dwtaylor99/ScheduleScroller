@@ -110,7 +110,7 @@ CHARACTERS = [
     Character("liz_walker.png", ["Liz", "Liz Walker"]),
     Character("lobo.png", ["Lobo", "Lobo II", "Lobo 2", "mst3kTor"]),
     Character("logan.png", ["Logan"]),
-    Character("Lt_Red_Bradley.png", ["Bradley", "Red Bradley", "Lt Bradley", "Lt Red Bradley"]),
+    Character("Lt_Red_Bradley.png", ["Bradley", "Red Bradley", "Red", "Lt Bradley", "Lt Red Bradley"]),
     Character("mac.png", ["Mac"]),
     Character("manuel.png", ["Manuel"]),
     Character("Margaret.png", ["Margaret", "Maggie", "mst3kScream"]),

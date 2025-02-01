@@ -30,9 +30,10 @@ EMILY_PURPLE = pygame.Color(100, 96, 173)  # "6460AD"
 GROUP_GREEN = pygame.Color(33, 130, 0)  # "218200"
 
 # Color schemes [dark, medium, light]:
+# dark and light are used for the gradient, medium used for scroller background
 SCHEME_DEFAULT = [BLUE, MED_BLUE, LT_BLUE]
-SCHEME_PINK = [(140, 35, 35), MED_RED, LT_RED]
-SCHEME_GREEN = [GREEN, (25, 100, 25), (70, 150, 80)]
+SCHEME_PINK = [(140, 35, 35), (140, 55, 80), LT_RED]
+SCHEME_GREEN = [(22, 80, 30), (30, 115, 35), (60, 140, 60)]
 
 # Set the color scheme
 COLOR_SCHEME = SCHEME_DEFAULT

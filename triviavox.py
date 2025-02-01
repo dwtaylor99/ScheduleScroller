@@ -31,7 +31,7 @@ from botscramble import SCRAMBLED_WORDS
 from character_game import CHARACTERS, CHARACTER_PATH
 from colors import *
 from constants import *
-from fonts import STR_STINGER, TXT_STINGER, FONT_MST3K_LG, TXT_EMOJI, FONT_EMOJI_LG, TXT_CHARACTER, TXT_SCRAMBLE
+from fonts import STR_STINGER, TXT_STINGER, FONT_MST3K_LG, TXT_EMOJI, FONT_EMOJI_LG, TXT_CHARACTER
 from movie_names import MOVIE_NAMES
 from util_text import wrap_text
 
