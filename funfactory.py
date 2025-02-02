@@ -6,6 +6,7 @@ from anims.deathray import DeathRay
 from anims.deathray_crow import DeathRayCrow
 from anims.elsanto_flying import ElSantoFlying
 from anims.enforcer import Enforcer, EnforcerReverse
+from anims.enforcer_chase import EnforcerChase
 from anims.exeter import Exeter
 from anims.fingal import Fingal
 from anims.forklift import Forklift
@@ -63,7 +64,7 @@ ANIMS_BY_EPNUM = {
     "624": (ElSantoFlying, 1),
     "701": (BloodBeast, random.randint(6, 10)),
     "701T": (BloodBeast, random.randint(6, 10)),
-    "820": (Enforcer if random.randint(1, 2) == 1 else EnforcerReverse, 1),
+    "820": (Enforcer if random.randint(1, 2) == 1 else EnforcerChase, 1),
     "821": ([TimeChasersPlane, TimeChasersPlaneOther] if random.randint(1, 2) == 1 else TimeChasersPlane, 1),
     "822": (Fingal, 1),
     "903": (Pumaman, 1),

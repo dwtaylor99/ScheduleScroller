@@ -15,7 +15,7 @@ class Enforcer(FunBase):
     def animate(self):
         if self.anim_step == 1:
             super().animate()
-            if self.x > self.screen.get_width():
+            if self.x < -400:
                 self.anim_step = 0
 
 
