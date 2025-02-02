@@ -174,8 +174,8 @@ class TriviaVox(commands.Bot):
         self.auto_update_game.start()
 
         ts = int(datetime.now().timestamp())
-        await self.get_ads_schedule()
         try:
+            await self.get_ads_schedule()
             botads.save_ads_time(self.next_ad_at, botads.convert_int_to_time(self.next_ad_at))
         except (AuthenticationError, Unauthorized):
             print("ERROR: Could not get ad schedule from Twitch; using file.")
