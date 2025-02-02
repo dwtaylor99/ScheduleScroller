@@ -152,10 +152,8 @@ class TriviaVox(commands.Bot):
 
     async def event_ready(self):
         self.is_connecting = False
-
         await self.check_if_live()
-
-        self.channel = super().get_channel(CHANNEL_NAME)
+        # self.channel = super().get_channel(CHANNEL_NAME)
 
         try:
             bottrivia.update()
@@ -247,8 +245,10 @@ class TriviaVox(commands.Bot):
                     await asyncio.sleep(10)
                     await self.stop_trivia()
 
+        # Is the user in the middle of a personal trivia game ("!gems redeem")
         username = message.author.display_name
         if username in self.personal_trivia.keys():
+            # If the user ia a subscriber, put their name in the sub_list.
             if message.author.is_subscriber:
                 self.sub_list.append(username)
                 self.sub_list = list(set(self.sub_list))
@@ -262,6 +262,8 @@ class TriviaVox(commands.Bot):
             guess = util_text.normalize_answers([message.content])[0]
 
             if guess in answers:
+                await self.bot_print("@{}, correct! You now have {} points."
+                                     .format(username, str(bottrivia.get_trivia_points(username) + 1)))
                 bottrivia.save_trivia_user_with_points(username, bottrivia.get_trivia_points(username) + 1)
             else:
                 await self.bot_print("@{}, sorry, that's incorrect. The answer is: {}"
@@ -284,8 +286,6 @@ class TriviaVox(commands.Bot):
     @routines.routine(minutes=5)
     async def auto_trivia(self):
         """Run a trivia question every few minutes."""
-        print("Running trivia now")
-        # Choose a game type
         await self.check_if_live()
         ts = int(datetime.now().timestamp())
 
