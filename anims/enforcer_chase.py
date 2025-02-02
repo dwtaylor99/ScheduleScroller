@@ -37,5 +37,4 @@ class EnforcerChase(FunBase):
                 self.laser_x = self.x + 570
 
             if self.x < -900:
-                print("Done")
                 self.anim_step = 0
