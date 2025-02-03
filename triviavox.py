@@ -153,7 +153,7 @@ class TriviaVox(commands.Bot):
     async def event_ready(self):
         self.is_connecting = False
         await self.check_if_live()
-        # self.channel = super().get_channel(CHANNEL_NAME)
+        self.channel = super().get_channel(CHANNEL_NAME)
 
         try:
             bottrivia.update()
