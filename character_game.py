@@ -150,7 +150,7 @@ CHARACTERS = [
     Character("observer.png", ["Observer", "Brain Guy", "Brainguy", "mst3kBrn"]),
     Character("omus.png", ["Omus"]),
     Character("ortega.png", ["Ortega", "mst3kOrtega"]),
-    Character("Peaches.png", ["Peaches", "Peaches Page"]),
+    Character("peaches.png", ["Peaches", "Peaches Page"]),
     Character("Pearl.png", ["Pearl", "Pearl Forrester", "mst3kPrl"]),
     Character("pepe.png", ["Pepe"]),
     Character("phipps.png", ["Alexander Phipps", "Alex", "Alexander", "Alex Phipps", "Phipps"]),
@@ -230,8 +230,3 @@ if __name__ == '__main__':
                 break
         if not found:
             print("File " + file + " has no Character")
-
-"""
-TODO:
-
-"""
