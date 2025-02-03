@@ -5,7 +5,7 @@ from anims.bloodbeast import BloodBeast
 from anims.deathray import DeathRay
 from anims.deathray_crow import DeathRayCrow
 from anims.elsanto_flying import ElSantoFlying
-from anims.enforcer import Enforcer, EnforcerReverse
+from anims.enforcer import Enforcer
 from anims.enforcer_chase import EnforcerChase
 from anims.exeter import Exeter
 from anims.fingal import Fingal
@@ -16,9 +16,9 @@ from anims.meteorite import Meteorite
 from anims.mood_servo import MoodServo
 from anims.moonbug import MoonBug
 from anims.mst3k_moon import MST3KMoon
+from anims.munchie_pizza import MunchiePizza
 from anims.oh_wow import OhWow
 from anims.orbit_jet import OrbitJet
-from anims.munchie_pizza import MunchiePizza
 from anims.pumaman import Pumaman
 from anims.sandstorm import SandStorm
 from anims.shuriken import Shuriken
@@ -29,12 +29,11 @@ from anims.starfighter import Starfighter
 from anims.time_chasers_plane import TimeChasersPlane
 from anims.time_chasers_plane_other import TimeChasersPlaneOther
 from anims.torgo import Torgo
-from anims.troy_csonka import TroyCsonka
+from anims.troy_dream import TroyDream
 from anims.vi_head import ViHead
 from anims.whitedot import WhiteDot
 from anims.widowmaker import Widowmaker
 from anims.zap_beer import ZapBeer
-
 
 ANIMS_BY_EPNUM = {
     "001": (SOL, 1),
@@ -68,7 +67,7 @@ ANIMS_BY_EPNUM = {
     "821": ([TimeChasersPlane, TimeChasersPlaneOther] if random.randint(1, 2) == 1 else TimeChasersPlane, 1),
     "822": (Fingal, 1),
     "903": (Pumaman, 1),
-    "910": (ZapBeer if random.randint(1, 2) == 1 else TroyCsonka, 1),
+    "910": (ZapBeer if random.randint(1, 2) == 1 else TroyDream, 1),
     "912": (ScreamingSkull, 1),
     "1007": ([OhWow, Meteorite], random.randint(3, 8)),
     "1304": (MunchiePizza, 1),

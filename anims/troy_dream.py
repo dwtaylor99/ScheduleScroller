@@ -10,11 +10,19 @@ local_clock = pygame.time.Clock()
 delta = 0
 
 
-class TroyCsonka(FunBase):
+class TroyDream(FunBase):
     def __init__(self, screen):
         super().__init__(screen)
         self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/troy.png'), 0.3).convert_alpha()
-        self.img2 = pygame.transform.smoothscale_by(pygame.image.load('images/fun/dream_csonka.png'), 0.75).convert_alpha()
+
+        rn = random.randint(1, 3)
+        if rn == 1:
+            self.img2 = pygame.transform.smoothscale_by(pygame.image.load('images/fun/dream_csonka.png'), 0.75).convert_alpha()
+        elif rn == 2:
+            self.img2 = pygame.transform.smoothscale_by(pygame.image.load('images/fun/dream_pipper.png'), 0.75).convert_alpha()
+        elif rn == 3:
+            self.img2 = pygame.transform.smoothscale_by(pygame.image.load('images/fun/dream_zap.png'), 0.75).convert_alpha()
+
         self.x = random.randrange(100, self.screen.get_width() - 1000)
         self.y = 539
         self.vel_x = 0
