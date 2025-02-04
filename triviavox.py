@@ -321,8 +321,8 @@ class TriviaVox(commands.Bot):
             self.prev_trivia.append(self.trivia_question)
             if len(self.prev_trivia) > 20:
                 self.prev_trivia.pop(0)
-            self.trivia_winners.clear()
-            self.game_end_time = time.time() + 60
+            # self.trivia_winners.clear()
+            # self.game_end_time = time.time() + 60
 
             await self.bot_print("/me Trivia Time! Q: {}".format(self.trivia_question.question))
 
@@ -349,8 +349,8 @@ class TriviaVox(commands.Bot):
             self.prev_trivia.append(self.trivia_question)
             if len(self.prev_emoji) > 20:
                 self.prev_emoji.pop(0)
-            self.trivia_winners.clear()
-            self.game_end_time = time.time() + 60
+            # self.trivia_winners.clear()
+            # self.game_end_time = time.time() + 60
 
             await self.bot_print("/me Emoji Time! Q: {}".format(self.trivia_question.question))
 
@@ -370,8 +370,8 @@ class TriviaVox(commands.Bot):
             self.prev_stingers.append(stinger_num)
             if len(self.prev_stingers) > 20:
                 self.prev_stingers.pop(0)
-            self.trivia_winners.clear()
-            self.game_end_time = time.time() + 60
+            # self.trivia_winners.clear()
+            # self.game_end_time = time.time() + 60
 
             await self.bot_print("/me Name the stinger seen on screen.")
             self.stinger_img = load_scaled_image(STINGER_PATH + stinger_file)
@@ -389,8 +389,8 @@ class TriviaVox(commands.Bot):
             self.prev_characters.append(character)
             if len(self.prev_characters) > 20:
                 self.prev_characters.pop(0)
-            self.trivia_winners.clear()
-            self.game_end_time = time.time() + 60
+            # self.trivia_winners.clear()
+            # self.game_end_time = time.time() + 60
 
             await self.bot_print("/me Name the character seen on screen.")
             self.character_img = load_scaled_image(CHARACTER_PATH + character.img_file)
@@ -406,11 +406,13 @@ class TriviaVox(commands.Bot):
             self.prev_scrambles.append(scramble_word)
             if len(self.prev_scrambles) > 20:
                 self.prev_scrambles.pop(0)
-            self.trivia_winners.clear()
-            self.game_end_time = time.time() + 60
+            # self.trivia_winners.clear()
+            # self.game_end_time = time.time() + 60
 
             await self.bot_print("/me Unscramble the character name on screen.")
 
+        self.trivia_winners.clear()
+        self.game_end_time = time.time() + 60
         print(self.trivia_question.answers)
 
     @routines.routine(seconds=15)

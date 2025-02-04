@@ -30,6 +30,7 @@ from anims.time_chasers_plane import TimeChasersPlane
 from anims.time_chasers_plane_other import TimeChasersPlaneOther
 from anims.torgo import Torgo
 from anims.troy_dream import TroyDream
+from anims.trumpy import Trumpy
 from anims.vi_head import ViHead
 from anims.whitedot import WhiteDot
 from anims.widowmaker import Widowmaker
@@ -44,6 +45,7 @@ ANIMS_BY_EPNUM = {
     "111": (MoonBug, 1),
     "301": (AtorGlider, 1),
     "302": (Gamera, 1),
+    "303": (Trumpy, 1),
     "304": (Gamera, 1),
     "308": (Gamera, 1),
     "310": (Forklift, 1),
@@ -99,7 +101,7 @@ def get(screen, title: str, epnum: str) -> []:
         # Choose a random animation
         return get_by_epnum(screen, random.choice(
             ['001', '002', '003', '004', '005',
-             '111', '301', '302', '310', '322', '410', '413', '414', '424', '609', '611', '612', '620', '624',
+             '111', '301', '302', '303', '310', '322', '410', '413', '414', '424', '609', '611', '612', '620', '624',
              '701', '820', '821', '822', '903', '910', '912', '1007', '1304', '1306', '1307']))
 
 
