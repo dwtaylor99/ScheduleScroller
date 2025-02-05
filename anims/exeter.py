@@ -22,16 +22,16 @@ class Exeter(FunBase):
 
     def interocitor(self):
         pygame.draw.polygon(self.screen, GRAY, [(self.x, self.y),
-                                                   (self.x + 230, self.y),
-                                                   (self.x + 115, self.y + 215),
-                                                   (self.x, self.y)])
+                                                (self.x + 230, self.y),
+                                                (self.x + 115, self.y + 215),
+                                                (self.x, self.y)])
 
         self.screen.blit(self.img, (self.x + 1, self.y + 5))
 
         pygame.draw.polygon(self.screen, DK_GRAY, [(self.x, self.y),
-                                                (self.x + 230, self.y),
-                                                (self.x + 115, self.y + 215),
-                                                (self.x, self.y)], 10)
+                                                   (self.x + 230, self.y),
+                                                   (self.x + 115, self.y + 215),
+                                                   (self.x, self.y)], 10)
 
         pygame.draw.circle(self.screen, DK_GRAY, (self.x + 4, self.y + 4), 10)
         pygame.draw.circle(self.screen, RED, (self.x + 4, self.y + 4), 7)
