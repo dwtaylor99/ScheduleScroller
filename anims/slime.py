@@ -1,5 +1,3 @@
-import random
-
 import pygame
 
 from funbase import FunBase
@@ -32,10 +30,4 @@ class Slime(FunBase):
             self.y += self.vel_y
 
             if self.y - self.temp_surf.get_height() > self.screen.get_height() // 2:
-                self.anim_step += 1
-
-        elif self.anim_step == 2:
-            # pygame.draw.rect(self.screen, (115, 178, 3), (0, 0, self.screen.get_width(), self.y))
-            # self.y = 0
-            self.anim_step = 0
-
+                self.anim_step = 0
