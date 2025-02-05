@@ -7,6 +7,7 @@ pygame.init()
 FONT_MD = pygame.font.Font("fonts/Inter.ttf", 16)
 FONT_LG = pygame.font.Font("fonts/Inter.ttf", 30)
 FONT_XL = pygame.font.Font("fonts/Inter.ttf", 48)
+FONT_XXL = pygame.font.Font("fonts/Inter.ttf", 72)
 
 # Font used in Overdrawn at the Memory Bank
 FONT_FINGAL_MD = pygame.font.Font("fonts/HandelGo.ttf", 16)

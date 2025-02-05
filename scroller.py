@@ -1,4 +1,5 @@
 import os.path
+import random
 import urllib.error
 
 import pygame.display
@@ -7,6 +8,7 @@ import schedule
 import summaries
 from anims.candy_heart_snow import CandyHeartSnow
 from anims.clover_snow import CloverSnow
+from anims.lights_off import LightsOff
 from anims.snow import SnowFlake
 from colors import *
 from constants import VALENTINES_DAY
@@ -76,6 +78,10 @@ main_summary = ""
 main_year = ""
 fun_objs = []
 time_until = ""  # Used to display time until next movie
+
+animation = None
+anim_x1 = 0
+anim_x2 = 0
 
 # Used for fading between "Playing" and "Up Next"
 header_color = pygame.Color(192, 192, 0, 0)
@@ -339,10 +345,16 @@ def draw_vertical_separators(screen):
 
 def draw_loading(screen):
     screen.fill(BLACK)
-    img = pygame.image.load('images/fun/seven_years_later.png').convert_alpha()
-    screen.blit(img, ((WIDTH - img.get_width()) // 2, (HEIGHT - img.get_height()) // 2))
-    screen.blit(TXT_LOADING, (100, HEIGHT - 100))
-    pygame.display.flip()
+    rn = random.randint(1, 2)
+    if rn == 1:
+        img = pygame.image.load('images/fun/seven_years_later.png').convert_alpha()
+        screen.blit(img, ((WIDTH - img.get_width()) // 2, (HEIGHT - img.get_height()) // 2))
+        screen.blit(TXT_LOADING, (100, HEIGHT - 100))
+        pygame.display.flip()
+    elif rn == 2:
+        img = pygame.image.load('images/fun/turn_lights_down.png').convert_alpha()
+        screen.blit(img, (0, 0))
+        pygame.display.flip()
 
 
 def setup(screen):
@@ -487,6 +499,19 @@ def main_loop(screen):
 if __name__ == '__main__':
     scr = pygame.display.set_mode((WIDTH, HEIGHT))
     clk = pygame.time.Clock()
+
+    # is_running = True
+    # lo = LightsOff(scr)
+    #
+    # while is_running:
+    #     lo.animate()
+    #     pygame.display.flip()
+    #
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT:
+    #             is_running = False
+    #
+    # pygame.quit()
 
     # summaries.refresh()
     # setup(scr)
