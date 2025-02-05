@@ -24,6 +24,7 @@ from anims.sandstorm import SandStorm
 from anims.shuriken import Shuriken
 from anims.skull import ScreamingSkull
 from anims.skydiver import Skydiver
+from anims.slime import Slime
 from anims.sol import SOL
 from anims.starfighter import Starfighter
 from anims.time_chasers_plane import TimeChasersPlane
@@ -42,6 +43,7 @@ ANIMS_BY_EPNUM = {
     "003": (MST3KMoon, 1),
     "004": (WhiteDot, 1),
     "005": (Exeter, 1),
+    "108": (Slime, 1),
     "111": (MoonBug, 1),
     "301": (AtorGlider, 1),
     "302": (Gamera, 1),
@@ -101,8 +103,9 @@ def get(screen, title: str, epnum: str) -> []:
         # Choose a random animation
         return get_by_epnum(screen, random.choice(
             ['001', '002', '003', '004', '005',
-             '111', '301', '302', '303', '310', '322', '410', '413', '414', '424', '609', '611', '612', '620', '624',
-             '701', '820', '821', '822', '903', '910', '912', '1007', '1304', '1306', '1307']))
+             '108', '111', '301', '302', '303', '310', '322', '410', '413', '414', '424',
+             '609', '611', '612', '620', '624', '701', '820', '821', '822',
+             '903', '910', '912', '1007', '1304', '1306', '1307']))
 
 
 class FunFactory:
