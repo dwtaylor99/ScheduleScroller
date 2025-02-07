@@ -9,6 +9,7 @@ from os import listdir
 from os.path import isfile, join
 
 import pygame.image
+from aiohttp import ClientConnectorError
 from twitchio import Message, Channel, AuthenticationError, Unauthorized
 from twitchio.ext import commands, routines
 
@@ -31,7 +32,7 @@ from botscramble import SCRAMBLED_WORDS
 from character_game import CHARACTERS, CHARACTER_PATH
 from colors import *
 from constants import *
-from fonts import STR_STINGER, TXT_STINGER, FONT_MST3K_LG, TXT_EMOJI, FONT_EMOJI_LG, TXT_CHARACTER
+from fonts import STR_STINGER, TXT_STINGER, FONT_MST3K_LG, TXT_EMOJI, FONT_EMOJI_LG, TXT_CHARACTER, STR_CHARACTER
 from movie_names import MOVIE_NAMES
 from util_text import wrap_text
 
@@ -129,8 +130,11 @@ class TriviaVox(commands.Bot):
         self.quotes = botquote.load()
 
     async def check_if_live(self):
-        streams = await self.fetch_streams(user_ids=[CHANNEL_ID])
-        self.is_live = len(streams) > 0
+        try:
+            streams = await self.fetch_streams(user_ids=[CHANNEL_ID])
+            self.is_live = len(streams) > 0
+        except ClientConnectorError:
+            print("ERROR: Could not reach the stream to test if live. is_live=" + str(self.is_live))
 
     async def bot_print(self, txt):
         print(txt)
@@ -212,6 +216,10 @@ class TriviaVox(commands.Bot):
         if message.echo:
             return
 
+        username = message.author.name  # "WhisperUser" doesn't have a display name attribute
+        if message.author.display_name:
+            username = message.author.display_name
+
         # Check if this is a command to display a quote
         output = ""
         msg = str(message.content).strip()
@@ -232,13 +240,13 @@ class TriviaVox(commands.Bot):
                         output = self.quotes[command].quotes[specific_num - 1]
                     else:
                         output = self.quotes[command].quote()
-            output = botquote.apply_params(output, msg, message.author.display_name, scroller.sched[0]['title'])
+            output = botquote.apply_params(output, msg, username, scroller.sched[0]['title'])
             await self.bot_print(output)
 
         if self.trivia_question is not None:
             guess = util_text.normalize_answers([message.content])[0]
             if guess in self.trivia_question.answers:
-                self.trivia_winners.append(message.author.display_name)
+                self.trivia_winners.append(username)
 
                 # Only start the timer after the first winner is detected.
                 if len(self.trivia_winners) == 1:
@@ -246,7 +254,6 @@ class TriviaVox(commands.Bot):
                     await self.stop_trivia()
 
         # Is the user in the middle of a personal trivia game ("!gems redeem")
-        username = message.author.display_name
         if username in self.personal_trivia.keys():
             # If the user ia a subscriber, put their name in the sub_list.
             if message.author.is_subscriber:
@@ -267,7 +274,7 @@ class TriviaVox(commands.Bot):
                 bottrivia.save_trivia_user_with_points(username, bottrivia.get_trivia_points(username) + 1)
             else:
                 await self.bot_print("@{}, sorry, that's incorrect. The answer is: {}"
-                                     .format(message.author.display_name, preserved_answer))
+                                     .format(username, preserved_answer))
 
             # remove user from personal_trivia
             del self.personal_trivia[username]
@@ -382,7 +389,7 @@ class TriviaVox(commands.Bot):
                 character = random.choice(CHARACTERS)
 
             answers = character.names
-            self.trivia_question = bottrivia.Trivia(STR_STINGER, answers)
+            self.trivia_question = bottrivia.Trivia(STR_CHARACTER, answers)
 
             self.preserved_answer = self.trivia_question.answers[0]
             self.trivia_question.answers = util_text.normalize_answers(self.trivia_question.answers)
@@ -500,7 +507,9 @@ class TriviaVox(commands.Bot):
     # @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.user)
     @commands.command(name="gems", aliases=['Gems', 'GEMS'])
     async def cmd_gems(self, ctx: commands.Context):
-        username = ctx.author.display_name
+        username = ctx.author.name
+        if ctx.author.display_name:
+            username = ctx.author.display_name
         gems = int(botgems.get_gems(username))
         parts = ctx.message.content.strip().split(" ")
         if len(parts) > 1:
