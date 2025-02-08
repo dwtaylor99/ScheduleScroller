@@ -10,7 +10,16 @@ class Shuriken(FunBase):
 
     def __init__(self, screen: Surface):
         super().__init__(screen)
-        self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/shuriken.png'), 0.5).convert_alpha()
+        rn = random.randint(1, 4)
+        if rn == 1:
+            self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/shuriken.png'), 0.5).convert_alpha()
+        elif rn == 2:
+            self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/shuriken2.png'), 0.4).convert_alpha()
+        elif rn == 3:
+            self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/shuriken3.png'), 0.4).convert_alpha()
+        else:
+            self.img = pygame.transform.smoothscale_by(pygame.image.load('images/fun/shuriken4.png'), 0.4).convert_alpha()
+
         self.x = random.randrange(-500, -150)
         self.y = random.randrange(50, screen.get_height() // 2 - 200)
         self.vel_x = 10 + (random.randrange(0, 3))
