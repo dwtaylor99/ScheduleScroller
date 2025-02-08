@@ -56,4 +56,4 @@ def generate_response(prompt: str) -> str:
 
 
 if __name__ == '__main__':
-    print(generate_response("What is the Twitch channel?"))
+    print(generate_response("What is the Twitch channel for Mystery Science Theater 3000?"))
