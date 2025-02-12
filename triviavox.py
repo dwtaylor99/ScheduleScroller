@@ -174,7 +174,7 @@ class TriviaVox(commands.Bot):
         self.auto_update_time_until.start()
         self.auto_trivia_stop.start()
         self.auto_update_game.start()
-        self.auto_message.start()
+        # self.auto_message.start()
 
         ts = int(datetime.now().timestamp())
         try:
