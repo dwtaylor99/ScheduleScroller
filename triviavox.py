@@ -174,6 +174,7 @@ class TriviaVox(commands.Bot):
         self.auto_update_time_until.start()
         self.auto_trivia_stop.start()
         self.auto_update_game.start()
+        self.auto_message.start()
 
         ts = int(datetime.now().timestamp())
         try:
@@ -453,10 +454,17 @@ class TriviaVox(commands.Bot):
     async def auto_update_game(self):
         self.game_loop()
 
-    @routines.routine(minutes=15)
+    @routines.routine(minutes=20)
     async def auto_message(self):
-        output = ("MST3K trivia every 5 minutes. " 
-                  "Watch on 'Source' mode to reduce latency between screen and chat (!latency for more).")
+        # output = ("MST3K trivia every 5 minutes. "
+        #           "Watch on 'Source' mode to reduce latency between screen and chat (!latency for more).")
+        # output = ("Ads have been reduce as much as possible to 30 seconds every hour (the lowest amount allowed "
+        #           "by Twitch). Thank you for your patience while I tested channel ads. I feel it's better to "
+        #           "minimize ads to increase enjoyment rather than trying to monetize this channel. "
+        #           "Thank you for all your support with subs and bits!")
+        output = """Ads have been reduced to the lowest allowed by Twitch, 30 seconds/hour.
+                    I feel this is the best way to maximize enjoyment of the channel.                
+                    Thank you for your patience and support!"""
         await self.bot_print(output)
 
     async def stop_trivia(self):
