@@ -504,7 +504,12 @@ class TriviaVox(commands.Bot):
         else:
             await self.bot_print("Sorry, you do not have permission to run this command.")
 
-    # @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.user)
+    @commands.command(name="credits")
+    async def cmd_credits(self, ctx: commands.Context):
+        """Show MovieVox/TriviaVox credits"""
+
+        await self.bot_print("MovieVox by LeftFourDave. Built using Python, Pygame, and TwitchIO. https://ko-fi.com/leftfourdave")
+
     @commands.command(name="gems", aliases=['Gems', 'GEMS'])
     async def cmd_gems(self, ctx: commands.Context):
         username = ctx.author.name

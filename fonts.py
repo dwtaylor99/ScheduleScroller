@@ -4,6 +4,7 @@ from colors import YELLOW
 
 pygame.init()
 
+FONT_SM = pygame.font.Font("fonts/Inter.ttf", 13)
 FONT_MD = pygame.font.Font("fonts/Inter.ttf", 16)
 FONT_LG = pygame.font.Font("fonts/Inter.ttf", 30)
 FONT_XL = pygame.font.Font("fonts/Inter.ttf", 48)
@@ -20,6 +21,8 @@ FONT_MST3K_LG = pygame.font.Font("fonts/SimianText_Orangutan.otf", 36)
 FONT_MST3K_XL = pygame.font.Font("fonts/SimianText_Orangutan.otf", 52)
 
 # Font used to render emoji
+FONT_EMOJI_SM = pygame.font.Font("fonts/seguiemj.ttf", 18)
+FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 22)
 FONT_EMOJI_LG = pygame.font.Font("fonts/seguiemj.ttf", 44)
 
 STR_STINGER = "Name the MST3K movie this stinger is from:"
