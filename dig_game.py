@@ -37,8 +37,10 @@ BICYCLE_SPEED = 1.0
 HOUSES = ["🏚️", "🏠", "🏡"]
 HOUSE_UPGRADE_1 = 75
 HOUSE_UPGRADE_2 = 150
+FINAL_HOUSE = "🏛️"  # For potential future use
 
 BACKPACK_UPGRADE = 100
+KEY_COST = 25
 
 HANDS = "🤛"
 HAMMER = "🔨"
@@ -52,8 +54,15 @@ BIKE = "🚲"
 BACKPACK = "🎒"
 CART = "🛒"
 
+CHEST = "🧰"
 OLD_KEY = "🗝️"
 SCROLL = "📜"
+GAMBLE1 = "🎰"
+GAMBLE2 = "🎲"
+GAMBLE3 = "🎱"
+MONEY_BAG = "💰"
+HOLE = "🕳️"
+
 BOMB = "💣"
 EXPLOSION = "💥"
 
@@ -62,6 +71,10 @@ SPACE_W = SPACE_H = 22
 
 TIME_PER_ITEM = 2000
 INFINITE_DURABILITY = 999999
+
+BOULDER_SYM = "⚪"
+TXT_BOULDER = FONT_EMOJI_SM.render(BOULDER_SYM, True, WHITE)
+TXT_CHEST = FONT_EMOJI_SM.render(CHEST, True, WHITE)
 
 is_paused = False
 
@@ -73,7 +86,9 @@ class Action(Enum):
     DIGGING = 3
 
 
-class Reward(Enum):
+class Drop(Enum):
+    """DROP = (Name, Value, Inventory_Representation)"""
+
     EMPTY = ("", 0, "")  # A cave space that has already been dug out.
     NONE = ("None", 0, "")  # A cave space with no reward, but still needs to be dug out.
     CLAY = ("Clay", 1, "🟤")
@@ -83,6 +98,9 @@ class Reward(Enum):
     SILVER = ("Silver", 10, "⬜")
     GOLD = ("Gold", 20, "🟨")
     DIAMOND = ("Diamond", 30, "💎")
+    CHEST = ("Chest", 0, CHEST)
+    BOULDER = ("Boulder", 0, BOULDER_SYM)
+    EXPOSED_BOULDER = ("Exposed Boulder", 0, BOULDER)
 
 
 class Tool:
@@ -135,9 +153,11 @@ class Player:
         self.name = name
         self.area = 0
         self.level = generate_area(self.area)
+        self.level_strikes = [0] * AREA_SIZES[self.area]
         self.x = HOME_X
         self.transport = ""
         self.speed = 0.5
+        self.speed_boost = 1.0
         self.house_index = 0
         self.icon_index = random.randrange(0, 12)
         self.action = Action.STANDING
@@ -145,20 +165,25 @@ class Player:
         self.target_index = 0
         self.tool: Tool = Pick1()
         self.tick = 0
-        self.dig_strike = 0
         self.backpack_level = 0
         self.max_inventory = 3
         self.inventory = []
+        self.chest_count = 0
         self.money = 0
 
     def draw_level(self, scrn, num):
         y = (SPACE_H * num) + (num * 50) + 32
 
+        # Draw the area cells
         for i, lvl in enumerate(self.level):
-            if lvl != Reward.EMPTY:
-                pygame.draw.rect(scrn, AREA_COLORS[self.area], (50 + (i * SPACE_W), y, SPACE_W + 1, SPACE_H))
-            else:
+            # Render boulders first so they are covered by the area cells
+            if lvl == Drop.EXPOSED_BOULDER:
+                scrn.blit(TXT_BOULDER, (50 + (i * SPACE_W), y))
+
+            if lvl in [Drop.EMPTY, Drop.EXPOSED_BOULDER]:
                 pygame.draw.rect(scrn, AREA_COLORS[self.area], (50 + (i * SPACE_W), y, SPACE_W + 1, SPACE_H), 1)
+            else:
+                pygame.draw.rect(scrn, AREA_COLORS[self.area], (50 + (i * SPACE_W), y, SPACE_W + 1, SPACE_H))
 
         if self.area < len(AREA_SIZES):
             person = FONT_EMOJI_SM.render(STANDING[self.icon_index], True, WHITE)
@@ -184,8 +209,13 @@ class Player:
 
             scrn.blit(person, (self.x, y))
 
+        # Draw the player's house
         house = FONT_EMOJI_MD.render(HOUSES[self.house_index], True, WHITE)
         scrn.blit(house, (HOME_X - 8, y - 2))
+
+        # Display legends
+        # scrn.blit(txt_progress, (10, scrn.get_height() - 48))
+        # scrn.blit(txt_items, (10, scrn.get_height() - 24))
 
         # Status:
         inv_list = []
@@ -200,16 +230,11 @@ class Player:
         if dur == INFINITE_DURABILITY:
             dur = "-"
 
-        # Display progress legend
-        scrn.blit(txt_progress, (10, scrn.get_height() - 48))
-
-        # Display item legend
-        scrn.blit(txt_items, (10, scrn.get_height() - 24))
-
         scrn.blit(FONT_EMOJI_SM.render(self.name, True, WHITE), (HOME_X - 5, y - SPACE_H - 3))
         scrn.blit(FONT_EMOJI_SM.render("⛰️: {}".format(self.area + 1), True, WHITE), (HOME_X + 170, y - SPACE_H - 3))
         scrn.blit(FONT_EMOJI_SM.render("💲{}".format(self.money), True, WHITE), (HOME_X + 220, y - SPACE_H - 5))
-        scrn.blit(FONT_EMOJI_SM.render("{}: {} ({})".format(self.tool.emoji, self.tool.name, dur), True, WHITE), (HOME_X + 300, y - SPACE_H - 5))
+        scrn.blit(FONT_EMOJI_SM.render("{} ({})".format(self.tool.emoji, dur), True, WHITE), (HOME_X + 300, y - SPACE_H - 5))
+        scrn.blit(FONT_EMOJI_SM.render("{}".format(CHEST * self.chest_count), True, WHITE), (HOME_X + 460, y - SPACE_H - 5))
         scrn.blit(FONT_EMOJI_SM.render("️{}".format(BOOT if self.transport != BICYCLE else BIKE), True, WHITE), (HOME_X + 540, y - SPACE_H - 5))
         scrn.blit(FONT_EMOJI_SM.render("️{}: {}".format(BACKPACK if self.backpack_level == 0 else CART, inven), True, WHITE), (HOME_X + 565, y - SPACE_H - 5))
 
@@ -230,19 +255,20 @@ class Player:
         if self.x == HOME_X:
             non_empty_spaces = 0
             for lvl in self.level:
-                if lvl != Reward.EMPTY:
+                if lvl != Drop.EMPTY:
                     non_empty_spaces += 1
             if non_empty_spaces == 0:
                 self.area += 1
                 self.level = generate_area(self.area)
+                self.level_strikes = [0] * AREA_SIZES[self.area]
 
         # If inventory is full, return home
         if len(self.inventory) == self.max_inventory and self.x > HOME_X:
             self.action = Action.WALKING_LEFT
-            self.x = round(self.x - self.speed, 2)
+            self.x = round(self.x - (self.speed * self.speed_boost), 2)
             self.target_x = HOME_X
 
-        # If we have items and we're home, start emptying the inventory
+        # If we have items, and we're home, start emptying the inventory
         elif len(self.inventory) > 0 and self.x == HOME_X and self.tick < TIME_PER_ITEM:
             # Waiting (emptying inventory)
             self.action = Action.STANDING
@@ -253,12 +279,46 @@ class Player:
             # Get money for inventory
             for inv in self.inventory:
                 name, val, emoji = inv.value
-                self.money += val * (self.house_index + 1)
+                if name == "Chest":
+                    self.chest_count += 1
+                else:
+                    self.money += val * (self.house_index + 1)
+
             self.inventory.clear()
             self.tick = 0
 
-        # If the player doesn't have a tool, buy the best the player can afford
-        elif self.x == HOME_X and self.tool.name == "Hands" and self.money >= Pick1().cost:
+            # If we have any chests, buy keys
+            while self.chest_count > 0 and self.money >= KEY_COST:
+                print("Opening chest")
+                self.money -= KEY_COST
+                # Open the chest and do whatever that means right here.
+                # Choose an effect: decrease speed, break current tool, break bicycle
+                rn = random.randint(1, 100)
+                if 1 <= rn <= 10:
+                    self.speed_boost = 1.5
+                elif 11 <= rn <= 20:
+                    self.speed_boost = 0.5
+                elif 21 <= rn <= 30:
+                    self.tool = Pick5()
+                elif 31 <= rn <= 40:
+                    self.tool = Hands()
+                elif 41 <= rn <= 50:
+                    self.transport = BICYCLE
+                elif 51 <= rn <= 60:
+                    self.transport = ""
+                elif 61 <= rn <= 70:
+                    self.money += 100
+                elif 71 <= rn <= 80:
+                    self.money -= 100
+                    self.money = 0 if self.money < 0 else self.money
+                elif 81 <= rn <= 90:
+                    self.money += 50
+                elif 91 <= rn <= 100:
+                    self.money -= 50
+                    self.money = 0 if self.money < 0 else self.money
+
+        # If the player doesn't have a tool or tool is nearly broken, buy the best the player can afford
+        elif self.x == HOME_X and (self.tool.name == "Hands" or self.tool.durability < 10) and self.money >= Pick1().cost:
             pick_tool = Pick1()
             if self.money >= Pick5().cost:
                 pick_tool = Pick5()
@@ -295,13 +355,13 @@ class Player:
 
         # If the player has no tool, they need to continue walking home to buy a tool
         elif self.target_x == HOME_X and self.action == Action.WALKING_LEFT and self.tool.name == "Hands":
-            self.x = round(self.x - self.speed, 2)
+            self.x = round(self.x - (self.speed * self.speed_boost), 2)
 
         else:
             # Find first diggable space (non-EMPTY)
             space_index = 0
             for space in self.level:
-                if space == Reward.EMPTY:
+                if space == Drop.EMPTY:
                     space_index += 1
                 else:
                     self.target_index = space_index
@@ -311,12 +371,12 @@ class Player:
             # Player is left of the target, so walk right
             if self.x < self.target_x:
                 self.action = Action.WALKING_RIGHT
-                self.x = round(self.x + self.speed, 2)
+                self.x = round(self.x + (self.speed * self.speed_boost), 2)
 
             # Player is right of the target, so walk left
             elif self.x > self.target_x:
                 self.action = Action.WALKING_LEFT
-                self.x = round(self.x - self.speed, 2)
+                self.x = round(self.x - (self.speed * self.speed_boost), 2)
 
             # Player is at the target x pos, start digging
             if abs(self.x - self.target_x) < 0.1:
@@ -326,7 +386,7 @@ class Player:
                 # Enough time has passed for a "dig"
                 if self.tick >= self.tool.speed:
                     self.tick = 0
-                    self.dig_strike += 1
+                    self.level_strikes[self.target_index] += 1
 
                     # Reduce tool durability, if possible
                     if self.tool.durability != INFINITE_DURABILITY:
@@ -345,25 +405,35 @@ class Player:
                     # If player has no tool, but has money for a tool, return home to buy one
                     if self.tool.name == "Hands" and (self.money + potential_money) >= Pick1().cost:
                         self.action = Action.WALKING_LEFT
-                        self.x = round(self.x - self.speed, 2)
+                        self.x = round(self.x - (self.speed * self.speed_boost), 2)
                         self.target_x = HOME_X
 
-                # After 5 strikes of the tool, gather any reward drops
-                if self.dig_strike == 5:
+                # After (area + 2) strikes of the tool, gather any reward drops
+                if self.level_strikes[self.target_index] == (self.area + 2):
                     self.tick = 0
-                    self.dig_strike = 0
 
-                    # If a reward dropped, add it to inventory
-                    if self.level[self.target_index] != Reward.NONE:
+                    # If a reward is dropped, add it to inventory
+                    if self.level[self.target_index] not in [Drop.NONE, Drop.BOULDER, Drop.EXPOSED_BOULDER]:
+                        # Add drop to inventory
                         self.inventory.append(self.level[self.target_index])
+                        # Mark the level space as EMPTY
+                        self.level[self.target_index] = Drop.EMPTY
 
-                    # Mark the level space as EMPTY
-                    self.level[self.target_index] = Reward.EMPTY
+                    elif self.level[self.target_index] == Drop.BOULDER:
+                        self.level[self.target_index] = Drop.EXPOSED_BOULDER
+
+                    elif self.level[self.target_index] == Drop.EXPOSED_BOULDER:
+                        # 25% chance of dropping a diamond, otherwise drop gold
+                        self.inventory.append(Drop.DIAMOND if random.randint(1, 4) == 1 else Drop.GOLD)
+                        self.level[self.target_index] = Drop.EMPTY
+
+                    else:
+                        self.level[self.target_index] = Drop.EMPTY
 
                     # If all spaces of the level are empty, return home to move to next area
                     if self.target_index == AREA_SIZES[self.area] - 1:
                         self.action = Action.WALKING_LEFT
-                        self.x = round(self.x - self.speed, 2)
+                        self.x = round(self.x - (self.speed * self.speed_boost), 2)
                         self.target_x = HOME_X
 
 
@@ -385,15 +455,30 @@ def generate_area1():
     for depth in range(AREA_SIZES[0]):
         rn = random.randint(1, 100) + depth  # add the depth so items are more likely as you go deeper
         if 60 <= rn <= 69:
-            area.append(Reward.CLAY)
+            area.append(Drop.CLAY)
         elif 70 <= rn <= 90:
-            area.append(Reward.STONE)
+            area.append(Drop.STONE)
         elif 91 <= rn <= 98:
-            area.append(Reward.COPPER)
+            area.append(Drop.COPPER)
         elif 99 <= rn <= 100:
-            area.append(Reward.IRON)
+            area.append(Drop.IRON)
         else:
-            area.append(Reward.NONE)
+            area.append(Drop.NONE)
+
+    # Add 20% chance of a boulder around the mid-point of the area:
+    if random.randint(1, 5) == 1:
+        for i in range(AREA_SIZES[0] // 2, AREA_SIZES[0]):
+            if area[i] == Drop.NONE:
+                area[i] = Drop.BOULDER
+                break
+
+    # Add 20% chance for a chest near the end of the area:
+    if random.randint(1, 5) == 1:
+        for i in range(AREA_SIZES[0] // 2 + 10, AREA_SIZES[0]):
+            if area[i] == Drop.NONE:
+                area[i] = Drop.CHEST
+                break
+
     return area
 
 
@@ -402,17 +487,31 @@ def generate_area2():
     for depth in range(AREA_SIZES[1]):
         rn = random.randint(1, 100) + depth  # add the depth so items are more likely as you go deeper
         if 40 <= rn <= 49:
-            area.append(Reward.CLAY)
+            area.append(Drop.CLAY)
         elif 50 <= rn <= 70:
-            area.append(Reward.STONE)
+            area.append(Drop.STONE)
         elif 71 <= rn <= 89:
-            area.append(Reward.COPPER)
+            area.append(Drop.COPPER)
         elif 90 <= rn <= 95:
-            area.append(Reward.IRON)
+            area.append(Drop.IRON)
         elif 96 <= rn <= 100:
-            area.append(Reward.SILVER)
+            area.append(Drop.SILVER)
         else:
-            area.append(Reward.NONE)
+            area.append(Drop.NONE)
+
+    # Add 25% chance of a boulder around the mid-point of the area:
+    if random.randint(1, 4) == 1:
+        for i in range(AREA_SIZES[0] // 2, AREA_SIZES[0]):
+            if area[i] == Drop.NONE:
+                area[i] = Drop.BOULDER
+                break
+    # Add 25% chance of a chest near the end of the area:
+    if random.randint(1, 4) == 1:
+        for i in range(AREA_SIZES[0] // 2 + 10, AREA_SIZES[0]):
+            if area[i] == Drop.NONE:
+                area[i] = Drop.CHEST
+                break
+
     return area
 
 
@@ -421,17 +520,32 @@ def generate_area3():
     for depth in range(AREA_SIZES[2]):
         rn = random.randint(1, 100) + depth  # add the depth so items are more likely as you go deeper
         if 40 <= rn <= 49:
-            area.append(Reward.STONE)
+            area.append(Drop.STONE)
         elif 50 <= rn <= 70:
-            area.append(Reward.COPPER)
+            area.append(Drop.COPPER)
         elif 71 <= rn <= 89:
-            area.append(Reward.IRON)
+            area.append(Drop.IRON)
         elif 90 <= rn <= 95:
-            area.append(Reward.SILVER)
+            area.append(Drop.SILVER)
         elif 96 <= rn <= 100:
-            area.append(Reward.GOLD)
+            area.append(Drop.GOLD)
         else:
-            area.append(Reward.NONE)
+            area.append(Drop.NONE)
+
+    # Add 33% chance of a boulder around the mid-point of the area:
+    if random.randint(1, 3) == 1:
+        for i in range(AREA_SIZES[0] // 2, AREA_SIZES[0]):
+            if area[i] == Drop.NONE:
+                area[i] = Drop.BOULDER
+                break
+
+    # Add 33% chance of a chest near the end of the area:
+    if random.randint(1, 3) == 1:
+        for i in range(AREA_SIZES[0] // 2 + 10, AREA_SIZES[0]):
+            if area[i] == Drop.NONE:
+                area[i] = Drop.CHEST
+                break
+
     return area
 
 
@@ -440,17 +554,32 @@ def generate_area4():
     for depth in range(AREA_SIZES[3]):
         rn = random.randint(1, 100) + depth  # add the depth so items are more likely as you go deeper
         if 40 <= rn <= 49:
-            area.append(Reward.COPPER)
+            area.append(Drop.COPPER)
         elif 50 <= rn <= 70:
-            area.append(Reward.IRON)
+            area.append(Drop.IRON)
         elif 71 <= rn <= 89:
-            area.append(Reward.SILVER)
+            area.append(Drop.SILVER)
         elif 90 <= rn <= 95:
-            area.append(Reward.GOLD)
+            area.append(Drop.GOLD)
         elif 96 <= rn <= 100:
-            area.append(Reward.DIAMOND)
+            area.append(Drop.DIAMOND)
         else:
-            area.append(Reward.NONE)
+            area.append(Drop.NONE)
+
+    # Add 50% chance of a boulder around the mid-point of the area:
+    if random.randint(1, 2) == 1:
+        for i in range(AREA_SIZES[0] // 2, AREA_SIZES[0]):
+            if area[i] == Drop.NONE:
+                area[i] = Drop.BOULDER
+                break
+
+    # Add 50% chance of a chest near the end of the area:
+    if random.randint(1, 2) == 1:
+        for i in range(AREA_SIZES[0] // 2 + 10, AREA_SIZES[0]):
+            if area[i] == Drop.NONE:
+                area[i] = Drop.CHEST
+                break
+
     return area
 
 
@@ -466,7 +595,7 @@ def legend_progress():
 
 def legend_items():
     legend = []
-    for e in Reward:
+    for e in Drop:
         name, value, emoji = e.value
         if emoji != "":
             legend.append("{}{}=${}".format(emoji, name, value))
@@ -483,11 +612,11 @@ if __name__ == '__main__':
     txt_progress = legend_progress()
     txt_items = legend_items()
 
-    players = [Player("LeftFourDave"), Player("BigEdith"), Player("Rornicus"), Player("meshuggen8r"),
-               Player("Bette_Meddler"), Player("ohjanji"), Player("ShirouHokuto")]
+    players = [Player("LeftFourDave"), Player("BigEdith"), Player("Rornicus"), Player("meshuggen8r")]
+    # Player("Bette_Meddler"), Player("ohjanji"), Player("ShirouHokuto")]
 
-    for pl in players:
-        pl.tool = Pick5()
+    # for pl in players:
+    #     pl.tool = Pick5()
 
     while is_running:
         screen.fill((0, 0, 0))
@@ -508,24 +637,23 @@ if __name__ == '__main__':
                 if event.key == pygame.K_p:
                     is_paused = not is_paused
                     print("is_paused", is_paused)
-                elif event.key in [pygame.K_PLUS, pygame.K_KP_PLUS]:
-                    for pl in players:
-                        pl.speed += 0.5
-                    print("speed:", players[0].speed)
-                elif event.key in [pygame.K_MINUS, pygame.K_KP_MINUS]:
-                    for pl in players:
-                        pl.speed -= 0.5
-                    print("speed:", players[0].speed)
 
     pygame.quit()
 
 """
 TODO:
+* Add bombs that can clear a cell quickly. Bombs can be purchased from an upgraded home.
+* Add gambling where player can win or lose money.
+* Bonus/side areas? Accessed via a hole or something to get special items: gambling items, free upgrades, etc
 
++ Chest supply positive/negative effects for player (decrease speed, break current tool, break bicycle, etc)
++ Replace tool when it's too low (<10 durability)
++ Digging takes more time in later levels (2 + area = 2, 3, 4, 5)
++ Add toolboxes (chests) that are returned home to be opened with keys. How do we get keys? Purchase or discover?
++ Add boulders: encountering a boulder adds X time to breaking but results in a guaranteed reward (best of the area?)
 + Sell inventory when nothing left to do.
 + When tool == Hands, draw a hand instead of a pickaxe.
 + Any time you go home, sell inventory
 + If using Hands, as soon as money is available, get a tool.
 + Backpack upgrade
-
 """
