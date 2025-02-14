@@ -741,7 +741,7 @@ if __name__ == '__main__':
 
 """
 TODO:
-(nothing)
+Check the date around midnight to see if special colors apply (Valentine's Day, St Patrick's Day, etc)
 
 Troublesome emoji:
 [1]    102 - Robot vs Aztec Mummy (Mexico flag) [1]            🤖🆚🇲🇽⚰️🧟‍♂️
