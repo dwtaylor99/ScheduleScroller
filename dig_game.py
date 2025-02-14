@@ -23,17 +23,17 @@ from fonts import FONT_EMOJI_SM, FONT_EMOJI_MD, FONT_EMOJI_LG
 FPS = 60
 
 AREA_SIZES = [35, 35, 40, 40, 40]
-AREA_COLORS = [(100, 100, 100), (100, 100, 0), (30, 100, 30), (0, 0, 100), (100, 0, 0)]
+AREA_COLORS = [(80, 80, 80), (130, 130, 0), (30, 100, 30), (0, 0, 100), (100, 0, 0)]
 
 STANDING = ["🧍‍♂️", "🧍🏻‍♂️", "🧍🏼‍♂️", "🧍🏽‍♂️", "🧍🏾‍♂️", "🧍🏿‍♂️", "🧍‍♀️", "🧍🏻‍♀️", "🧍🏼‍♀️", "🧍🏽‍♀️", "🧍🏾‍♀️", "🧍🏿‍♀️"]
 WALKING = ["🚶‍♂️", "🚶🏻‍♂️", "🚶🏼‍♂️", "🚶🏽‍♂️", "🚶🏾‍♂️", "🚶🏿‍♂️", "🚶‍♀️", "🚶🏻‍♀️", "🚶🏼‍♀️", "🚶🏽‍♀️", "🚶🏾‍♀️", "🚶🏿‍♀️"]
 RUNNING = ["🏃‍♂️", "🏃🏻‍♂️", "🏃🏼‍♂️", "🏃🏽‍♂️", "🏃🏾‍♂️", "🏃🏿‍♂️", "🏃‍♀️", "🏃🏻‍♀️", "🏃🏼‍♀️", "🏃🏽‍♀️", "🏃🏾‍♀️", "🏃🏿‍♀️"]
 BIKING = ["🚴‍♂️", "🚴🏻‍♂️", "🚴🏼‍♂️", "🚴🏽‍♂️", "🚴🏾‍♂️", "🚴🏿‍♂️", "🚴‍♀️", "🚴🏻‍♀️", "🚴🏼‍♀️", "🚴🏽‍♀️", "🚴🏾‍♀️", "🚴🏿‍♀️"]
 
-HOUSES = ["🏚️", "🏠", "🏡"]
+HOUSES = ["🏚️", "🏠", "🏡", "🏛️"]
 HOUSE_UPGRADE_1 = 75
 HOUSE_UPGRADE_2 = 150
-FINAL_HOUSE = "🏛️"  # For potential future use
+HOUSE_UPGRADE_3 = 400
 
 BACKPACK_UPGRADE = 100
 KEY_COST = 25
@@ -48,7 +48,7 @@ HAMMER_PICK = "⚒️"
 BACKPACK = "🎒"
 CART = "🛒"
 
-CHEST = "🧰"
+CHEST_SYM = "🧰"
 OLD_KEY = "🗝️"
 SCROLL = "📜"
 GAMBLE1 = "🎲"
@@ -73,7 +73,7 @@ INFINITE_DURABILITY = 999999
 
 BOULDER_SYM = "⚪"
 TXT_BOULDER = FONT_EMOJI_SM.render(BOULDER_SYM, True, WHITE)
-TXT_CHEST = FONT_EMOJI_SM.render(CHEST, True, WHITE)
+TXT_CHEST = FONT_EMOJI_SM.render(CHEST_SYM, True, WHITE)
 TXT_PAUSED = FONT_EMOJI_LG.render("PAUSED", True, WHITE)
 TXT_PAUSED_X = 0
 TXT_PAUSED_Y = 0
@@ -82,6 +82,10 @@ TRAN_NAME = 0
 TRAN_COST = 1
 TRAN_EMOJI = 2
 TRAN_SPEED = 3
+
+DROP_NAME = 0
+DROP_COST = 1
+DROP_EMOJI = 2
 
 is_paused = False
 
@@ -112,9 +116,9 @@ class Drop(Enum):
     SILVER = ("Silver", 10, "⬜")
     GOLD = ("Gold", 20, "🟨")
     DIAMOND = ("Diamond", 30, "💎")
-    CHEST = ("Chest", 0, CHEST)
+    CHEST = ("Chest", 0, CHEST_SYM)
     BOULDER = ("Boulder", 0, BOULDER_SYM)
-    EXPOSED_BOULDER = ("Exposed Boulder", 0, BOULDER)
+    EXPOSED_BOULDER = ("Exposed Boulder", 0, BOULDER_SYM)
 
 
 class Tool:
@@ -165,6 +169,7 @@ class Pick5(Tool):
 class Player:
     def __init__(self, name: str):
         self.name = name
+        self.status = ""
         self.area = 0
         self.level = generate_area(self.area)
         self.level_strikes = [0] * AREA_SIZES[self.area]
@@ -190,16 +195,17 @@ class Player:
         # Draw the area cells
         if self.area < len(AREA_SIZES):
             for i, lvl in enumerate(self.level):
+                x = 50 + (i * SPACE_W)
                 # Render boulders first so they are covered by the area cells
                 if lvl == Drop.EXPOSED_BOULDER:
-                    scrn.blit(TXT_BOULDER, (50 + (i * SPACE_W), y))
+                    scrn.blit(TXT_BOULDER, (x, y))
 
                 if lvl in [Drop.EMPTY, Drop.EXPOSED_BOULDER]:
-                    pygame.draw.rect(scrn, AREA_COLORS[self.area], (50 + (i * SPACE_W), y, SPACE_W + 1, SPACE_H), 1)
+                    pygame.draw.rect(scrn, AREA_COLORS[self.area], (x, y, SPACE_W + 1, SPACE_H), 1)
+                    scrn.blit(WALLS[self.area], (x, y))
                 else:
-                    pygame.draw.rect(scrn, AREA_COLORS[self.area], (50 + (i * SPACE_W), y, SPACE_W + 1, SPACE_H))
+                    pygame.draw.rect(scrn, AREA_COLORS[self.area], (x, y, SPACE_W + 1, SPACE_H))
 
-            person = FONT_EMOJI_SM.render(STANDING[self.icon_index], True, WHITE)
             if self.action == Action.DIGGING and self.tick < (self.tool.speed // 2):
                 tool_img = FONT_EMOJI_SM.render(self.tool.emoji, True, WHITE)
                 tool_img = pygame.transform.flip(tool_img, True, False)
@@ -242,6 +248,10 @@ class Player:
                 person = pygame.transform.flip(person, True, False)
                 scrn.blit(person, (self.x, y))
 
+            else:
+                person = FONT_EMOJI_SM.render(STANDING[self.icon_index], True, WHITE)
+                scrn.blit(person, (self.x, y))
+
         # Draw the player's house
         house = FONT_EMOJI_MD.render(HOUSES[self.house_index], True, WHITE)
         scrn.blit(house, (HOME_X - 8, y - 2))
@@ -253,26 +263,29 @@ class Player:
         # Status:
         inv_list = []
         for inv in self.inventory:
-            inv_list.append(inv.value[2])
+            inv_list.append(inv.value[DROP_EMOJI])
         inven = "".join(inv_list)
 
         dur = "-" if self.tool.durability == INFINITE_DURABILITY else self.tool.durability
 
         scrn.blit(FONT_EMOJI_SM.render(self.name, True, WHITE), (HOME_X - 5, y - SPACE_H - 3))
-        FONT_EMOJI_SM.set_bold(True)
-        scrn.blit(FONT_EMOJI_SM.render("⛰️: {}".format(self.area + 1), True, AREA_COLORS[self.area]), (HOME_X + 170, y - SPACE_H - 3))
-        FONT_EMOJI_SM.set_bold(False)
-        scrn.blit(FONT_EMOJI_SM.render("💲{}".format(self.money), True, "#00cc00"), (HOME_X + 220, y - SPACE_H - 5))
-        scrn.blit(FONT_EMOJI_SM.render("{} ({})".format(self.tool.emoji, dur), True, WHITE), (HOME_X + 300, y - SPACE_H - 5))
+        if self.area < len(AREA_SIZES):
+            FONT_EMOJI_SM.set_bold(True)
+            scrn.blit(FONT_EMOJI_SM.render("⛰️: {}".format(self.area + 1), True, AREA_COLORS[self.area]), (HOME_X + 170, y - SPACE_H))
+            FONT_EMOJI_SM.set_bold(False)
+        scrn.blit(FONT_EMOJI_SM.render("💲{}".format(self.money), True, "#00cc00"), (HOME_X + 220, y - SPACE_H - 3))
+        scrn.blit(FONT_EMOJI_SM.render("{} ({})".format(self.tool.emoji, dur), True, WHITE), (HOME_X + 300, y - SPACE_H - 3))
         if self.chest_count > 0:
-            scrn.blit(FONT_EMOJI_SM.render("{}×{}".format(CHEST, self.chest_count), True, WHITE), (HOME_X + 460, y - SPACE_H - 3))
-        scrn.blit(FONT_EMOJI_SM.render("️{}".format(self.transport.value[TRAN_EMOJI]), True, WHITE), (HOME_X + 540, y - SPACE_H - 5))
-        scrn.blit(FONT_EMOJI_SM.render("️{}: {}".format(BACKPACK if self.backpack_level == 0 else CART, inven), True, WHITE), (HOME_X + 565, y - SPACE_H - 5))
+            scrn.blit(FONT_EMOJI_SM.render("{}×{}".format(CHEST_SYM, self.chest_count), True, WHITE), (HOME_X + 460, y - SPACE_H - 3))
+        scrn.blit(FONT_EMOJI_SM.render("️{}".format(self.transport.value[TRAN_EMOJI]), True, WHITE), (HOME_X + 540, y - SPACE_H - 3))
+        scrn.blit(FONT_EMOJI_SM.render("️{}: {}".format(BACKPACK if self.backpack_level == 0 else CART, inven), True, WHITE), (HOME_X + 565, y - SPACE_H - 3))
 
     def dig(self):
+        status = []
 
         # Is the player done with all areas?
         if self.area >= len(AREA_SIZES):
+            status.append("Player is finished with all areas.")
             # Sell all remaining inventory if nothing left to do.
             if len(self.inventory) > 0:
                 for inv in self.inventory:
@@ -290,6 +303,7 @@ class Player:
                 if lvl != Drop.EMPTY:
                     non_empty_spaces += 1
             if non_empty_spaces == 0:
+                status.append("Moving to next area.")
                 self.area += 1
                 if self.area < len(AREA_SIZES):
                     self.level = generate_area(self.area)
@@ -297,6 +311,7 @@ class Player:
 
         # If inventory is full, return home
         if len(self.inventory) == self.max_inventory and self.x > HOME_X:
+            status.append("Inventory full so returning home.")
             self.action = Action.WALKING_LEFT
             self.x = round(self.x - self.speed, 2)
             self.target_x = HOME_X
@@ -304,57 +319,79 @@ class Player:
         # If we have items, and we're home, start emptying the inventory
         elif len(self.inventory) > 0 and self.x == HOME_X and self.tick < TIME_PER_ITEM:
             # Waiting (emptying inventory)
+            status.append("Emptying inventory.")
             self.action = Action.STANDING
             self.tick += dt
 
         # After waiting long enough to empty inventory, gain money for each item
         elif len(self.inventory) > 0 and self.x == HOME_X and self.tick >= TIME_PER_ITEM:
             # Get money for inventory
+            inv_amt = 0
             for inv in self.inventory:
                 name, val, emoji = inv.value
                 if name == "Chest":
                     self.chest_count += 1
                 else:
-                    self.money += val * (self.house_index + 1)
+                    inv_amt += val * (self.house_index + 1)
+
+            status.append("Gained ${} from selling inventory.".format(str(inv_amt)))
+            self.money += inv_amt
 
             self.inventory.clear()
             self.tick = 0
 
             # If we have any chests, buy keys
             while self.chest_count > 0 and self.money >= KEY_COST:
-                # print("Opening chest")
+                status.append("Buying a key to open chest...")
                 self.money -= KEY_COST
                 self.chest_count -= 1
-                # Open the chest and do whatever that means right here.
+
                 # Choose an effect: decrease speed, break current tool, break bicycle
+                eff = ""
                 rn = random.randint(1, 100)
                 if 1 <= rn <= 10:
-                    pass  # TODO: Add something good
+                    eff = "Backpack upgrade"
+                    if self.backpack_level == 0:
+                        self.backpack_level += 1
+                        self.max_inventory = 6
                 elif 11 <= rn <= 20:
-                    pass  # TODO: Add something bad
+                    eff = "Backpack downgrade"
+                    if self.backpack_level == 1:
+                        self.backpack_level -= 1
+                        self.max_inventory = 3
                 elif 21 <= rn <= 30:
+                    eff = "Gain best tool!"
                     self.tool = Pick5()
                 elif 31 <= rn <= 40:
+                    eff = "Broken tool"
                     self.tool = Hands()
                 elif 41 <= rn <= 50:
+                    eff = "Gain best transport!"
                     self.transport = Transport.MOTOR_SCOOTER
                     self.speed = Transport.MOTOR_SCOOTER.value[TRAN_SPEED]
                 elif 51 <= rn <= 60:
+                    eff = "Broken transport"
                     self.transport = Transport.BOOTS
                     self.speed = Transport.BOOTS.value[TRAN_SPEED]
                 elif 61 <= rn <= 70:
+                    eff = "Gain $100"
                     self.money += 100
                 elif 71 <= rn <= 80:
+                    eff = "Lose $100"
                     self.money -= 100
                     self.money = 0 if self.money < 0 else self.money
                 elif 81 <= rn <= 90:
+                    eff = "Gain $50"
                     self.money += 50
                 elif 91 <= rn <= 100:
+                    eff = "Lose $50"
                     self.money -= 50
                     self.money = 0 if self.money < 0 else self.money
+                status.append(" chest effect: {}".format(eff))
 
         # If the player doesn't have a tool or tool is nearly broken, buy the best the player can afford
         elif self.x == HOME_X and (self.tool.name == "Hands" or self.tool.durability < 10) and self.money >= Pick1().cost:
+            status.append("Buying a new tool...")
             pick_tool = Pick1()
             if self.money >= Pick5().cost:
                 pick_tool = Pick5()
@@ -364,47 +401,61 @@ class Player:
                 pick_tool = Pick3()
             elif self.money >= Pick2().cost:
                 pick_tool = Pick2()
+            status.append(" bought a {}".format(pick_tool.name))
 
             self.money -= pick_tool.cost
             self.tool = pick_tool
 
         # Check if player can afford a transport upgrade
-        elif (self.x == HOME_X and self.tool.name != "Hands" and self.transport == Transport.BOOTS and
-              self.money >= Transport.SCOOTER.value[TRAN_COST]):
+        elif (self.x == HOME_X and self.tool.name != "Hands" and self.money >= Transport.MOTOR_SCOOTER.value[TRAN_COST] and
+              self.transport in [Transport.BOOTS, Transport.SCOOTER, Transport.BIKE]):
+            status.append("Buying a Motor Scooter...")
+            self.transport = Transport.MOTOR_SCOOTER
+            self.money -= Transport.MOTOR_SCOOTER.value[TRAN_COST]
+            self.speed = Transport.MOTOR_SCOOTER.value[TRAN_SPEED]
 
-            if self.money >= Transport.MOTOR_SCOOTER.value[TRAN_COST]:
-                self.transport = Transport.MOTOR_SCOOTER
-                self.money -= Transport.MOTOR_SCOOTER.value[TRAN_COST]
-                self.speed = Transport.MOTOR_SCOOTER.value[TRAN_SPEED]
+        elif (self.x == HOME_X and self.tool.name != "Hands" and self.money >= Transport.BIKE.value[TRAN_COST] and
+              self.transport in [Transport.BOOTS, Transport.SCOOTER]):
+            status.append("Buying a Bike...")
+            self.transport = Transport.BIKE
+            self.money -= Transport.BIKE.value[TRAN_COST]
+            self.speed = Transport.BIKE.value[TRAN_SPEED]
 
-            elif self.money >= Transport.BIKE.value[TRAN_COST]:
-                self.transport = Transport.BIKE
-                self.money -= Transport.BIKE.value[TRAN_COST]
-                self.speed = Transport.BIKE.value[TRAN_SPEED]
-
-            elif self.money >= Transport.SCOOTER.value[TRAN_COST]:
-                self.transport = Transport.SCOOTER
-                self.money -= Transport.SCOOTER.value[TRAN_COST]
-                self.speed = Transport.SCOOTER.value[TRAN_SPEED]
+        elif (self.x == HOME_X and self.tool.name != "Hands" and self.money >= Transport.SCOOTER.value[TRAN_COST] and
+              self.transport == Transport.BOOTS):
+            status.append("Buying a Scooter...")
+            self.transport = Transport.SCOOTER
+            self.money -= Transport.SCOOTER.value[TRAN_COST]
+            self.speed = Transport.SCOOTER.value[TRAN_SPEED]
 
         # Check if player can afford to upgrade the backpack
         elif self.x == HOME_X and self.backpack_level == 0 and self.money >= BACKPACK_UPGRADE:
+            status.append("Upgrading backpack.")
             self.money -= BACKPACK_UPGRADE
             self.backpack_level += 1
             self.max_inventory = 6
 
         # Check if player can afford the first upgrade their house
         elif self.x == HOME_X and self.tool.name != "Hands" and self.house_index == 0 and self.money >= HOUSE_UPGRADE_1:
+            status.append("Upgrading house (first upgrade).")
             self.money -= HOUSE_UPGRADE_1
             self.house_index = 1
 
         # Check if player can afford the second upgrade their house
         elif self.x == HOME_X and self.tool.name != "Hands" and self.house_index == 1 and self.money >= HOUSE_UPGRADE_2:
+            status.append("Upgrading house (second upgrade).")
             self.money -= HOUSE_UPGRADE_2
             self.house_index = 2
 
+        # Check if player can afford the third upgrade their house
+        elif self.x == HOME_X and self.tool.name != "Hands" and self.house_index == 1 and self.money >= HOUSE_UPGRADE_3:
+            status.append("Upgrading house (third upgrade).")
+            self.money -= HOUSE_UPGRADE_3
+            self.house_index = 3
+
         # If the player has no tool, they need to continue walking home to buy a tool
         elif self.target_x == HOME_X and self.action == Action.WALKING_LEFT and self.tool.name == "Hands":
+            status.append("Continuing walk home.")
             self.x = round(self.x - self.speed, 2)
 
         else:
@@ -417,19 +468,23 @@ class Player:
                     self.target_index = space_index
                     self.target_x = 50 + ((space_index - 1) * SPACE_W) + 4
                     break
+            # status.append("Targeting cell {}.".format(str(self.target_index)))
 
             # Player is left of the target, so walk right
             if self.x < self.target_x:
+                # status.append("Walking right.")
                 self.action = Action.WALKING_RIGHT
                 self.x = round(self.x + self.speed, 2)
 
             # Player is right of the target, so walk left
             elif self.x > self.target_x:
+                # status.append("Walking left.")
                 self.action = Action.WALKING_LEFT
                 self.x = round(self.x - self.speed, 2)
 
             # Player is at the target x pos, start digging
             if abs(self.x - self.target_x) <= self.transport.value[TRAN_SPEED]:
+                status.append("Digging.")
                 self.x = self.target_x
                 self.action = Action.DIGGING
                 self.tick += dt
@@ -455,6 +510,7 @@ class Player:
 
                     # If player has no tool, but has money for a tool, return home to buy one
                     if self.tool.name == "Hands" and (self.money + potential_money) >= Pick1().cost:
+                        status.append("Returning home to buy a tool.")
                         self.action = Action.WALKING_LEFT
                         self.x = round(self.x - self.speed, 2)
                         self.target_x = HOME_X
@@ -466,17 +522,22 @@ class Player:
                     # If a reward is dropped, add it to inventory
                     if self.level[self.target_index] not in [Drop.NONE, Drop.BOULDER, Drop.EXPOSED_BOULDER]:
                         # Add drop to inventory
-                        self.inventory.append(self.level[self.target_index])
+                        drop = self.level[self.target_index]
+                        status.append("Picked up {}.".format(drop.name))
+                        self.inventory.append(drop)
                         # Mark the level space as EMPTY
                         self.level[self.target_index] = Drop.EMPTY
 
                     elif self.level[self.target_index] == Drop.BOULDER:
+                        status.append("Discovered a boulder.")
                         self.level[self.target_index] = Drop.EXPOSED_BOULDER
                         self.level_strikes[self.target_index] = 0
 
                     elif self.level[self.target_index] == Drop.EXPOSED_BOULDER:
                         # 25% chance of dropping a diamond, otherwise drop gold
-                        self.inventory.append(Drop.DIAMOND if random.randint(1, 4) == 1 else Drop.GOLD)
+                        drop = Drop.DIAMOND if random.randint(1, 4) == 1 else Drop.GOLD
+                        status.append("Picked up {} from boulder.".format(drop.name))
+                        self.inventory.append(drop)
                         self.level[self.target_index] = Drop.EMPTY
 
                     else:
@@ -484,9 +545,16 @@ class Player:
 
                     # If all spaces of the level are empty, return home to move to next area
                     if self.target_index == AREA_SIZES[self.area] - 1:
+                        status.append("Returning home to start a new area.")
                         self.action = Action.WALKING_LEFT
                         self.x = round(self.x - self.speed, 2)
                         self.target_x = HOME_X
+
+        if len(status) > 0:
+            current_status = self.name + ": " + (" ".join(status))
+            if self.status != current_status:
+                self.status = current_status
+                print(current_status)
 
 
 def generate_area(num):
@@ -533,8 +601,8 @@ def generate_area1():
                 area[i] = Drop.CHEST
                 break
 
-    for i in range(30):
-        area[i] = Drop.EMPTY
+    # for i in range(30):
+    #     area[i] = Drop.EMPTY
 
     return area
 
@@ -697,18 +765,28 @@ if __name__ == '__main__':
     is_running = True
     dt = 0
 
+    texture_scale = 0.16
+    WALLS = [
+        pygame.transform.smoothscale_by(pygame.image.load('images/game/walls/gray_wall.png'), texture_scale).convert(),
+        pygame.transform.smoothscale_by(pygame.image.load('images/game/walls/yellow_wall.png'), texture_scale).convert(),
+        pygame.transform.smoothscale_by(pygame.image.load('images/game/walls/green_wall.png'), texture_scale).convert(),
+        pygame.transform.smoothscale_by(pygame.image.load('images/game/walls/blue_wall.png'), texture_scale).convert(),
+        pygame.transform.smoothscale_by(pygame.image.load('images/game/walls/red_wall.png'), texture_scale).convert()
+    ]
+
     TXT_PAUSED_X = (screen.get_width() - TXT_PAUSED.get_width()) // 2
     TXT_PAUSED_Y = (screen.get_height() - TXT_PAUSED.get_height()) // 2
 
     txt_progress = legend_progress()
     txt_items = legend_items()
 
-    players = [Player("LeftFourDave"), Player("BigEdith"), Player("Rornicus"), Player("meshuggen8r")]
-    # Player("Bette_Meddler"), Player("ohjanji"), Player("ShirouHokuto")]
+    players = [Player("LeftFourDave"), Player("BigEdith"), Player("Rornicus"), Player("meshuggen8r"),
+               Player("Bette_Meddler"), Player("ohjanji"), Player("ShirouHokuto")]
 
-    # for pl in players:
-    #     pl.tool = Pick5()
-    #     pl.tool.speed = 100
+    for pl in players:
+        pl.tool = Pick5()
+        pl.tool.speed = 100
+        pl.tool.durability = 5000
     #     pl.transport = Transport.BIKE
     #     pl.speed = Transport.BIKE.value[TRAN_SPEED]
     # players[1].transport = Transport.SCOOTER
