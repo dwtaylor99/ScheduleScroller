@@ -655,16 +655,14 @@ class TriviaVox(commands.Bot):
             # 813=Jack Frost, 1104=Avalanche, 1113=Xmas That Almost Wasn't
             now_mm = int(datetime.strftime(datetime.now(), "%M"))
             if now_mm in [0, 1, 15, 16, 30, 31, 45, 46]:
-                if scroller.sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
-                    if len(scroller.snow_flakes) == 0:
-                        for _ in range(scroller.NUM_SNOWFLAKES):
-                            if DATE_YYYY == VALENTINES_DAY:
-                                scroller.snow_flakes.append(CandyHeartSnow(self.screen))
-                            elif DATE_YYYY == ST_PATRICKS_DAY:
-                                scroller.snow_flakes.append(CloverSnow(self.screen))
-                            else:
-                                scroller.snow_flakes.append(SnowFlake(self.screen))
-                    scroller.snow(self.screen)
+                if len(scroller.snow_flakes) == 0:
+                    for _ in range(scroller.NUM_SNOWFLAKES):
+                        if scroller.sched[0]['epnum'] in ['321', '422', '521', '813', '1104', '1113']:
+                            scroller.snow_flakes.append(SnowFlake(self.screen))
+                        elif DATE_YYYY == VALENTINES_DAY:
+                            scroller.snow_flakes.append(CandyHeartSnow(self.screen))
+                        elif DATE_YYYY == ST_PATRICKS_DAY:
+                            scroller.snow_flakes.append(CloverSnow(self.screen))
 
                 elif scroller.sched[0]['epnum'] == '501':
                     if len(scroller.snow_flakes) == 0:
@@ -672,6 +670,7 @@ class TriviaVox(commands.Bot):
                             scroller.snow_flakes.append(CandyHeartSnow(self.screen))
                     scroller.snow(self.screen)
 
+                scroller.snow(self.screen)
             else:
                 scroller.snow_flakes.clear()
 
