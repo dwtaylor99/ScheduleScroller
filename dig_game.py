@@ -68,7 +68,8 @@ MOTOR_SCOOTER_SYM = "🛵"
 HOME_X = 20
 SPACE_W = SPACE_H = 22
 
-TIME_PER_ITEM = 2000
+TIME_PER_ITEM = 500
+TIME_TO_EMPTY_INV = 2000
 INFINITE_DURABILITY = 999999
 
 BOULDER_SYM = "⚪"
@@ -196,13 +197,12 @@ class Player:
         if self.area < len(AREA_SIZES):
             for i, lvl in enumerate(self.level):
                 x = 50 + (i * SPACE_W)
-                # Render boulders first so they are covered by the area cells
-                if lvl == Drop.EXPOSED_BOULDER:
-                    scrn.blit(TXT_BOULDER, (x, y))
 
                 if lvl in [Drop.EMPTY, Drop.EXPOSED_BOULDER]:
                     pygame.draw.rect(scrn, AREA_COLORS[self.area], (x, y, SPACE_W + 1, SPACE_H), 1)
                     scrn.blit(WALLS[self.area], (x, y))
+                    if lvl == Drop.EXPOSED_BOULDER:
+                        scrn.blit(TXT_BOULDER, (x, y))
                 else:
                     pygame.draw.rect(scrn, AREA_COLORS[self.area], (x, y, SPACE_W + 1, SPACE_H))
 
@@ -317,14 +317,14 @@ class Player:
             self.target_x = HOME_X
 
         # If we have items, and we're home, start emptying the inventory
-        elif len(self.inventory) > 0 and self.x == HOME_X and self.tick < TIME_PER_ITEM:
+        elif len(self.inventory) > 0 and self.x == HOME_X and self.tick < TIME_TO_EMPTY_INV:
             # Waiting (emptying inventory)
             status.append("Emptying inventory.")
             self.action = Action.STANDING
             self.tick += dt
 
         # After waiting long enough to empty inventory, gain money for each item
-        elif len(self.inventory) > 0 and self.x == HOME_X and self.tick >= TIME_PER_ITEM:
+        elif len(self.inventory) > 0 and self.x == HOME_X and self.tick >= TIME_TO_EMPTY_INV:
             # Get money for inventory
             inv_amt = 0
             for inv in self.inventory:
