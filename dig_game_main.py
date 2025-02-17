@@ -8,6 +8,8 @@ from colors import WHITE, BLACK
 from dig_game_drops import screen
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
 from dig_game_tiles import Tiles, TILE_W, TILE_H
+from dig_game_utils import constrain
+from dig_game_world import generate_world
 from fonts import FONT_EMOJI_SM
 
 pygame.init()
@@ -23,92 +25,20 @@ MOUSE_OK_COLOR = "#00CF00"
 MOUSE_BAD_COLOR = "#CF0000"
 HOLLOW_COLOR = (255, 0, 255, 0)
 
-LEVEL_W = LEVEL_H = 20
-world = [[Tiles.AIR for ix in range(LEVEL_W)] for iy in range(LEVEL_H)]
-
 GRAVITY = 0.5
 JUMP_VEL = -8.0
 WALK_VEL = 3.0
 DIG_TICKS = 1000  # Should be based on player's tool level
 
-last_m_tile_x = last_m_tile_y = 0
+LEVEL_W = LEVEL_H = 20
+world = [[Tiles.AIR for ix in range(LEVEL_W)] for iy in range(LEVEL_H)]
 
+jump_allowed = True
+last_m_tile_x = last_m_tile_y = 0
 torch_anim_step = torch_ticks = 0
 
 
-def generate_world():
-    for y in range(LEVEL_H):
-        for x in range(LEVEL_W):
-            rn = random.randint(1, 100) + y
-
-            if 1 <= y <= 3:
-                if 1 <= rn <= 40:
-                    world[y][x] = Tiles.DIRT
-                elif 41 <= rn <= 70:
-                    world[y][x] = Tiles.STONE
-                elif 71 <= rn <= 90:
-                    world[y][x] = Tiles.CLAY
-                elif 91 <= rn <= 200:
-                    world[y][x] = Tiles.COPPER
-
-            if 4 <= y <= 7:
-                if 1 <= rn <= 70:
-                    world[y][x] = Tiles.STONE
-                elif 71 <= rn <= 90:
-                    world[y][x] = Tiles.CLAY
-                elif 91 <= rn <= 200:
-                    world[y][x] = Tiles.COPPER
-
-            if 8 <= y <= 15:
-                if 1 <= rn <= 50:
-                    world[y][x] = Tiles.STONE
-                elif 51 <= rn <= 70:
-                    world[y][x] = Tiles.COPPER
-                elif 71 <= rn <= 90:
-                    world[y][x] = Tiles.IRON
-                elif 91 <= rn <= 200:
-                    world[y][x] = Tiles.SILVER
-
-            if 16 <= y <= 20:
-                if 1 <= rn <= 50:
-                    world[y][x] = Tiles.STONE
-                elif 51 <= rn <= 70:
-                    world[y][x] = Tiles.IRON
-                elif 71 <= rn <= 90:
-                    world[y][x] = Tiles.GOLD
-                elif 91 <= rn <= 200:
-                    world[y][x] = Tiles.DIAMOND
-
-    # for yyy in range(19):
-    #     world[yyy][10] = Tiles.AIR
-
-    rn = 2  # random.randint(1, 2)
-    for room_i in range(rn):
-        room_x = random.randrange(LEVEL_W - 4) + 2
-        room_y = random.randrange(LEVEL_H // 2) + (LEVEL_H // 2) - 3
-
-        room_size = random.randint(2, 4)
-        for jj in range(room_size):
-            for ii in range(room_size):
-                yyy = constrain(room_y + jj, 0, LEVEL_H - 1)
-                xxx = constrain(room_x + ii, 0, LEVEL_W - 1)
-                world[yyy][xxx] = Tiles.AIR
-            if jj == room_size - 1:
-                world[room_y + jj][room_x] = Tiles.REWARD_URN
-
-    return world
-
-
-def constrain(val, min_val, max_val):
-    out = val
-    if val < min_val:
-        out = min_val
-    elif val > max_val:
-        out = max_val
-    return out
-
-
-def draw_world():
+def draw_world(world):
     global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks
 
     screen.fill(BLACK)
@@ -118,8 +48,22 @@ def draw_world():
     gradient.rect_gradient_h(screen, (64, 64, 64), (0, 0, 0), pygame.Rect(0, TILE_H * 2, LEVEL_W * TILE_W, LEVEL_H * TILE_H - (TILE_H * 2)))
 
     # Border
-    pygame.draw.rect(screen, (64, 64, 64), (0, LEVEL_H * TILE_H, LEVEL_W * TILE_W + (TILE_W // 2), TILE_H // 2))
-    pygame.draw.rect(screen, (64, 64, 64), (LEVEL_W * TILE_W, 0, (TILE_W // 2), LEVEL_H * TILE_H))
+    low_border_x = 0
+    low_border_y = LEVEL_H * TILE_H
+    low_border_w = LEVEL_W * TILE_W + (TILE_W // 2)
+    low_border_h = TILE_H // 2
+    pygame.draw.rect(screen, (64, 64, 64), (low_border_x, low_border_y, low_border_w, low_border_h))
+
+    side_border_x = LEVEL_W * TILE_W
+    side_border_y = 0
+    side_border_w = TILE_W // 2
+    side_border_h = LEVEL_H * TILE_H
+    pygame.draw.rect(screen, (64, 64, 64), (side_border_x, side_border_y, side_border_w, side_border_h))
+
+    for iy in range(0, TILE_H // 2, 3):
+        pygame.draw.rect(screen, BLACK, (0, low_border_y + iy + 2, low_border_w, 1))
+    for ix in range(0, TILE_W // 2, 3):
+        pygame.draw.rect(screen, BLACK, (side_border_x + ix + 2, 0, 1, side_border_h))
 
     # Draw the world tiles
     for y in range(LEVEL_H):
@@ -153,7 +97,7 @@ def draw_world():
             torch_anim_step = (torch_anim_step + 1) % len(TORCH_ANIM)
             torch_ticks = 0
 
-    screen.blit(temp_surf, (fog_x, fog_y))
+    # screen.blit(temp_surf, (fog_x, fog_y))
 
     """ Tile the player occupies """
     tile_x = int(player.x + 8) // TILE_W
@@ -161,8 +105,8 @@ def draw_world():
     tile_x = constrain(tile_x, 0, LEVEL_W - 1)
     tile_y = constrain(tile_y, 0, LEVEL_H - 1)
 
-    stats = FONT_EMOJI_SM.render("X: {}, Y: {}, tile_x: {}, tile_y: {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
-    screen.blit(stats, (4, LEVEL_H * TILE_H + 4))
+    # stats = FONT_EMOJI_SM.render("X: {}, Y: {}, tile_x: {}, tile_y: {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
+    # screen.blit(stats, (4, LEVEL_H * TILE_H + 4))
 
     """ Mouse Movement """
     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -177,7 +121,7 @@ def draw_world():
             if world[m_tile_y][m_tile_x] != Tiles.AIR and abs(tile_x - m_tile_x) < 2 and abs(tile_y - m_tile_y) < 2:
                 m_color = MOUSE_OK_COLOR
 
-        # Hightlight mouse tile
+        # Highlight mouse tile
         pygame.draw.rect(screen, m_color, (m_tile_x * TILE_W, m_tile_y * TILE_H, TILE_W, TILE_H), 2)
 
         """ Mouse Buttons """
@@ -225,33 +169,17 @@ def draw_world():
 
     """ Player Movement """
 
-    # Can player move left/right?
-    min_x = 0
-    max_x = (LEVEL_W - 1) * TILE_W + PLAYER_W
+    left_tile = world[tile_y][tile_x - 1] if tile_x - 1 >= 0 else Tiles.STONE
+    right_tile = world[tile_y][tile_x + 1] if tile_x + 1 < LEVEL_W else Tiles.STONE
 
-    if tile_x - 1 >= 0:
-        left_tile = world[tile_y][tile_x - 1]
-    else:
-        left_tile = Tiles.STONE
-
-    if tile_x + 1 < LEVEL_W:
-        right_tile = world[tile_y][tile_x + 1]
-    else:
-        right_tile = Tiles.STONE
-
-    if left_tile != Tiles.AIR:
-        min_x = (tile_x - 1) * TILE_W + TILE_W - (PLAYER_W // 2)
-    if right_tile != Tiles.AIR:
-        max_x = (tile_x + 1) * TILE_W - PLAYER_W - (PLAYER_W // 2)
+    min_x = (tile_x - 1) * TILE_W + TILE_W - (PLAYER_W // 2) if left_tile != Tiles.AIR else 0
+    max_x = (tile_x + 1) * TILE_W - PLAYER_W - (PLAYER_W // 2) if right_tile != Tiles.AIR else (LEVEL_W - 1) * TILE_W + PLAYER_W
 
     player.x += player.vel_x
-    if player.x < min_x:
-        player.x = min_x
-    elif player.x > max_x:
-        player.x = max_x
+    player.x = constrain(player.x, min_x, max_x)
 
-    stats2 = FONT_EMOJI_SM.render("min_x: {}, max_x: {}".format(min_x, max_x), True, WHITE).convert_alpha()
-    screen.blit(stats2, (4, LEVEL_H * TILE_H + 24))
+    # stats2 = FONT_EMOJI_SM.render("min_x: {}, max_x: {}".format(min_x, max_x), True, WHITE).convert_alpha()
+    # screen.blit(stats2, (4, LEVEL_H * TILE_H + 24))
 
     if not player.jumping:
         while tile_y < LEVEL_H and world[tile_y][tile_x] == Tiles.AIR:
@@ -334,16 +262,14 @@ def draw_world():
 
 
 if __name__ == '__main__':
-    world = generate_world()
+    world = generate_world(LEVEL_W, LEVEL_H)
+    player = Player()
 
     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
-
-    player = Player()
-    player.x = random.randrange((LEVEL_W - 1) * TILE_W + (TILE_W * 2))
-
     pygame.key.set_repeat(1, FPS)
+
     while is_running:
-        draw_world()
+        draw_world(world)
 
         pygame.display.flip()
 
@@ -364,6 +290,7 @@ if __name__ == '__main__':
                         player.vel_x = -(WALK_VEL // 2)
                     else:
                         player.vel_x = -WALK_VEL
+
                 elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
                     player.facing = Facing.RIGHT
                     if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
@@ -371,17 +298,20 @@ if __name__ == '__main__':
                     else:
                         player.vel_x = WALK_VEL
 
-                if player.on_ground and keys[pygame.K_SPACE]:
+                elif keys[pygame.K_t]:
+                    player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H // 2, TORCH_DIST, TORCH_DIST))
+
+                if keys[pygame.K_SPACE] and player.on_ground and jump_allowed:
+                    jump_allowed = False
                     player.vel_y = JUMP_VEL
                     player.on_ground = False
                     player.jumping = True
 
-                if keys[pygame.K_t]:
-                    player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H // 2, TORCH_DIST, TORCH_DIST))
-
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d, pygame.K_LEFT, pygame.K_RIGHT]:
                     player.vel_x = 0.0
+                if event.key == pygame.K_SPACE:
+                    jump_allowed = True
 
             elif event.type == pygame.MOUSEWHEEL:
                 if event.y > 0:
@@ -399,10 +329,12 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Caves 
+* Combine on_ground and jumping flags 
 * Larger, scrolling world
 * Lamps/Torch to expand sight line
 
++ Stop space bar from repeat jumping
++ Caves
 + Rooms
 + Convert inventory array to dict
 + Limit sight line
