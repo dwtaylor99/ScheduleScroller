@@ -197,7 +197,7 @@ def draw_world():
             # Block breaks
             if player.ticks >= DIG_TICKS:
                 player.ticks = 0
-                player.inventory.append(world[m_tile_y][m_tile_x])
+                player.add_inv(world[m_tile_y][m_tile_x])
                 world[m_tile_y][m_tile_x] = Tiles.AIR
 
             # Digging progress
@@ -210,16 +210,17 @@ def draw_world():
 
         # Place a block
         if but3 and m_color == MOUSE_BAD_COLOR and world[m_tile_y][m_tile_x] == Tiles.AIR and (m_tile_x != tile_x or m_tile_y != tile_y):
-            if len(player.inventory) > 0:
+            if len(player.inv_dict.keys()) > 0:
                 ks = list(player.inv_dict.keys())
                 if len(ks) > 0:
                     while player.inv_selected >= len(ks):
                         player.inv_selected -= 1
+
                     if player.inv_selected < 0:
                         player.inv_selected = 0
+
                     tile = ks[player.inv_selected]
-                    i = player.inventory.index(tile)
-                    player.inventory.pop(i)
+                    player.remove_inv(tile)
                     world[m_tile_y][m_tile_x] = tile
 
     """ Player Movement """
@@ -291,7 +292,6 @@ def draw_world():
         while tile_y < LEVEL_H and world[tile_y][tile_x] == Tiles.AIR:
             player.on_ground = False
             tile_y += 1
-            # tile_y = constrain(tile_y, 0, LEVEL_H - 1)
 
         target_y = (tile_y - 1) * TILE_H
         if target_y < 0:
@@ -324,18 +324,10 @@ def draw_world():
     pygame.draw.rect(screen, "#00FF00", player.get_rect(), 1)
 
     """ Render Inventory """
-    inv_dict = {}
-    for inv_i, inv in enumerate(player.inventory):
-        if inv in inv_dict.keys():
-            inv_dict[inv] = inv_dict[inv] + 1
-        else:
-            inv_dict[inv] = 1
-    player.inv_dict = inv_dict
-
     inv_x = LEVEL_W * TILE_W + (TILE_W // 2) + 4
-    for inv_i, key in enumerate(inv_dict.keys()):
+    for inv_i, key in enumerate(player.inv_dict.keys()):
         screen.blit(key.value.drop.img, (inv_x - 2, inv_i * TILE_H + TILE_H + 1))
-        screen.blit(FONT_EMOJI_SM.render(str(inv_dict[key]), True, WHITE).convert_alpha(), (inv_x + TILE_W + 4, inv_i * TILE_H + TILE_H + 18))
+        screen.blit(FONT_EMOJI_SM.render(str(player.inv_dict[key]), True, WHITE).convert_alpha(), (inv_x + TILE_W + 4, inv_i * TILE_H + TILE_H + 18))
         if player.inv_selected == inv_i:
             screen.blit(FONT_EMOJI_SM.render(key.value.drop.name, True, WHITE).convert_alpha(), (inv_x, 20))
             pygame.draw.rect(screen, "#00FF00", (inv_x, inv_i * TILE_H + TILE_H, TILE_W, TILE_H), 2)
@@ -407,11 +399,12 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Convert inventory array to dict
-* Caves and rooms
+* Caves 
 * Larger, scrolling world
 * Lamps/Torch to expand sight line
 
++ Rooms
++ Convert inventory array to dict
 + Limit sight line
 + Lamps to keep areas lit
 """
