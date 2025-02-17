@@ -4,6 +4,7 @@ from enum import Enum
 import pygame
 
 from colors import WHITE, BLACK
+from fonts import FONT_EMOJI_SM
 
 pygame.init()
 screen = pygame.display.set_mode((1920//2, 900))
@@ -12,14 +13,6 @@ dt = 0
 is_running = True
 
 FPS = 60
-
-STONE = "S"
-CLAY = "Y"
-COPPER = "C"
-IRON = "I"
-SILVER = "V"
-GOLD = "G"
-DIAMOND = "D"
 
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 
@@ -89,14 +82,14 @@ class Drops(Enum):
 
 TILE_W = TILE_H = 40
 TILE_SCALE = 0.29
-IMG_DIRT = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/brown_dirt.png"), TILE_SCALE).convert()
-IMG_STONE = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/gray_wall.png"), TILE_SCALE).convert()
-IMG_CLAY = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/red_wall.png"), TILE_SCALE).convert()
-IMG_COPPER = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/yellow_wall.png"), TILE_SCALE).convert()
-IMG_IRON = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/blue_wall.png"), TILE_SCALE).convert()
-IMG_SILVER = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/cobble.png"), TILE_SCALE).convert()
-IMG_GOLD = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/yellow_cobble.png"), TILE_SCALE).convert()
-IMG_DIAMOND = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/mixed.png"), TILE_SCALE).convert()
+IMG_DIRT = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/brown_dirt.png"), TILE_SCALE).convert_alpha()
+IMG_STONE = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/gray_wall.png"), TILE_SCALE).convert_alpha()
+IMG_CLAY = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/red_wall.png"), TILE_SCALE).convert_alpha()
+IMG_COPPER = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/yellow_wall.png"), TILE_SCALE).convert_alpha()
+IMG_IRON = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/blue_wall.png"), TILE_SCALE).convert_alpha()
+IMG_SILVER = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/cobble.png"), TILE_SCALE).convert_alpha()
+IMG_GOLD = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/yellow_cobble.png"), TILE_SCALE).convert_alpha()
+IMG_DIAMOND = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/mixed.png"), TILE_SCALE).convert_alpha()
 
 
 class Tile:
@@ -109,46 +102,54 @@ class Air(Tile):
     img = None
 
 
-class Dirt(Tile):
-    img = IMG_DIRT
+# class Dirt(Tile):
+#     img = IMG_DIRT
+#     drop = DirtDrop()
 
 
 class Stone(Tile):
     img = IMG_STONE
+    drop = StoneDrop()
 
 
 class Clay(Tile):
     img = IMG_CLAY
+    drop = ClayDrop()
 
 
 class Copper(Tile):
     img = IMG_COPPER
+    drop = CopperDrop()
     dig_level = 1
 
 
 class Iron(Tile):
     img = IMG_IRON
+    drop = IronDrop()
     dig_level = 2
 
 
 class Silver(Tile):
-    img = IMG_IRON
+    img = IMG_SILVER
+    drop = SilverDrop()
     dig_level = 2
 
 
 class Gold(Tile):
     img = IMG_GOLD
+    drop = GoldDrop()
     dig_level = 2
 
 
 class Diamond(Tile):
     img = IMG_DIAMOND
+    drop = DiamondDrop()
     dig_level = 2
 
 
 class Tiles(Enum):
     AIR = Air()
-    DIRT = Dirt()
+    # DIRT = Dirt()
     STONE = Stone()
     CLAY = Clay()
     COPPER = Copper()
@@ -249,6 +250,15 @@ def print_world(wrld):
         print()
 
 
+def constrain(val, min_val, max_val):
+    out = val
+    if val < min_val:
+        out = min_val
+    elif val > max_val:
+        out = max_val
+    return out
+
+
 def draw_world():
     for y in range(LEVEL_H):
         yy = y * TILE_H
@@ -263,20 +273,16 @@ def draw_world():
     # Tile the player occupies
     tile_x = int(player.x + 8) // TILE_W
     tile_y = int(player.y + 2 + PLAYER_H) // TILE_H
-    if tile_x < 0:
-        tile_x = 0
-    if tile_x >= LEVEL_W:
-        tile_x = LEVEL_W - 1
-    if tile_y < 0:
-        tile_y = 0
-    if tile_y >= LEVEL_H:
-        tile_y = LEVEL_H - 1
+    tile_x = constrain(tile_x, 0, LEVEL_W - 1)
+    tile_y = constrain(tile_y, 0, LEVEL_H - 1)
 
     """ Mouse Movement """
     mouse_x, mouse_y = pygame.mouse.get_pos()
     if 0 <= mouse_x <= LEVEL_W * TILE_W and 0 <= mouse_y <= LEVEL_H * TILE_H:
         m_tile_x = mouse_x // TILE_W
         m_tile_y = mouse_y // TILE_H
+        m_tile_x = constrain(m_tile_x, 0, LEVEL_W - 1)
+        m_tile_y = constrain(m_tile_y, 0, LEVEL_H - 1)
 
         m_color = "#C70000"
         if 0 <= tile_x < LEVEL_W and 0 <= tile_y < LEVEL_H:
@@ -290,20 +296,27 @@ def draw_world():
         but1, but2, but3 = pygame.mouse.get_pressed()
         if but1 and m_color == "#00C700":
             player.ticks += dt
+
+            # Block breaks
             if player.ticks >= DIG_TICKS:
                 player.ticks = 0
                 player.inventory.append(world[m_tile_y][m_tile_x])
                 world[m_tile_y][m_tile_x] = Tiles.AIR
 
+            # Digging progress
             else:
                 dug_h = TILE_H * (DIG_TICKS - player.ticks) / DIG_TICKS
-                pygame.draw.rect(screen, "#222222", (m_tile_x * TILE_W + 2, m_tile_y * TILE_H, TILE_W - 4, TILE_H - dug_h))
+                temp_surf = pygame.Surface((TILE_W - 4, TILE_H - dug_h))
+                temp_surf.set_alpha(128)
+                temp_surf.fill((192, 0, 0))
+                screen.blit(temp_surf, (m_tile_x * TILE_W + 2, m_tile_y * TILE_H))
 
+        # Place a block
         if but3 and m_color == "#C70000" and world[m_tile_y][m_tile_x] == Tiles.AIR and (m_tile_x != tile_x or m_tile_y != tile_y):
             if len(player.inventory) > 0:
                 ks = list(player.inv_dict.keys())
                 if len(ks) > 0:
-                    while player.inv_selected > len(ks):
+                    while player.inv_selected >= len(ks):
                         player.inv_selected -= 1
                     if player.inv_selected < 0:
                         player.inv_selected = 0
@@ -408,19 +421,19 @@ def draw_world():
 
     """ Render Inventory """
     inv_dict = {}
-    inv_x = LEVEL_W * TILE_W + TILE_W
     for inv_i, inv in enumerate(player.inventory):
         if inv in inv_dict.keys():
-            count = inv_dict[inv]
-            inv_dict[inv] = count + 1
+            inv_dict[inv] = inv_dict[inv] + 1
         else:
             inv_dict[inv] = 1
     player.inv_dict = inv_dict
 
+    inv_x = LEVEL_W * TILE_W + TILE_W
     for inv_i, key in enumerate(inv_dict.keys()):
-        screen.blit(key.value.img, (inv_x, inv_i * TILE_H + TILE_H))
-        screen.blit(FONT_EMOJI_MD.render(str(inv_dict[key]), True, WHITE), (inv_x + TILE_W, inv_i * TILE_H + TILE_H))
+        screen.blit(key.value.drop.img, (inv_x - 2, inv_i * TILE_H + TILE_H + 1))
+        screen.blit(FONT_EMOJI_SM.render(str(inv_dict[key]), True, WHITE), (inv_x + TILE_W + 4, inv_i * TILE_H + TILE_H + 18))
         if player.inv_selected == inv_i:
+            screen.blit(FONT_EMOJI_SM.render(key.value.drop.name, True, WHITE), (inv_x, 20))
             pygame.draw.rect(screen, "#00FF00", (inv_x, inv_i * TILE_H + TILE_H, TILE_W, TILE_H), 2)
 
 
