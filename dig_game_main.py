@@ -19,6 +19,8 @@ is_running = True
 FPS = 60
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 
+MOUSE_OK_COLOR = "#00CF00"
+MOUSE_BAD_COLOR = "#CF0000"
 HOLLOW_COLOR = (255, 0, 255, 0)
 
 LEVEL_W = LEVEL_H = 20
@@ -132,29 +134,35 @@ def draw_world():
     surf_w = surf_h = 3000
     surf_w2 = surf_h2 = surf_w // 2
 
+    # The main circle around the player
     temp_surf = pygame.Surface((surf_w, surf_h))
     temp_surf.fill(BLACK)
     temp_surf.set_colorkey((255, 0, 255))
     pygame.draw.circle(temp_surf, HOLLOW_COLOR, (surf_w2, surf_h2), 100)
-
     fog_x = player.x - surf_w2 + (PLAYER_W // 2)
     fog_y = player.y - surf_h2 + (PLAYER_H // 2)
 
+    # Additional circles for each of the torches
     for torch in player.torches:
         screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (TORCH_W_SCALED // 2), torch.y - (TORCH_H_SCALED // 2)))
         pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x - fog_x, torch.y - fog_y), torch.w)
+
+        # Torch animation
         torch_ticks += dt
         if torch_ticks >= 100:
-            torch_ticks = 0
             torch_anim_step = (torch_anim_step + 1) % len(TORCH_ANIM)
+            torch_ticks = 0
 
     screen.blit(temp_surf, (fog_x, fog_y))
 
-    # Tile the player occupies
+    """ Tile the player occupies """
     tile_x = int(player.x + 8) // TILE_W
     tile_y = int(player.y + 2 + PLAYER_H) // TILE_H
     tile_x = constrain(tile_x, 0, LEVEL_W - 1)
     tile_y = constrain(tile_y, 0, LEVEL_H - 1)
+
+    stats = FONT_EMOJI_SM.render("X: {}, Y: {}, tile_x: {}, tile_y: {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
+    screen.blit(stats, (4, LEVEL_H * TILE_H + 4))
 
     """ Mouse Movement """
     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -164,10 +172,10 @@ def draw_world():
         m_tile_x = constrain(m_tile_x, 0, LEVEL_W - 1)
         m_tile_y = constrain(m_tile_y, 0, LEVEL_H - 1)
 
-        m_color = "#C70000"
+        m_color = MOUSE_BAD_COLOR
         if 0 <= tile_x < LEVEL_W and 0 <= tile_y < LEVEL_H:
             if world[m_tile_y][m_tile_x] != Tiles.AIR and abs(tile_x - m_tile_x) < 2 and abs(tile_y - m_tile_y) < 2:
-                m_color = "#00C700"
+                m_color = MOUSE_OK_COLOR
 
         # Hightlight mouse tile
         pygame.draw.rect(screen, m_color, (m_tile_x * TILE_W, m_tile_y * TILE_H, TILE_W, TILE_H), 2)
@@ -183,7 +191,7 @@ def draw_world():
         last_m_tile_x = m_tile_x
         last_m_tile_y = m_tile_y
 
-        if but1 and m_color == "#00C700":
+        if but1 and m_color == MOUSE_OK_COLOR:
             player.ticks += dt
 
             # Block breaks
@@ -201,7 +209,7 @@ def draw_world():
                 screen.blit(temp_surf, (m_tile_x * TILE_W + 2, m_tile_y * TILE_H))
 
         # Place a block
-        if but3 and m_color == "#C70000" and world[m_tile_y][m_tile_x] == Tiles.AIR and (m_tile_x != tile_x or m_tile_y != tile_y):
+        if but3 and m_color == MOUSE_BAD_COLOR and world[m_tile_y][m_tile_x] == Tiles.AIR and (m_tile_x != tile_x or m_tile_y != tile_y):
             if len(player.inventory) > 0:
                 ks = list(player.inv_dict.keys())
                 if len(ks) > 0:
@@ -220,20 +228,29 @@ def draw_world():
     min_x = 0
     max_x = (LEVEL_W - 1) * TILE_W + PLAYER_W
 
-    if tile_x - 1 > 0 and tile_x + 1 < LEVEL_W:
+    if tile_x - 1 >= 0:
         left_tile = world[tile_y][tile_x - 1]
-        right_tile = world[tile_y][tile_x + 1]
+    else:
+        left_tile = Tiles.STONE
 
-        if left_tile != Tiles.AIR:
-            min_x = (tile_x - 1) * TILE_W + TILE_W - (PLAYER_W // 2)
-        if right_tile != Tiles.AIR:
-            max_x = (tile_x + 1) * TILE_W - PLAYER_W - (PLAYER_W // 2)
+    if tile_x + 1 < LEVEL_W:
+        right_tile = world[tile_y][tile_x + 1]
+    else:
+        right_tile = Tiles.STONE
+
+    if left_tile != Tiles.AIR:
+        min_x = (tile_x - 1) * TILE_W + TILE_W - (PLAYER_W // 2)
+    if right_tile != Tiles.AIR:
+        max_x = (tile_x + 1) * TILE_W - PLAYER_W - (PLAYER_W // 2)
 
     player.x += player.vel_x
     if player.x < min_x:
         player.x = min_x
     elif player.x > max_x:
         player.x = max_x
+
+    stats2 = FONT_EMOJI_SM.render("min_x: {}, max_x: {}".format(min_x, max_x), True, WHITE).convert_alpha()
+    screen.blit(stats2, (4, LEVEL_H * TILE_H + 24))
 
     if not player.jumping:
         while tile_y < LEVEL_H and world[tile_y][tile_x] == Tiles.AIR:
@@ -393,7 +410,8 @@ TODO:
 * Convert inventory array to dict
 * Caves and rooms
 * Larger, scrolling world
-* Limit sight line
-* Lamps to keep areas lit
 * Lamps/Torch to expand sight line
+
++ Limit sight line
++ Lamps to keep areas lit
 """
