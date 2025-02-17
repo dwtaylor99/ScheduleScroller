@@ -1,184 +1,24 @@
 import random
-from enum import Enum
 
 import pygame
 
 import gradient
 from colors import WHITE, BLACK
+from dig_game_drops import screen
+from dig_game_player import Facing, RUNNING, WALKING, Player, PLAYER_W, PLAYER_H
+from dig_game_tiles import Tiles, TILE_W, TILE_H
 from fonts import FONT_EMOJI_SM
 
 pygame.init()
-screen = pygame.display.set_mode((1920//2, 1080))
+
 clock = pygame.time.Clock()
 dt = 0
 is_running = True
 
 FPS = 60
-
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 
-
-class Drop:
-    name = ""
-    value = 0
-    img = None
-
-
-class NoneDrop(Drop):
-    name = "None"
-
-
-class DirtDrop(Drop):
-    name = "Dirt"
-    value = 1
-    img = FONT_EMOJI_MD.render("🟫", True, WHITE)
-
-
-class StoneDrop(Drop):
-    name = "Stone"
-    value = 1
-    img = FONT_EMOJI_MD.render("⚫", True, WHITE)
-
-
-class ClayDrop(Drop):
-    name = "Clay"
-    value = 2
-    img = FONT_EMOJI_MD.render("🟤", True, WHITE)
-
-
-class CopperDrop(Drop):
-    name = "Copper"
-    value = 5
-    img = FONT_EMOJI_MD.render("🔶", True, WHITE)
-
-
-class IronDrop(Drop):
-    name = "Iron"
-    value = 10
-    img = FONT_EMOJI_MD.render("🔷", True, WHITE)
-
-
-class SilverDrop(Drop):
-    name = "Silver"
-    value = 15
-    img = FONT_EMOJI_MD.render("⬜", True, WHITE)
-
-
-class GoldDrop(Drop):
-    name = "Gold"
-    value = 25
-    img = FONT_EMOJI_MD.render("🟨", True, WHITE)
-
-
-class DiamondDrop(Drop):
-    name = "Diamond"
-    value = 40
-    img = FONT_EMOJI_MD.render("💎", True, WHITE)
-
-
-class Drops(Enum):
-    NONE = NoneDrop()
-    CLAY = ClayDrop()
-    STONE = StoneDrop()
-    COPPER = CopperDrop()
-    IRON = IronDrop()
-    SILVER = SilverDrop()
-    GOLD = GoldDrop()
-    DIAMOND = DiamondDrop()
-
-
-TILE_W = TILE_H = 42
-TILE_SCALE = 0.3
-IMG_DIRT = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/brown_dirt.png"), TILE_SCALE).convert_alpha()
-IMG_STONE = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/stone_block.png"), TILE_SCALE).convert_alpha()
-IMG_CLAY = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/clay_block.png"), TILE_SCALE).convert_alpha()
-IMG_COPPER = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/copper_block.png"), TILE_SCALE).convert_alpha()
-IMG_IRON = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/iron_block.png"), TILE_SCALE).convert_alpha()
-IMG_SILVER = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/silver_block.png"), TILE_SCALE).convert_alpha()
-IMG_GOLD = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/gold_block.png"), TILE_SCALE).convert_alpha()
-IMG_DIAMOND = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/diamond_block.png"), TILE_SCALE).convert_alpha()
-
-# IMG_DIRT = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/brown_dirt.png"), TILE_SCALE).convert_alpha()
-# IMG_STONE = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/gray_wall.png"), TILE_SCALE).convert_alpha()
-# IMG_CLAY = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/red_wall.png"), TILE_SCALE).convert_alpha()
-# IMG_COPPER = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/yellow_wall.png"), TILE_SCALE).convert_alpha()
-# IMG_IRON = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/blue_wall.png"), TILE_SCALE).convert_alpha()
-# IMG_SILVER = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/cobble.png"), TILE_SCALE).convert_alpha()
-# IMG_GOLD = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/yellow_cobble.png"), TILE_SCALE).convert_alpha()
-# IMG_DIAMOND = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/mixed.png"), TILE_SCALE).convert_alpha()
-
-
-class Tile:
-    img = None
-    drop = Drops.NONE
-    dig_level = 0
-
-
-class Air(Tile):
-    img = None
-
-
-class Dirt(Tile):
-    img = IMG_DIRT
-    drop = DirtDrop()
-
-
-class Stone(Tile):
-    img = IMG_STONE
-    drop = StoneDrop()
-
-
-class Clay(Tile):
-    img = IMG_CLAY
-    drop = ClayDrop()
-
-
-class Copper(Tile):
-    img = IMG_COPPER
-    drop = CopperDrop()
-    dig_level = 1
-
-
-class Iron(Tile):
-    img = IMG_IRON
-    drop = IronDrop()
-    dig_level = 2
-
-
-class Silver(Tile):
-    img = IMG_SILVER
-    drop = SilverDrop()
-    dig_level = 2
-
-
-class Gold(Tile):
-    img = IMG_GOLD
-    drop = GoldDrop()
-    dig_level = 2
-
-
-class Diamond(Tile):
-    img = IMG_DIAMOND
-    drop = DiamondDrop()
-    dig_level = 2
-
-
-class Tiles(Enum):
-    AIR = Air()
-    DIRT = Dirt()
-    STONE = Stone()
-    CLAY = Clay()
-    COPPER = Copper()
-    IRON = Iron()
-    SILVER = Silver()
-    GOLD = Gold()
-    DIAMOND = Diamond()
-
-
-class Facing(Enum):
-    LEFT = -1
-    RIGHT = 1
-
+HOLLOW_COLOR = (255, 0, 255, 0)
 
 LEVEL_W = LEVEL_H = 20
 world = [[Tiles.AIR for ix in range(LEVEL_W)] for iy in range(LEVEL_H)]
@@ -186,43 +26,40 @@ world = [[Tiles.AIR for ix in range(LEVEL_W)] for iy in range(LEVEL_H)]
 GRAVITY = 0.5
 JUMP_VEL = -8.0
 WALK_VEL = 3.0
-VIEW_DIST = 20
-
-PLAYER_W = 14
-PLAYER_H = 36
-
-DIG_TICKS = 1000
-
-STANDING = ["🧍‍♂️", "🧍🏻‍♂️", "🧍🏼‍♂️", "🧍🏽‍♂️", "🧍🏾‍♂️", "🧍🏿‍♂️", "🧍‍♀️", "🧍🏻‍♀️", "🧍🏼‍♀️", "🧍🏽‍♀️", "🧍🏾‍♀️", "🧍🏿‍♀️"]
-WALKING = ["🚶‍♂️", "🚶🏻‍♂️", "🚶🏼‍♂️", "🚶🏽‍♂️", "🚶🏾‍♂️", "🚶🏿‍♂️", "🚶‍♀️", "🚶🏻‍♀️", "🚶🏼‍♀️", "🚶🏽‍♀️", "🚶🏾‍♀️", "🚶🏿‍♀️"]
-RUNNING = ["🏃‍♂️", "🏃🏻‍♂️", "🏃🏼‍♂️", "🏃🏽‍♂️", "🏃🏾‍♂️", "🏃🏿‍♂️", "🏃‍♀️", "🏃🏻‍♀️", "🏃🏼‍♀️", "🏃🏽‍♀️", "🏃🏾‍♀️", "🏃🏿‍♀️"]
-BIKING = ["🚴‍♂️", "🚴🏻‍♂️", "🚴🏼‍♂️", "🚴🏽‍♂️", "🚴🏾‍♂️", "🚴🏿‍♂️", "🚴‍♀️", "🚴🏻‍♀️", "🚴🏼‍♀️", "🚴🏽‍♀️", "🚴🏾‍♀️", "🚴🏿‍♀️"]
-HOUSES = ["🏚️", "🏠", "🏡", "🏛️"]
+DIG_TICKS = 1000  # Should be based on player's tool level
 
 last_m_tile_x = 0
 last_m_tile_y = 0
 
+# Torches
+TORCH_DIST = 100  # Default distance to light up (radius of circle)
+TORCH_SHEET = pygame.image.load("images/game/torch_sheet.png")
+TORCH_SCALE = 0.05
+torch_x = 64
+torch_y = 115
+torch_w = 260
+torch_h = 520
+torch_w_scaled = torch_w * TORCH_SCALE
+torch_h_scaled = torch_h * TORCH_SCALE
 
-class Player:
-    # position and movement
-    x = 0.0
-    y = 0.0
-    emoji_index = random.randrange(len(WALKING))
-    facing = Facing.RIGHT
-    vel_x = 0.0
-    vel_y = 0.0
-    on_ground = True
-    jumping = False
-    ticks = 0
+TORCH_SHEET.set_clip((torch_x, torch_y, torch_w, torch_h))
+TORCH_01 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
+TORCH_SHEET.set_clip((torch_x + torch_w, torch_y, torch_w, torch_h))
+TORCH_02 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
+TORCH_SHEET.set_clip((torch_x + torch_w * 2, torch_y, torch_w, torch_h))
+TORCH_03 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
+TORCH_SHEET.set_clip((torch_x + torch_w * 3, torch_y, torch_w, torch_h))
+TORCH_04 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
+TORCH_SHEET.set_clip((torch_x + torch_w * 4, torch_y, torch_w, torch_h))
+TORCH_05 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
+TORCH_SHEET.set_clip((torch_x + torch_w * 5, torch_y, torch_w, torch_h))
+TORCH_06 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
+TORCH_SHEET.set_clip((torch_x + torch_w * 6, torch_y, torch_w, torch_h))
+TORCH_07 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
 
-    # stats
-    house_index = 0
-    inventory: [Tile] = []
-    inv_dict = {}
-    inv_selected = 0
-
-    def get_rect(self):
-        return pygame.Rect(self.x + 8, self.y + 6, PLAYER_W, PLAYER_H)
+TORCH_ANIM = [TORCH_01, TORCH_02, TORCH_03, TORCH_04, TORCH_05, TORCH_06, TORCH_07]
+torch_anim_step = 0
+torch_ticks = 0
 
 
 def generate_world():
@@ -268,17 +105,24 @@ def generate_world():
                 elif 91 <= rn <= 200:
                     world[y][x] = Tiles.DIAMOND
 
-    for yyy in range(19):
-        world[yyy][10] = Tiles.AIR
+    # for yyy in range(19):
+    #     world[yyy][10] = Tiles.AIR
+
+    rn = 2  # random.randint(1, 2)
+    for room_i in range(rn):
+        room_x = random.randrange(LEVEL_W - 4) + 2
+        room_y = random.randrange(LEVEL_H // 2) + (LEVEL_H // 2) - 3
+
+        room_size = random.randint(2, 4)
+        for jj in range(room_size):
+            for ii in range(room_size):
+                yyy = constrain(room_y + jj, 0, LEVEL_H - 1)
+                xxx = constrain(room_x + ii, 0, LEVEL_W - 1)
+                world[yyy][xxx] = Tiles.AIR
+            if jj == room_size - 1:
+                world[room_y + jj][room_x] = Tiles.REWARD_URN
 
     return world
-
-
-def print_world(wrld):
-    for y in range(LEVEL_H):
-        for x in range(LEVEL_W):
-            print(str(wrld[y][x]) + " ", end="")
-        print()
 
 
 def constrain(val, min_val, max_val):
@@ -291,26 +135,48 @@ def constrain(val, min_val, max_val):
 
 
 def draw_world():
-    global last_m_tile_x, last_m_tile_y
+    global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks
 
     screen.fill(BLACK)
 
     # Gradient background
-    gradient.rect_gradient_h(screen, (0, 32, 192), (64, 64, 64), pygame.Rect(0, 0, LEVEL_W * TILE_W, 2 * TILE_H))
+    gradient.rect_gradient_h(screen, (100, 140, 210), (64, 64, 64), pygame.Rect(0, 0, LEVEL_W * TILE_W, 2 * TILE_H))
     gradient.rect_gradient_h(screen, (64, 64, 64), (0, 0, 0), pygame.Rect(0, TILE_H * 2, LEVEL_W * TILE_W, LEVEL_H * TILE_H - (TILE_H * 2)))
 
     # Border
     pygame.draw.rect(screen, (64, 64, 64), (0, LEVEL_H * TILE_H, LEVEL_W * TILE_W + (TILE_W // 2), TILE_H // 2))
     pygame.draw.rect(screen, (64, 64, 64), (LEVEL_W * TILE_W, 0, (TILE_W // 2), LEVEL_H * TILE_H))
 
+    # Draw the world tiles
     for y in range(LEVEL_H):
         yy = y * TILE_H
         for x in range(LEVEL_W):
             xx = x * TILE_W
-            if abs(xx - player.x) < TILE_W * VIEW_DIST and abs(yy - player.y) < TILE_H * VIEW_DIST:
-                tile = world[y][x]
-                if tile.value.img is not None:
-                    screen.blit(tile.value.img, (xx, yy))
+            tile = world[y][x].value
+            if tile.img is not None:
+                screen.blit(tile.img, (xx, yy))
+
+    """ Circle around player """
+    surf_w = surf_h = 3000
+    surf_w2 = surf_h2 = surf_w // 2
+
+    temp_surf = pygame.Surface((surf_w, surf_h))
+    temp_surf.fill(BLACK)
+    temp_surf.set_colorkey((255, 0, 255))
+    pygame.draw.circle(temp_surf, HOLLOW_COLOR, (surf_w2, surf_h2), 100)
+
+    fog_x = player.x - surf_w2 + (PLAYER_W // 2)
+    fog_y = player.y - surf_h2 + (PLAYER_H // 2)
+
+    for torch in player.torches:
+        screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (torch_w_scaled // 2), torch.y - (torch_h_scaled // 2)))
+        pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x - fog_x, torch.y - fog_y), torch.w)
+        torch_ticks += dt
+        if torch_ticks >= 100:
+            torch_ticks = 0
+            torch_anim_step = (torch_anim_step + 1) % len(TORCH_ANIM)
+
+    screen.blit(temp_surf, (fog_x, fog_y))
 
     # Tile the player occupies
     tile_x = int(player.x + 8) // TILE_W
@@ -433,9 +299,10 @@ def draw_world():
             player.y = min_y
 
         # Find where player should land
-        while world[tile_y][tile_x] == Tiles.AIR:
+        while tile_y < LEVEL_H and world[tile_y][tile_x] == Tiles.AIR:
             player.on_ground = False
             tile_y += 1
+            # tile_y = constrain(tile_y, 0, LEVEL_H - 1)
 
         target_y = (tile_y - 1) * TILE_H
         if target_y < 0:
@@ -451,21 +318,20 @@ def draw_world():
             player.y = target_y
 
         if player.facing == Facing.LEFT:
-            emoji = FONT_EMOJI_MD.render(RUNNING[player.emoji_index], True, WHITE)
+            emoji = FONT_EMOJI_MD.render(RUNNING[player.emoji_index], True, WHITE).convert_alpha()
         else:
-            emoji = pygame.transform.flip(FONT_EMOJI_MD.render(RUNNING[player.emoji_index], True, WHITE), True, False)
+            emoji = pygame.transform.flip(FONT_EMOJI_MD.render(RUNNING[player.emoji_index], True, WHITE), True, False).convert_alpha()
         screen.blit(emoji, (player.x, player.y + 4))
 
     # Not jumping, walking
     else:
         if player.facing == Facing.LEFT:
-            emoji = FONT_EMOJI_MD.render(WALKING[player.emoji_index], True, WHITE)
+            emoji = FONT_EMOJI_MD.render(WALKING[player.emoji_index], True, WHITE).convert_alpha()
         else:
-            emoji = pygame.transform.flip(FONT_EMOJI_MD.render(WALKING[player.emoji_index], True, WHITE), True, False)
+            emoji = pygame.transform.flip(FONT_EMOJI_MD.render(WALKING[player.emoji_index], True, WHITE), True, False).convert_alpha()
         screen.blit(emoji, (player.x, player.y + 4))
 
     # Player hitbox
-    # pygame.draw.rect(screen, "#00FF00", (player.x + 8, player.y + 2, PLAYER_W, PLAYER_H), 1)
     pygame.draw.rect(screen, "#00FF00", player.get_rect(), 1)
 
     """ Render Inventory """
@@ -480,16 +346,15 @@ def draw_world():
     inv_x = LEVEL_W * TILE_W + (TILE_W // 2) + 4
     for inv_i, key in enumerate(inv_dict.keys()):
         screen.blit(key.value.drop.img, (inv_x - 2, inv_i * TILE_H + TILE_H + 1))
-        screen.blit(FONT_EMOJI_SM.render(str(inv_dict[key]), True, WHITE), (inv_x + TILE_W + 4, inv_i * TILE_H + TILE_H + 18))
+        screen.blit(FONT_EMOJI_SM.render(str(inv_dict[key]), True, WHITE).convert_alpha(), (inv_x + TILE_W + 4, inv_i * TILE_H + TILE_H + 18))
         if player.inv_selected == inv_i:
-            screen.blit(FONT_EMOJI_SM.render(key.value.drop.name, True, WHITE), (inv_x, 20))
+            screen.blit(FONT_EMOJI_SM.render(key.value.drop.name, True, WHITE).convert_alpha(), (inv_x, 20))
             pygame.draw.rect(screen, "#00FF00", (inv_x, inv_i * TILE_H + TILE_H, TILE_W, TILE_H), 2)
 
 
 if __name__ == '__main__':
     world = generate_world()
 
-    # Set mouse cursor
     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
 
     player = Player()
@@ -514,15 +379,24 @@ if __name__ == '__main__':
 
                 if keys[pygame.K_a] or keys[pygame.K_LEFT]:
                     player.facing = Facing.LEFT
-                    player.vel_x = -WALK_VEL
+                    if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+                        player.vel_x = -(WALK_VEL // 2)
+                    else:
+                        player.vel_x = -WALK_VEL
                 elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
                     player.facing = Facing.RIGHT
-                    player.vel_x = WALK_VEL
+                    if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+                        player.vel_x = (WALK_VEL // 2)
+                    else:
+                        player.vel_x = WALK_VEL
 
                 if player.on_ground and keys[pygame.K_SPACE]:
                     player.vel_y = JUMP_VEL
                     player.on_ground = False
                     player.jumping = True
+
+                if keys[pygame.K_t]:
+                    player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H // 2, TORCH_DIST, TORCH_DIST))
 
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d, pygame.K_LEFT, pygame.K_RIGHT]:
@@ -541,3 +415,13 @@ if __name__ == '__main__':
         dt = clock.tick(FPS)
 
     pygame.quit()
+
+"""
+TODO:
+* Convert inventory array to dict
+* Caves and rooms
+* Larger, scrolling world
+* Limit sight line
+* Lamps to keep areas lit
+* Lamps/Torch to expand sight line
+"""
