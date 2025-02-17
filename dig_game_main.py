@@ -1,11 +1,12 @@
 import random
 
 import pygame
+from dig_game_objects import Facing, RUNNING, WALKING, Player, PLAYER_W, PLAYER_H
 
 import gradient
 from colors import WHITE, BLACK
 from dig_game_drops import screen
-from dig_game_player import Facing, RUNNING, WALKING, Player, PLAYER_W, PLAYER_H
+from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
 from dig_game_tiles import Tiles, TILE_W, TILE_H
 from fonts import FONT_EMOJI_SM
 
@@ -28,38 +29,9 @@ JUMP_VEL = -8.0
 WALK_VEL = 3.0
 DIG_TICKS = 1000  # Should be based on player's tool level
 
-last_m_tile_x = 0
-last_m_tile_y = 0
+last_m_tile_x = last_m_tile_y = 0
 
-# Torches
-TORCH_DIST = 100  # Default distance to light up (radius of circle)
-TORCH_SHEET = pygame.image.load("images/game/torch_sheet.png")
-TORCH_SCALE = 0.05
-torch_x = 64
-torch_y = 115
-torch_w = 260
-torch_h = 520
-torch_w_scaled = torch_w * TORCH_SCALE
-torch_h_scaled = torch_h * TORCH_SCALE
-
-TORCH_SHEET.set_clip((torch_x, torch_y, torch_w, torch_h))
-TORCH_01 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
-TORCH_SHEET.set_clip((torch_x + torch_w, torch_y, torch_w, torch_h))
-TORCH_02 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
-TORCH_SHEET.set_clip((torch_x + torch_w * 2, torch_y, torch_w, torch_h))
-TORCH_03 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
-TORCH_SHEET.set_clip((torch_x + torch_w * 3, torch_y, torch_w, torch_h))
-TORCH_04 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
-TORCH_SHEET.set_clip((torch_x + torch_w * 4, torch_y, torch_w, torch_h))
-TORCH_05 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
-TORCH_SHEET.set_clip((torch_x + torch_w * 5, torch_y, torch_w, torch_h))
-TORCH_06 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
-TORCH_SHEET.set_clip((torch_x + torch_w * 6, torch_y, torch_w, torch_h))
-TORCH_07 = pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha()
-
-TORCH_ANIM = [TORCH_01, TORCH_02, TORCH_03, TORCH_04, TORCH_05, TORCH_06, TORCH_07]
-torch_anim_step = 0
-torch_ticks = 0
+torch_anim_step = torch_ticks = 0
 
 
 def generate_world():
@@ -169,7 +141,7 @@ def draw_world():
     fog_y = player.y - surf_h2 + (PLAYER_H // 2)
 
     for torch in player.torches:
-        screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (torch_w_scaled // 2), torch.y - (torch_h_scaled // 2)))
+        screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (TORCH_W_SCALED // 2), torch.y - (TORCH_H_SCALED // 2)))
         pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x - fog_x, torch.y - fog_y), torch.w)
         torch_ticks += dt
         if torch_ticks >= 100:

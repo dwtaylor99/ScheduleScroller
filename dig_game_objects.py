@@ -42,3 +42,20 @@ class Player:
 
     def get_rect(self):
         return pygame.Rect(self.x + 8, self.y + 6, PLAYER_W, PLAYER_H)
+
+
+# Torches
+TORCH_DIST = 100  # Default distance to light up (radius of circle)
+TORCH_SHEET = pygame.image.load("images/game/torch_sheet.png")
+TORCH_SCALE = 0.05
+TORCH_X = 64
+TORCH_Y = 115
+TORCH_W = 260
+TORCH_H = 520
+TORCH_W_SCALED = TORCH_W * TORCH_SCALE
+TORCH_H_SCALED = TORCH_H * TORCH_SCALE
+
+TORCH_ANIM = []
+for i in range(7):
+    TORCH_SHEET.set_clip((TORCH_X + (TORCH_W * i), TORCH_Y, TORCH_W, TORCH_H))
+    TORCH_ANIM.append(pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha())
