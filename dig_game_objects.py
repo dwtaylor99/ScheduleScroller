@@ -22,7 +22,7 @@ class Facing(Enum):
 
 class Player:
     # position and movement
-    x = 400.0
+    x = 5.0
     y = 0.0
     emoji_index = random.randrange(len(WALKING))
     facing = Facing.RIGHT

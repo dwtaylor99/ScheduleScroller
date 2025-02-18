@@ -307,6 +307,9 @@ class TriviaVox(commands.Bot):
 
             botads.save_ads_time(self.next_ad_at)
 
+        """
+        This ad detection stopped working so I am disabling it.
+        
         # If ads are running in the next 5 minutes (300 seconds), don't start a game that needs the screen
         if self.is_live and self.next_ad_at - ts > 300:
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER, GameType.CHARACTER])
@@ -315,6 +318,8 @@ class TriviaVox(commands.Bot):
         else:
             print("Not choosing a Stinger/Character game because of the time.")
             self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI])
+        """
+        self.game_type = random.choice([GameType.TRIVIA, GameType.EMOJI, GameType.STINGER, GameType.CHARACTER])
 
         if IS_DEBUG:
             self.game_type = GameType.STINGER
