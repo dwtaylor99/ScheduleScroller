@@ -1,11 +1,9 @@
-import random
-
 import pygame
-from dig_game_objects import Facing, RUNNING, WALKING, Player, PLAYER_W, PLAYER_H
 
 import gradient
 from colors import WHITE, BLACK
 from dig_game_drops import screen
+from dig_game_objects import Facing, RUNNING, WALKING, Player, PLAYER_W, PLAYER_H
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
 from dig_game_tiles import Tiles, TILE_W, TILE_H
 from dig_game_utils import constrain
@@ -30,10 +28,16 @@ JUMP_VEL = -8.0
 WALK_VEL = 3.0
 DIG_TICKS = 1000  # Should be based on player's tool level
 
-# WORLD_W = WORLD_H = 40
-# world = [[Tiles.AIR for ix in range(WORLD_W)] for iy in range(WORLD_H)]
-LEVEL_W = LEVEL_H = 20
-world = [[Tiles.AIR for ix in range(LEVEL_W)] for iy in range(LEVEL_H)]
+WORLD_W = 40
+WORLD_H = 20
+world = [[Tiles.AIR for ix in range(WORLD_W)] for iy in range(WORLD_H)]
+LEVEL_W = 20
+LEVEL_H = 20
+# world = [[Tiles.AIR for ix in range(LEVEL_W)] for iy in range(LEVEL_H)]
+
+SCROLL_MIN_X = 300
+SCROLL_MAX_X = (LEVEL_W * TILE_W) - 300
+view_x = 10
 
 jump_allowed = True
 last_m_tile_x = last_m_tile_y = 0
@@ -41,7 +45,7 @@ torch_anim_step = torch_ticks = 0
 
 
 def draw_world(world):
-    global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks
+    global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks, view_x
 
     screen.fill(BLACK)
 
@@ -80,11 +84,19 @@ def draw_world(world):
     # Draw the world tiles
     for y in range(LEVEL_H):
         yy = y * TILE_H
-        for x in range(LEVEL_W):
-            xx = x * TILE_W
+        for x in range(view_x, view_x + LEVEL_W):
+            xx = (x - view_x) * TILE_W
             tile = world[y][x].value
             if tile.img is not None:
                 screen.blit(tile.img, (xx, yy))
+
+    if player.x < SCROLL_MIN_X and view_x > 0:
+        player.x = SCROLL_MIN_X
+        view_x = constrain(view_x - 1, 0, WORLD_W - LEVEL_W)
+
+    if player.x > SCROLL_MAX_X and view_x < WORLD_W - LEVEL_W:
+        player.x = SCROLL_MAX_X
+        view_x = constrain(view_x + 1, 0, WORLD_W - LEVEL_W)
 
     """ Circle around player """
     surf_w = surf_h = 3000
@@ -109,7 +121,7 @@ def draw_world(world):
             torch_anim_step = (torch_anim_step + 1) % len(TORCH_ANIM)
             torch_ticks = 0
 
-    screen.blit(temp_surf, (fog_x, fog_y))
+    # screen.blit(temp_surf, (fog_x, fog_y))
 
     """ Mouse Movement """
     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -119,7 +131,7 @@ def draw_world(world):
 
         m_color = MOUSE_BAD_COLOR
         if 0 <= tile_x < LEVEL_W and 0 <= tile_y < LEVEL_H:
-            if world[m_tile_y][m_tile_x] != Tiles.AIR and abs(tile_x - m_tile_x) < 2 and abs(tile_y - m_tile_y) < 2:
+            if world[m_tile_y][m_tile_x - view_x] != Tiles.AIR and abs(tile_x - m_tile_x) < 2 and abs(tile_y - m_tile_y) < 2:
                 m_color = MOUSE_OK_COLOR
 
         # Highlight mouse tile
@@ -142,8 +154,8 @@ def draw_world(world):
             # Block breaks
             if player.ticks >= DIG_TICKS:
                 player.ticks = 0
-                player.add_inv(world[m_tile_y][m_tile_x])
-                world[m_tile_y][m_tile_x] = Tiles.AIR
+                player.add_inv(world[m_tile_y][m_tile_x - view_x])
+                world[m_tile_y][m_tile_x - view_x] = Tiles.AIR
 
             # Digging progress
             else:
@@ -154,7 +166,7 @@ def draw_world(world):
                 screen.blit(temp_surf, (m_tile_x * TILE_W + 2, m_tile_y * TILE_H))
 
         # Place a block
-        if but3 and m_color == MOUSE_BAD_COLOR and world[m_tile_y][m_tile_x] == Tiles.AIR and (m_tile_x != tile_x or m_tile_y != tile_y):
+        if but3 and m_color == MOUSE_BAD_COLOR and world[m_tile_y][m_tile_x - view_x] == Tiles.AIR and (m_tile_x != tile_x or m_tile_y != tile_y):
             if len(player.inv_dict.keys()) > 0:
                 ks = list(player.inv_dict.keys())
                 if len(ks) > 0:
@@ -166,12 +178,12 @@ def draw_world(world):
 
                     tile = ks[player.inv_selected]
                     player.remove_inv(tile)
-                    world[m_tile_y][m_tile_x] = tile
+                    world[m_tile_y][m_tile_x - view_x] = tile
 
     """ Player Movement """
 
-    left_tile = world[tile_y][tile_x - 1] if tile_x - 1 >= 0 else Tiles.STONE
-    right_tile = world[tile_y][tile_x + 1] if tile_x + 1 < LEVEL_W else Tiles.STONE
+    left_tile = world[tile_y][tile_x - view_x - 1] if tile_x - 1 >= 0 else Tiles.STONE
+    right_tile = world[tile_y][tile_x - view_x + 1] if tile_x + 1 < LEVEL_W else Tiles.STONE
 
     min_x = (tile_x - 1) * TILE_W + TILE_W - (PLAYER_W // 2) if left_tile != Tiles.AIR else 0
     max_x = (tile_x + 1) * TILE_W - PLAYER_W - (PLAYER_W // 2) if right_tile != Tiles.AIR else (LEVEL_W - 1) * TILE_W + PLAYER_W
@@ -183,7 +195,7 @@ def draw_world(world):
     # screen.blit(stats2, (4, LEVEL_H * TILE_H + 24))
 
     if player.on_ground:
-        while tile_y < LEVEL_H and world[tile_y][tile_x] == Tiles.AIR:
+        while tile_y < WORLD_H and world[tile_y][tile_x - view_x] == Tiles.AIR:
             player.on_ground = False
             tile_y += 1
 
@@ -211,13 +223,13 @@ def draw_world(world):
 
         # Check for a max jump height if there is a tile above the player
         min_y = -100
-        if tile_y > 0 and world[tile_y - 1][tile_x] != Tiles.AIR:
+        if tile_y > 0 and world[tile_y - 1][tile_x - view_x] != Tiles.AIR:
             min_y = tile_y * TILE_H
         if player.y <= min_y:
             player.y = min_y
 
         # Find where player should land
-        while tile_y < LEVEL_H and world[tile_y][tile_x] == Tiles.AIR:
+        while tile_y < LEVEL_H and world[tile_y][tile_x - view_x] == Tiles.AIR:
             player.on_ground = False
             tile_y += 1
 
@@ -261,7 +273,8 @@ def draw_world(world):
 
 
 if __name__ == '__main__':
-    world = generate_world(LEVEL_W, LEVEL_H)
+    world = generate_world(WORLD_W, WORLD_H)
+    # world = generate_world(LEVEL_W, LEVEL_H)
     player = Player()
 
     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
@@ -285,14 +298,24 @@ if __name__ == '__main__':
 
                 if keys[pygame.K_a] or keys[pygame.K_LEFT]:
                     player.facing = Facing.LEFT
-                    if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
-                        player.vel_x = -(WALK_VEL // 2)
+
+                    if player.x <= SCROLL_MIN_X and view_x > 0:
+                        player.x = SCROLL_MIN_X
+                        view_x = constrain(view_x - 1, 0, WORLD_W - LEVEL_W)
                     else:
-                        player.vel_x = -WALK_VEL
+                        if keys[pygame.K_LSHIFT]:
+                            player.vel_x = -(WALK_VEL // 2)
+                        else:
+                            player.vel_x = -WALK_VEL
 
                 elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
                     player.facing = Facing.RIGHT
-                    if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+
+                    if player.x >= SCROLL_MAX_X and view_x < WORLD_W - LEVEL_W:
+                        player.x = SCROLL_MAX_X
+                        view_x = constrain(view_x + 1, 0, WORLD_W - LEVEL_W)
+
+                    if keys[pygame.K_LSHIFT]:
                         player.vel_x = (WALK_VEL // 2)
                     else:
                         player.vel_x = WALK_VEL
