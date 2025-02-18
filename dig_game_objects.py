@@ -29,7 +29,7 @@ class Player:
     vel_x = 0.0
     vel_y = 0.0
     on_ground = True
-    jumping = False
+    # jumping = False
     ticks = 0
 
     # stats

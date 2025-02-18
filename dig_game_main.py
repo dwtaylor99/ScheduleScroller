@@ -30,6 +30,8 @@ JUMP_VEL = -8.0
 WALK_VEL = 3.0
 DIG_TICKS = 1000  # Should be based on player's tool level
 
+# WORLD_W = WORLD_H = 40
+# world = [[Tiles.AIR for ix in range(WORLD_W)] for iy in range(WORLD_H)]
 LEVEL_W = LEVEL_H = 20
 world = [[Tiles.AIR for ix in range(LEVEL_W)] for iy in range(LEVEL_H)]
 
@@ -60,10 +62,20 @@ def draw_world(world):
     side_border_h = LEVEL_H * TILE_H
     pygame.draw.rect(screen, (64, 64, 64), (side_border_x, side_border_y, side_border_w, side_border_h))
 
+    # Border stripes
     for iy in range(0, TILE_H // 2, 3):
         pygame.draw.rect(screen, BLACK, (0, low_border_y + iy + 2, low_border_w, 1))
     for ix in range(0, TILE_W // 2, 3):
         pygame.draw.rect(screen, BLACK, (side_border_x + ix + 2, 0, 1, side_border_h))
+
+    """ Tile the player occupies """
+    tile_x = int(player.x + 8) // TILE_W
+    tile_y = int(player.y + 2 + PLAYER_H) // TILE_H
+    tile_x = constrain(tile_x, 0, LEVEL_W - 1)
+    tile_y = constrain(tile_y, 0, LEVEL_H - 1)
+
+    # stats = FONT_EMOJI_SM.render("X: {}, Y: {}, tile_x: {}, tile_y: {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
+    # screen.blit(stats, (4, LEVEL_H * TILE_H + 4))
 
     # Draw the world tiles
     for y in range(LEVEL_H):
@@ -97,24 +109,13 @@ def draw_world(world):
             torch_anim_step = (torch_anim_step + 1) % len(TORCH_ANIM)
             torch_ticks = 0
 
-    # screen.blit(temp_surf, (fog_x, fog_y))
-
-    """ Tile the player occupies """
-    tile_x = int(player.x + 8) // TILE_W
-    tile_y = int(player.y + 2 + PLAYER_H) // TILE_H
-    tile_x = constrain(tile_x, 0, LEVEL_W - 1)
-    tile_y = constrain(tile_y, 0, LEVEL_H - 1)
-
-    # stats = FONT_EMOJI_SM.render("X: {}, Y: {}, tile_x: {}, tile_y: {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
-    # screen.blit(stats, (4, LEVEL_H * TILE_H + 4))
+    screen.blit(temp_surf, (fog_x, fog_y))
 
     """ Mouse Movement """
     mouse_x, mouse_y = pygame.mouse.get_pos()
     if 0 <= mouse_x <= LEVEL_W * TILE_W and 0 <= mouse_y <= LEVEL_H * TILE_H:
-        m_tile_x = mouse_x // TILE_W
-        m_tile_y = mouse_y // TILE_H
-        m_tile_x = constrain(m_tile_x, 0, LEVEL_W - 1)
-        m_tile_y = constrain(m_tile_y, 0, LEVEL_H - 1)
+        m_tile_x = constrain(mouse_x // TILE_W, 0, LEVEL_W - 1)
+        m_tile_y = constrain(mouse_y // TILE_H, 0, LEVEL_H - 1)
 
         m_color = MOUSE_BAD_COLOR
         if 0 <= tile_x < LEVEL_W and 0 <= tile_y < LEVEL_H:
@@ -181,7 +182,7 @@ def draw_world(world):
     # stats2 = FONT_EMOJI_SM.render("min_x: {}, max_x: {}".format(min_x, max_x), True, WHITE).convert_alpha()
     # screen.blit(stats2, (4, LEVEL_H * TILE_H + 24))
 
-    if not player.jumping:
+    if player.on_ground:
         while tile_y < LEVEL_H and world[tile_y][tile_x] == Tiles.AIR:
             player.on_ground = False
             tile_y += 1
@@ -200,12 +201,11 @@ def draw_world(world):
         # Stop falling
         if player.y >= target_y:
             player.on_ground = True
-            player.jumping = False
             player.vel_y = 0.0
             player.y = target_y
 
     # Jumping
-    if player.jumping:
+    if not player.on_ground:
         player.vel_y += GRAVITY
         player.y += player.vel_y
 
@@ -230,7 +230,6 @@ def draw_world(world):
         # Stop jumping, player has landed
         if player.y >= target_y:
             player.on_ground = True
-            player.jumping = False
             player.vel_y = 0.0
             player.y = target_y
 
@@ -305,7 +304,6 @@ if __name__ == '__main__':
                     jump_allowed = False
                     player.vel_y = JUMP_VEL
                     player.on_ground = False
-                    player.jumping = True
 
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d, pygame.K_LEFT, pygame.K_RIGHT]:
@@ -329,10 +327,10 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Combine on_ground and jumping flags 
 * Larger, scrolling world
 * Lamps/Torch to expand sight line
 
++ Combine on_ground and jumping flags 
 + Stop space bar from repeat jumping
 + Caves
 + Rooms
