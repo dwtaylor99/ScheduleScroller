@@ -35,11 +35,10 @@ LEVEL_H = 20
 main_world = [[Tiles.AIR for ix in range(WORLD_W)] for iy in range(WORLD_H)]
 # world = [[Tiles.AIR for ix in range(LEVEL_W)] for iy in range(LEVEL_H)]
 
-SCROLL_TICKS_MAX = 300
+SCROLL_TICKS_MAX = 100
 SCROLL_MIN_X = 300
 SCROLL_MAX_X = (LEVEL_W * TILE_W) - 300
 view_x = 0
-fview_x = 0.0
 scroll_ticks = 0
 
 jump_allowed = True
@@ -48,11 +47,10 @@ torch_anim_step = torch_ticks = 0
 
 
 def draw_world(world):
-    global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks, view_x, fview_x, scroll_ticks
+    global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks, view_x, scroll_ticks
 
     screen.fill(BLACK)
     # view_x = 0  # Never got this to work correctly. It should be an X offset to shift the world by 'view_x' to allow scrolling.
-    # view_x = int(fview_x)
 
     """ Background """
     gradient.rect_gradient_h(screen, (100, 140, 210), (64, 64, 64), pygame.Rect(0, 0, LEVEL_W * TILE_W, 2 * TILE_H))
@@ -94,27 +92,19 @@ def draw_world(world):
 
     if player.x < SCROLL_MIN_X and view_x > 0:
         player.x = SCROLL_MIN_X
-        fview_x = fview_x + player.vel_x
-        if fview_x <= 0.0:
-            fview_x = TILE_W
-            view_x -= 1
-        # scroll_ticks += dt
-        # if scroll_ticks >= SCROLL_TICKS_MAX:
-        #     scroll_ticks = 0
-        #     view_x = constrain(view_x - 1, 0, WORLD_W - LEVEL_W)
-        #     print("<- view_x", view_x)
+        scroll_ticks += dt
+        if scroll_ticks >= SCROLL_TICKS_MAX:
+            scroll_ticks = 0
+            view_x = constrain(view_x - 1, 0, WORLD_W - LEVEL_W)
+            print("<- view_x", view_x)
 
     if player.x > SCROLL_MAX_X and view_x < WORLD_W - LEVEL_W:
         player.x = SCROLL_MAX_X
-        fview_x = fview_x + player.vel_x
-        if fview_x >= TILE_W:
-            fview_x = 0.0
-            view_x += 1
-        # scroll_ticks += dt
-        # if scroll_ticks >= SCROLL_TICKS_MAX:
-        #     scroll_ticks = 0
-        #     view_x = constrain(view_x + 1, 0, WORLD_W - LEVEL_W)
-        #     print("-> view_x", view_x)
+        scroll_ticks += dt
+        if scroll_ticks >= SCROLL_TICKS_MAX:
+            scroll_ticks = 0
+            view_x = constrain(view_x + 1, 0, WORLD_W - LEVEL_W)
+            print("-> view_x", view_x)
 
     """ Circle around player """
     surf_w = surf_h = 3000
@@ -166,7 +156,7 @@ def draw_world(world):
         last_m_tile_x = m_tile_x
         last_m_tile_y = m_tile_y
 
-        if but1 and m_color == MOUSE_OK_COLOR and world[m_tile_y][m_tile_x + view_x] != Tiles.AIR:
+        if but1 and m_color == MOUSE_OK_COLOR:
             player.ticks += dt
 
             # Block breaks
@@ -182,7 +172,6 @@ def draw_world(world):
                     a = str(world[1][wx])[6:8]
                     print("{}".format(a), end=" ")
                 print()
-                print("{}^{}".format("   " * (tile_x + view_x), tile_x + view_x))
 
             # Digging progress
             else:
@@ -193,7 +182,7 @@ def draw_world(world):
                 screen.blit(temp_surf, (m_tile_x * TILE_W + 2, m_tile_y * TILE_H))
 
         # Place a block
-        if (but3 and m_color == MOUSE_BAD_COLOR and world[m_tile_y][m_tile_x + view_x] == Tiles.AIR
+        if (but3 and m_color == MOUSE_BAD_COLOR and world[m_tile_y][m_tile_x - view_x] == Tiles.AIR
                 and (m_tile_x != tile_x or m_tile_y != tile_y) and abs(tile_x - m_tile_x) < 2 and abs(tile_y - m_tile_y) < 2):
             if len(player.inv_dict.keys()) > 0:
                 ks = list(player.inv_dict.keys())
@@ -206,27 +195,24 @@ def draw_world(world):
 
                     tile = ks[player.inv_selected]
                     player.remove_inv(tile)
-                    world[m_tile_y][m_tile_x + view_x] = tile
-
-        stats2 = FONT_EMOJI_SM.render("m_tile_x: {}, m_tile_y: {}".format(m_tile_x, m_tile_y), True, WHITE).convert_alpha()
-        screen.blit(stats2, (4, 930))
+                    world[m_tile_y][m_tile_x - view_x] = tile
 
     """ Player Movement """
 
-    left_tile = world[tile_y][tile_x + view_x - 1] if tile_x + view_x - 1 >= 0 else Tiles.STONE
-    right_tile = world[tile_y][tile_x + view_x + 1] if tile_x + view_x + 1 < WORLD_W else Tiles.STONE
     # left_tile = world[tile_y][tile_x - view_x - 1] if tile_x - 1 >= 0 else Tiles.STONE
     # right_tile = world[tile_y][tile_x - view_x + 1] if tile_x + 1 < LEVEL_W else Tiles.STONE
+    left_tile = world[tile_y][tile_x - view_x - 1] if tile_x - 1 >= 0 else Tiles.STONE
+    right_tile = world[tile_y][tile_x - view_x + 1] if tile_x + 1 < LEVEL_W else Tiles.STONE
 
-    # min_x = (tile_x - 1) * TILE_W + TILE_W - (PLAYER_W // 2) if left_tile != Tiles.AIR else 0
-    # max_x = (tile_x + 1) * TILE_W - PLAYER_W - (PLAYER_W // 2) if right_tile != Tiles.AIR else (LEVEL_W - 1) * TILE_W + PLAYER_W
     min_x = (tile_x - 1) * TILE_W + TILE_W - (PLAYER_W // 2) if left_tile != Tiles.AIR else 0
     max_x = (tile_x + 1) * TILE_W - PLAYER_W - (PLAYER_W // 2) if right_tile != Tiles.AIR else (LEVEL_W - 1) * TILE_W + PLAYER_W
+    # min_x = (tile_x - view_x - 1) * TILE_W + TILE_W - (PLAYER_W // 2) if left_tile != Tiles.AIR else 0
+    # max_x = (tile_x - view_x + 1) * TILE_W - PLAYER_W - (PLAYER_W // 2) if right_tile != Tiles.AIR else (LEVEL_W - 1) * TILE_W + PLAYER_W
 
     player.x = constrain(player.x + player.vel_x, min_x, max_x)
 
-    stats = FONT_EMOJI_SM.render("px: {}, py:{}, tile_x: {}, tile_y: {}, view_x: {}, fview_x: {}, left_tile: {}, right_tile: {}, min_x: {}, max_x: {}"
-                                 .format(player.x, player.y, tile_x, tile_y, view_x, fview_x, left_tile, right_tile, min_x, max_x), True, WHITE).convert_alpha()
+    stats = FONT_EMOJI_SM.render("px: {}, py: {}, tile_x: {}, tile_y: {}, view_x: {}, left_tile: {}, right_tile: {}, min_x: {}, max_x: {}"
+                                 .format(player.x, player.y, tile_x, tile_y, view_x, left_tile, right_tile, min_x, max_x), True, WHITE).convert_alpha()
     screen.blit(stats, (4, 900))
 
     if player.on_ground:
@@ -254,13 +240,13 @@ def draw_world(world):
 
         # Check for a max jump height if there is a tile above the player
         min_y = -100
-        if tile_y > 0 and world[tile_y - 1][tile_x + view_x] != Tiles.AIR:
+        if tile_y > 0 and world[tile_y - 1][tile_x - view_x] != Tiles.AIR:
             min_y = tile_y * TILE_H
         if player.y <= min_y:
             player.y = min_y
 
         # Find where player should land
-        while tile_y < LEVEL_H and world[tile_y][tile_x + view_x] == Tiles.AIR:
+        while tile_y < LEVEL_H and world[tile_y][tile_x - view_x] == Tiles.AIR:
             player.on_ground = False
             tile_y += 1
 
@@ -328,14 +314,10 @@ if __name__ == '__main__':
 
                     if player.x < SCROLL_MIN_X and view_x > 0:
                         player.x = SCROLL_MIN_X
-                        fview_x = fview_x + player.vel_x
-                        if fview_x <= 0.0:
-                            fview_x = TILE_W
-                            view_x -= 1
-                        # scroll_ticks += dt
-                        # if scroll_ticks >= SCROLL_TICKS_MAX:
-                        #     scroll_ticks = 0
-                        #     view_x = constrain(view_x - 1, 0, WORLD_W - LEVEL_W)
+                        scroll_ticks += dt
+                        if scroll_ticks >= SCROLL_TICKS_MAX:
+                            scroll_ticks = 0
+                            view_x = constrain(view_x - 1, 0, WORLD_W - LEVEL_W)
                     else:
                         if keys[pygame.K_LSHIFT]:
                             player.vel_x = -WALK_VEL // 2
@@ -347,14 +329,10 @@ if __name__ == '__main__':
 
                     if player.x > SCROLL_MAX_X and view_x < WORLD_W - LEVEL_W:
                         player.x = SCROLL_MAX_X
-                        fview_x = fview_x + player.vel_x
-                        if fview_x >= TILE_W:
-                            fview_x = 0.0
-                            view_x += 1
-                        # scroll_ticks += dt
-                        # if scroll_ticks >= SCROLL_TICKS_MAX:
-                        #     scroll_ticks = 0
-                        #     view_x = constrain(view_x + 1, 0, WORLD_W - LEVEL_W)
+                        scroll_ticks += dt
+                        if scroll_ticks >= SCROLL_TICKS_MAX:
+                            scroll_ticks = 0
+                            view_x = constrain(view_x + 1, 0, WORLD_W - LEVEL_W)
 
                     if keys[pygame.K_LSHIFT]:
                         player.vel_x = WALK_VEL // 2
