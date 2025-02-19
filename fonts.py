@@ -24,6 +24,7 @@ FONT_MST3K_XL = pygame.font.Font("fonts/SimianText_Orangutan.otf", 52)
 FONT_EMOJI_SM = pygame.font.Font("fonts/seguiemj.ttf", 18)
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 22)
 FONT_EMOJI_LG = pygame.font.Font("fonts/seguiemj.ttf", 44)
+FONT_EMOJI_XL = pygame.font.Font("fonts/seguiemj.ttf", 96)
 
 STR_STINGER = "Name the MST3K movie this stinger is from:"
 TXT_STINGER = FONT_MST3K_LG.render(STR_STINGER, True, YELLOW)

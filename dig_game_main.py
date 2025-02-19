@@ -5,7 +5,8 @@ from colors import WHITE, BLACK, YELLOW, RED
 from dig_game_drops import screen
 from dig_game_objects import Facing, RUNNING, WALKING, Player, PLAYER_W, PLAYER_H
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
-from dig_game_tiles import Tiles, TILE_W, TILE_H, Tree01, RewardUrn, IMG_GRASS, IMG_VOLTAGE
+from dig_game_tiles import Tiles, TILE_W, TILE_H, Tree01, RewardUrn, IMG_GRASS, IMG_VOLTAGE, IMG_BUSH_01, IMG_BUSH_02, \
+    IMG_BUSH_03, IMG_BUSH_04
 from dig_game_utils import constrain
 from dig_game_world import generate_world
 from fonts import FONT_EMOJI_SM
@@ -43,6 +44,8 @@ jump_allowed = True
 last_m_tile_x = last_m_tile_y = 0
 torch_anim_step = torch_ticks = 0
 
+ui_surf = pygame.Surface((screen.get_width(), TILE_H * 2))
+
 
 def draw_world(world, bgs):
     global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks
@@ -78,7 +81,10 @@ def draw_world(world, bgs):
             xx = x * TILE_W
             tile = world[y][x].value
             if bgs[y][x] is not None:
-                world_surf.blit(bgs[y][x], (xx, yy))
+                off_y = 0
+                if bgs[y][x] in [IMG_BUSH_01, IMG_BUSH_02, IMG_BUSH_03, IMG_BUSH_04]:
+                    off_y = -bgs[y][x].get_height() + TILE_H
+                world_surf.blit(bgs[y][x], (xx, yy + off_y))
             if tile.img is not None:
                 world_surf.blit(tile.img, (xx + tile.img_offset_x, yy + tile.img_offset_y))
                 if y == 5:
@@ -192,8 +198,10 @@ def draw_world(world, bgs):
                 player.tool_charge -= dug_h / ((player.tool_level + 2) * 100)
 
     # Place a block
-    if (but3 and not world[m_tile_y][m_tile_x].value.is_solid
+    if (but3 and world[m_tile_y][m_tile_x] == Tiles.AIR
+            and world[m_tile_y][m_tile_x] not in [Tiles.HOUSE_1, Tiles.HOUSE_2, Tiles.HOUSE_3, Tiles.HOUSE_4]
             and (m_tile_x != tile_x or m_tile_y != tile_y) and abs(tile_x - m_tile_x) < 2 and abs(tile_y - m_tile_y) < 2):
+
         if len(player.inv_dict.keys()) > 0:
             ks = list(player.inv_dict.keys())
             if len(ks) > 0:
@@ -213,11 +221,13 @@ def draw_world(world, bgs):
                     for torch in player.torches:
                         t_tile_x = torch.x // TILE_W
                         t_tile_y = torch.y // TILE_H
-                        if m_tile_x == t_tile_x and m_tile_y == t_tile_y:
-                            pass
-                        else:
+                        if m_tile_x != t_tile_x or m_tile_y != t_tile_y:
                             new_torch_list.append(torch)
                     player.torches = new_torch_list
+
+    # Right-clicked the house, open house UI
+    elif but3 and world[m_tile_y][m_tile_x] in [Tiles.HOUSE_1, Tiles.HOUSE_2, Tiles.HOUSE_3, Tiles.HOUSE_4]:
+        print("House clicked!")
 
     """ Player Movement """
     # Limit left/right movement
@@ -297,7 +307,6 @@ def draw_world(world, bgs):
     """ Render UI """
     # Inventory
     FONT_EMOJI_SM.set_bold(True)
-    ui_surf = pygame.Surface((screen_w, TILE_H * 2))
     ui_surf.fill((32, 32, 32))
     ui_surf_w = ui_surf.get_width()
     ui_surf_h = ui_surf.get_height()
@@ -306,8 +315,8 @@ def draw_world(world, bgs):
     for inv_i, key in enumerate(player.inv_dict.keys()):
         inv_x = TILE_W * inv_i + 3
         ui_surf.blit(key.value.drop.value.img, (inv_x, 32))
-        ui_surf.blit(FONT_EMOJI_SM.render(str(player.inv_dict[key]), True, BLACK).convert_alpha(), (inv_x + 3, 34))
-        ui_surf.blit(FONT_EMOJI_SM.render(str(player.inv_dict[key]), True, WHITE).convert_alpha(), (inv_x + 1, 32))
+        ui_surf.blit(FONT_EMOJI_SM.render(str(player.inv_dict[key]), True, BLACK).convert_alpha(), (inv_x + 3, 33))
+        ui_surf.blit(FONT_EMOJI_SM.render(str(player.inv_dict[key]), True, WHITE).convert_alpha(), (inv_x + 2, 32))
 
         if player.inv_selected == inv_i:
             pygame.draw.rect(ui_surf, "#00FF00", (TILE_W * inv_i + 4, 30, TILE_W, TILE_H), 2)
@@ -423,7 +432,7 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Extract 'ui_surf' out of draw_world() method
+* Allow house upgrade with signifant resources required
 * Allow tool recharge somehow
 * Ability to construct single-use batteries (copper + iron?)
 * Should blocks remember the percent dug they are?
@@ -431,9 +440,12 @@ TODO:
 * Player animations
 * Lamps/Torch to expand sight line
 * Fix player can move about 3-5 pixels inside a block while holding left/right
-* Background bushes for aesthetics
 
 COMPLETED:
++ Background bushes for aesthetics
++ Fix bush heights so they don't extend underground
++ Extract 'ui_surf' out of draw_world() method
++ Don't allow block placement on top of House
 + Add more trees
 + Add charge level to tool, reduce charge level based on time digging, show charge in UI, 
 + Key bounce issue

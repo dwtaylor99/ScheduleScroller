@@ -85,6 +85,30 @@ class TreeDrop(Drop):
     img = FONT_EMOJI_MD.render("🌳", True, WHITE).convert_alpha()
 
 
+class House1Drop(Drop):
+    name = "House Lvl 1"
+    value = 1000
+    img = IMG_HOUSE_01 = FONT_EMOJI_MD.render("🏚️", True, WHITE)
+
+
+class House2Drop(Drop):
+    name = "House Lvl 2"
+    value = 1000
+    img = IMG_HOUSE_02 = FONT_EMOJI_MD.render("🏠️", True, WHITE)
+
+
+class House3Drop(Drop):
+    name = "House Lvl 3"
+    value = 1000
+    img = IMG_HOUSE_03 = FONT_EMOJI_MD.render("🏡", True, WHITE)
+
+
+class House4Drop(Drop):
+    name = "House Lvl 4"
+    value = 1000
+    img = IMG_HOUSE_04 = FONT_EMOJI_MD.render("🏛️", True, WHITE)
+
+
 class Drops(Enum):
     NONE = NoneDrop()
     DIRT = DirtDrop()
@@ -98,3 +122,7 @@ class Drops(Enum):
     DIAMOND = DiamondDrop()
     REWARD_URN = RewardUrnDrop()
     TREE_DROP = TreeDrop()
+    HOUSE_1 = House1Drop()
+    HOUSE_2 = House2Drop()
+    HOUSE_3 = House3Drop()
+    HOUSE_4 = House4Drop()

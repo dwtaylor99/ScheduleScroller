@@ -3,8 +3,8 @@ from enum import Enum
 import pygame
 
 from colors import WHITE
-from dig_game_drops import DiamondDrop, GoldDrop, SilverDrop, IronDrop, Drops, DirtDrop, StoneDrop, ClayDrop, \
-    CopperDrop, RewardUrnDrop, CoalDrop, TreeDrop
+from dig_game_drops import Drops
+from fonts import FONT_EMOJI_XL
 
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 
@@ -27,11 +27,6 @@ IMG_BLUE_BRICKS = pygame.transform.smoothscale_by(pygame.image.load("images/game
 IMG_RED_BRICKS = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/red_wall.png"), TILE_SCALE).convert_alpha()
 IMG_GRAY_BRICKS = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/bricks.png"), TILE_SCALE).convert_alpha()
 
-IMG_URN = FONT_EMOJI_MD.render("🏺", True, WHITE)
-IMG_TORCH = FONT_EMOJI_MD.render("🔦", True, WHITE)
-IMG_VOLTAGE = FONT_EMOJI_MD.render("⚡", True, WHITE)
-IMG_BATTERY = FONT_EMOJI_MD.render("🔋", True, WHITE)
-
 IMG_GRASS = pygame.image.load("images/game/tiles/grass.png").convert_alpha()
 IMG_TREE_01 = pygame.image.load("images/game/tiles/tree_01.png").convert_alpha()
 IMG_TREE_02 = pygame.image.load("images/game/tiles/tree_02.png").convert_alpha()
@@ -42,6 +37,15 @@ IMG_BUSH_01 = pygame.image.load("images/game/tiles/bush_01.png").convert_alpha()
 IMG_BUSH_02 = pygame.image.load("images/game/tiles/bush_02.png").convert_alpha()
 IMG_BUSH_03 = pygame.image.load("images/game/tiles/bush_03.png").convert_alpha()
 IMG_BUSH_04 = pygame.image.load("images/game/tiles/bush_04.png").convert_alpha()
+
+IMG_URN = FONT_EMOJI_MD.render("🏺", True, WHITE)
+IMG_TORCH = FONT_EMOJI_MD.render("🔦", True, WHITE)
+IMG_VOLTAGE = FONT_EMOJI_MD.render("⚡", True, WHITE)
+IMG_BATTERY = FONT_EMOJI_MD.render("🔋", True, WHITE)
+IMG_HOUSE_01 = FONT_EMOJI_XL.render("🏚️", True, WHITE)
+IMG_HOUSE_02 = FONT_EMOJI_XL.render("🏠️", True, WHITE)
+IMG_HOUSE_03 = FONT_EMOJI_XL.render("🏡", True, WHITE)
+IMG_HOUSE_04 = FONT_EMOJI_XL.render("🏛️", True, WHITE)
 
 
 class Tile:
@@ -173,6 +177,46 @@ class Tree04(Tile):
     dig_ticks = 1000
 
 
+class House1(Tile):
+    img = IMG_HOUSE_01
+    img_offset_x = -40
+    img_offset_y = TILE_H - img.get_height()
+    is_solid = False
+    drop = Drops.HOUSE_1
+    dig_level = 1
+    dig_ticks = 5000
+
+
+class House2(Tile):
+    img = IMG_HOUSE_02
+    img_offset_x = -40
+    img_offset_y = TILE_H - img.get_height()
+    is_solid = False
+    drop = Drops.HOUSE_2
+    dig_level = 1
+    dig_ticks = 5000
+
+
+class House3(Tile):
+    img = IMG_HOUSE_03
+    img_offset_x = -40
+    img_offset_y = TILE_H - img.get_height()
+    is_solid = False
+    drop = Drops.HOUSE_3
+    dig_level = 1
+    dig_ticks = 5000
+
+
+class House4(Tile):
+    img = IMG_HOUSE_04
+    img_offset_x = -40
+    img_offset_y = TILE_H - img.get_height()
+    is_solid = False
+    drop = Drops.HOUSE_4
+    dig_level = 1
+    dig_ticks = 5000
+
+
 class Tiles(Enum):
     AIR = Air()
     GRASS_DIRT = GrassDirt()
@@ -190,3 +234,7 @@ class Tiles(Enum):
     TREE_02 = Tree02()
     TREE_03 = Tree03()
     TREE_04 = Tree04()
+    HOUSE_1 = House1()
+    HOUSE_2 = House2()
+    HOUSE_3 = House3()
+    HOUSE_4 = House4()

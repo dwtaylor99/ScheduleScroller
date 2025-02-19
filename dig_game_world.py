@@ -71,6 +71,9 @@ def generate_world(level_width, level_height):
                 elif 90 <= rn < 100:
                     world[y][x] = Tiles.DIAMOND
 
+    # Place a house on level 5 and overwrite whatever is there
+    world[4][random.randrange(level_width)] = Tiles.HOUSE_1
+
     # Add some caves
     for cave_i in range(random.randint(1, 3)):
         cave_len = random.randint(10, 20)  # how long is the cave?
