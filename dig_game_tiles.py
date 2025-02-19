@@ -29,10 +29,19 @@ IMG_GRAY_BRICKS = pygame.transform.smoothscale_by(pygame.image.load("images/game
 
 IMG_URN = FONT_EMOJI_MD.render("🏺", True, WHITE)
 IMG_TORCH = FONT_EMOJI_MD.render("🔦", True, WHITE)
+IMG_VOLTAGE = FONT_EMOJI_MD.render("⚡", True, WHITE)
+IMG_BATTERY = FONT_EMOJI_MD.render("🔋", True, WHITE)
 
 IMG_GRASS = pygame.image.load("images/game/tiles/grass.png").convert_alpha()
 IMG_TREE_01 = pygame.image.load("images/game/tiles/tree_01.png").convert_alpha()
 IMG_TREE_02 = pygame.image.load("images/game/tiles/tree_02.png").convert_alpha()
+IMG_TREE_03 = pygame.image.load("images/game/tiles/tree_03.png").convert_alpha()
+IMG_TREE_04 = pygame.image.load("images/game/tiles/tree_04.png").convert_alpha()
+
+IMG_BUSH_01 = pygame.image.load("images/game/tiles/bush_01.png").convert_alpha()
+IMG_BUSH_02 = pygame.image.load("images/game/tiles/bush_02.png").convert_alpha()
+IMG_BUSH_03 = pygame.image.load("images/game/tiles/bush_03.png").convert_alpha()
+IMG_BUSH_04 = pygame.image.load("images/game/tiles/bush_04.png").convert_alpha()
 
 
 class Tile:
@@ -53,64 +62,64 @@ class Air(Tile):
 
 class GrassDirt(Tile):
     img = IMG_GRASS_DIRT
-    drop = DirtDrop()
+    drop = Drops.DIRT
     dig_ticks = 500
 
 
 class Dirt(Tile):
     img = IMG_DIRT
-    drop = DirtDrop()
+    drop = Drops.DIRT
     dig_ticks = 500
 
 
 class Stone(Tile):
     img = IMG_STONE
-    drop = StoneDrop()
+    drop = Drops.STONE
     dig_ticks = 1000
 
 
 class Clay(Tile):
     img = IMG_CLAY
-    drop = ClayDrop()
+    drop = Drops.CLAY
     dig_ticks = 1500
 
 
 class Coal(Tile):
     img = IMG_COAL
-    drop = CoalDrop()
+    drop = Drops.COAL
     dig_ticks = 1500
 
 
 class Copper(Tile):
     img = IMG_COPPER
-    drop = CopperDrop()
+    drop = Drops.COPPER
     dig_ticks = 2000
 
 
 class Iron(Tile):
     img = IMG_IRON
-    drop = IronDrop()
+    drop = Drops.IRON
     dig_level = 2
     dig_ticks = 2500
 
 
 class Silver(Tile):
     img = IMG_SILVER
-    drop = SilverDrop()
+    drop = Drops.SILVER
     dig_level = 2
     dig_ticks = 2500
 
 
 class Gold(Tile):
     img = IMG_GOLD
-    drop = GoldDrop()
+    drop = Drops.GOLD
     dig_level = 2
     dig_ticks = 3000
 
 
 class Diamond(Tile):
     img = IMG_DIAMOND
-    drop = DiamondDrop()
+    drop = Drops.DIAMOND
     dig_level = 2
     dig_ticks = 5000
 
@@ -120,7 +129,7 @@ class RewardUrn(Tile):
     img_offset_x = 5
     img_offset_y = 5
     is_solid = False
-    drop = RewardUrnDrop()
+    drop = Drops.REWARD_URN
     dig_ticks = 1000
 
 
@@ -129,7 +138,7 @@ class Tree01(Tile):
     img_offset_x = -65
     img_offset_y = TILE_H - img.get_height()
     is_solid = False
-    drop = TreeDrop()
+    drop = Drops.TREE_DROP
     dig_level = 1
     dig_ticks = 1000
 
@@ -139,7 +148,27 @@ class Tree02(Tile):
     img_offset_x = -40
     img_offset_y = TILE_H - img.get_height()
     is_solid = False
-    drop = TreeDrop()
+    drop = Drops.TREE_DROP
+    dig_level = 1
+    dig_ticks = 1000
+
+
+class Tree03(Tile):
+    img = IMG_TREE_03
+    img_offset_x = -40
+    img_offset_y = TILE_H - img.get_height()
+    is_solid = False
+    drop = Drops.TREE_DROP
+    dig_level = 1
+    dig_ticks = 1000
+
+
+class Tree04(Tile):
+    img = IMG_TREE_04
+    img_offset_x = -40
+    img_offset_y = TILE_H - img.get_height()
+    is_solid = False
+    drop = Drops.TREE_DROP
     dig_level = 1
     dig_ticks = 1000
 
@@ -159,3 +188,5 @@ class Tiles(Enum):
     REWARD_URN = RewardUrn()
     TREE_01 = Tree01()
     TREE_02 = Tree02()
+    TREE_03 = Tree03()
+    TREE_04 = Tree04()

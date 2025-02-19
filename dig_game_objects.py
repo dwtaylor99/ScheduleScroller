@@ -38,6 +38,8 @@ class Player:
     inv_dict = {}
     inv_selected = 0
     torches = []
+    tool_level = 1
+    tool_charge = 100
 
     def add_inv(self, tile: Tiles):
         if tile in self.inv_dict.keys():

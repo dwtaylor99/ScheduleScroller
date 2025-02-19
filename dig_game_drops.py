@@ -5,7 +5,7 @@ import pygame
 from colors import WHITE
 
 pygame.init()
-screen = pygame.display.set_mode((1920 // 2, 1080 // 2))
+screen = pygame.display.set_mode((1920 // 2, 1080))
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 
 
@@ -87,7 +87,9 @@ class TreeDrop(Drop):
 
 class Drops(Enum):
     NONE = NoneDrop()
+    DIRT = DirtDrop()
     CLAY = ClayDrop()
+    COAL = CoalDrop()
     STONE = StoneDrop()
     COPPER = CopperDrop()
     IRON = IronDrop()

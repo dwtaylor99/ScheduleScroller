@@ -1,6 +1,7 @@
 import random
 
-from dig_game_tiles import Tiles, IMG_BLUE_BRICKS, IMG_RED_BRICKS, IMG_GRAY_BRICKS, IMG_GREEN_VINES
+from dig_game_tiles import Tiles, IMG_BLUE_BRICKS, IMG_RED_BRICKS, IMG_GRAY_BRICKS, IMG_GREEN_VINES, IMG_BUSH_04, \
+    IMG_BUSH_03, IMG_BUSH_02, IMG_BUSH_01
 from dig_game_utils import constrain
 
 
@@ -25,8 +26,10 @@ def generate_world(level_width, level_height):
 
             # Add trees
             if y == overworld - 1:
-                if rn < 25:
-                    world[y][x] = random.choice([Tiles.TREE_01, Tiles.TREE_02])
+                if 0 <= rn < 50:
+                    background[y][x] = random.choice([IMG_BUSH_01, IMG_BUSH_02, IMG_BUSH_03, IMG_BUSH_04])
+                if 50 <= rn < 75:
+                    world[y][x] = random.choice([Tiles.TREE_01, Tiles.TREE_02, Tiles.TREE_03, Tiles.TREE_04])
 
             if overworld <= y < level_1:
                 if 0 <= rn < 60:
