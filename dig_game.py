@@ -767,11 +767,11 @@ if __name__ == '__main__':
 
     texture_scale = 0.16
     WALLS = [
-        pygame.transform.smoothscale_by(pygame.image.load('images/game/walls/gray_wall.png'), texture_scale).convert(),
-        pygame.transform.smoothscale_by(pygame.image.load('images/game/walls/yellow_wall.png'), texture_scale).convert(),
-        pygame.transform.smoothscale_by(pygame.image.load('images/game/walls/green_wall.png'), texture_scale).convert(),
-        pygame.transform.smoothscale_by(pygame.image.load('images/game/walls/blue_wall.png'), texture_scale).convert(),
-        pygame.transform.smoothscale_by(pygame.image.load('images/game/walls/red_wall.png'), texture_scale).convert()
+        pygame.transform.smoothscale_by(pygame.image.load('images/game/tiles/gray_wall.png'), texture_scale).convert(),
+        pygame.transform.smoothscale_by(pygame.image.load('images/game/tiles/yellow_wall.png'), texture_scale).convert(),
+        pygame.transform.smoothscale_by(pygame.image.load('images/game/tiles/green_wall.png'), texture_scale).convert(),
+        pygame.transform.smoothscale_by(pygame.image.load('images/game/tiles/blue_wall.png'), texture_scale).convert(),
+        pygame.transform.smoothscale_by(pygame.image.load('images/game/tiles/red_wall.png'), texture_scale).convert()
     ]
 
     TXT_PAUSED_X = (screen.get_width() - TXT_PAUSED.get_width()) // 2

@@ -1,12 +1,10 @@
 import random
 
-import pygame
-
-from dig_game_tiles import Tiles, IMG_BLUE_BRICKS, IMG_RED_BRICKS, IMG_GRAY_BRICKS
+from dig_game_tiles import Tiles, IMG_BLUE_BRICKS, IMG_RED_BRICKS, IMG_GRAY_BRICKS, IMG_GREEN_VINES
 from dig_game_utils import constrain
 
 
-def generate_world(level_width, level_height, tile_w, tile_h):
+def generate_world(level_width, level_height):
     world = [[Tiles.AIR for _ in range(level_width)] for _ in range(level_height)]
     background = [[None for _ in range(level_width)] for _ in range(level_height)]
 
@@ -21,8 +19,14 @@ def generate_world(level_width, level_height, tile_w, tile_h):
             # rn = random.randrange(100) + y
             rn = random.randrange(100)
 
+            # Top 5 levels are Air so player has some build height
             if y < overworld:
                 world[y][x] = Tiles.AIR
+
+            # Add trees
+            if y == overworld - 1:
+                if rn < 25:
+                    world[y][x] = random.choice([Tiles.TREE_01, Tiles.TREE_02])
 
             if overworld <= y < level_1:
                 if 0 <= rn < 60:
@@ -69,7 +73,7 @@ def generate_world(level_width, level_height, tile_w, tile_h):
         cave_len = random.randint(10, 20)  # how long is the cave?
         cave_x = random.randint(3, 10)  # where to start the cave, x position
         cave_y = random.randint(7, 14)  # where to start the cave, y position
-        cave_bg = random.choice([IMG_BLUE_BRICKS, IMG_RED_BRICKS, IMG_GRAY_BRICKS])
+        cave_bg = random.choice([IMG_GREEN_VINES])
         for _ in range(cave_len):
             world[cave_y][cave_x] = Tiles.AIR
             background[cave_y][cave_x] = cave_bg
@@ -83,7 +87,7 @@ def generate_world(level_width, level_height, tile_w, tile_h):
             elif direc == 4:
                 cave_x += 1
             cave_x = constrain(cave_x, 0, level_width)
-            cave_y = constrain(cave_y, 0, level_height)
+            cave_y = constrain(cave_y, overworld + 2, level_height)
 
     # Add some cave rooms
     for room_i in range(random.randint(1, 3)):
@@ -98,7 +102,7 @@ def generate_world(level_width, level_height, tile_w, tile_h):
         for jj in range(room_size):
             for ii in range(room_size):
                 yyy = constrain(room_y + jj, 0, level_height - 1)
-                xxx = constrain(room_x + ii, 0, level_width - 1)
+                xxx = constrain(room_x + ii, overworld + 2, level_width - 1)
                 world[yyy][xxx] = room_tile
                 background[yyy][xxx] = room_bg
             if jj == room_size - 1:
@@ -109,4 +113,4 @@ def generate_world(level_width, level_height, tile_w, tile_h):
 
 
 if __name__ == '__main__':
-    generate_world(40, 50, 42, 42)
+    generate_world(40, 50)

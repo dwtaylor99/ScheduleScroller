@@ -22,8 +22,8 @@ class Facing(Enum):
 
 class Player:
     # position and movement
-    x = 0.0
-    y = 0.0
+    x = 420
+    y = 160.0  # start on Tile 5 which allows player a little build height.
     emoji_index = random.randrange(len(WALKING))
     facing = Facing.RIGHT
     vel_x = 0.0
@@ -52,7 +52,8 @@ class Player:
                 del self.inv_dict[tile]
 
     def get_rect(self):
-        return pygame.Rect(self.x + 8, self.y + 6, PLAYER_W, PLAYER_H)
+        return pygame.Rect(self.x, self.y + 6, PLAYER_W, PLAYER_H)
+        # return pygame.Rect(self.x + 8, self.y + 6, PLAYER_W, PLAYER_H)
 
 
 # Torches

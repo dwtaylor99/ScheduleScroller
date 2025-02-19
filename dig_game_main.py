@@ -5,7 +5,7 @@ from colors import WHITE, BLACK, YELLOW, RED
 from dig_game_drops import screen
 from dig_game_objects import Facing, RUNNING, WALKING, Player, PLAYER_W, PLAYER_H
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
-from dig_game_tiles import Tiles, TILE_W, TILE_H, Air
+from dig_game_tiles import Tiles, TILE_W, TILE_H, Tree01, RewardUrn, IMG_GRASS
 from dig_game_utils import constrain
 from dig_game_world import generate_world
 from fonts import FONT_EMOJI_SM
@@ -15,6 +15,8 @@ pygame.init()
 clock = pygame.time.Clock()
 dt = 0
 is_running = True
+is_debug_stats = False
+key_ticks = 0
 
 FPS = 60
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
@@ -26,14 +28,12 @@ HOLLOW_COLOR = (255, 0, 255, 0)
 GRAVITY = 0.4
 JUMP_VEL = -5.0
 WALK_VEL = 6.0
-# DIG_TICKS = 1000  # Should be based on player's tool level
 
-WORLD_W = 40
+WORLD_W = 50
 WORLD_H = 50
 LEVEL_W = 20
 LEVEL_H = 20
 main_world = [[Tiles.AIR for _ in range(WORLD_W)] for _ in range(WORLD_H)]
-main_bg = [[None for _ in range(WORLD_W)] for _ in range(WORLD_H)]
 
 jump_allowed = True
 last_m_tile_x = last_m_tile_y = 0
@@ -76,7 +76,15 @@ def draw_world(world, bgs):
             if bgs[y][x] is not None:
                 world_surf.blit(bgs[y][x], (xx, yy))
             if tile.img is not None:
-                world_surf.blit(tile.img, (xx, yy))
+                if type(tile) is Tree01:
+                    world_surf.blit(tile.img, (xx + tile.img_offset_x, yy + tile.img_offset_y))
+                    # world_surf.blit(tile.img, (xx - 65, yy + TILE_H - tile.img.get_height()))
+                elif type(tile) is RewardUrn:
+                    world_surf.blit(tile.img, (xx + tile.img_offset_x, yy + tile.img_offset_y))
+                else:
+                    world_surf.blit(tile.img, (xx + tile.img_offset_x, yy + tile.img_offset_y))
+                    if y == 5:
+                        world_surf.blit(IMG_GRASS, (xx, yy - TILE_H + 2))
 
     player.x = constrain(player.x + player.vel_x, 0, world_surf.get_width() - PLAYER_W)
     player.y = constrain(player.y + player.vel_y, -100, world_surf.get_height())
@@ -84,6 +92,7 @@ def draw_world(world, bgs):
     offset_x = -player.x + screen_w2 + (PLAYER_W // 2)
     offset_y = -player.y + (screen_h2 // 2)
 
+    # Draw the surfaces to the screen
     screen.blit(sky_surf, (offset_x, offset_y - sky_surf.get_height()))
     screen.blit(world_surf, (offset_x, offset_y))
 
@@ -103,7 +112,6 @@ def draw_world(world, bgs):
     for torch in player.torches:
         screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (TORCH_W_SCALED // 2) - 7 + offset_x, torch.y - (TORCH_H_SCALED // 2) + offset_y))
         pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x + offset_x - PLAYER_W, torch.y - (tile_y * TILE_H) - TILE_H - offset_y), torch.w)
-        # pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x - fog_x + offset_x, torch.y - fog_y + offset_y), torch.w)
 
         # Torch animation
         torch_ticks += dt
@@ -111,7 +119,8 @@ def draw_world(world, bgs):
             torch_anim_step = (torch_anim_step + 1) % len(TORCH_ANIM)
             torch_ticks = 0
 
-    # screen.blit(temp_surf, (0, (TILE_H * 7) + offset_y))
+    if not is_debug_stats:
+        screen.blit(temp_surf, (0, (TILE_H * 7) + offset_y))
 
     """ Mouse Movement """
     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -129,6 +138,7 @@ def draw_world(world, bgs):
     # Highlight mouse tile
     pygame.draw.rect(screen, m_color, (m_tile_x * TILE_W + offset_x, m_tile_y * TILE_H + offset_y, TILE_W, TILE_H), 2)
 
+    # Reset ticks if mouse button 1 is released
     if not but1:
         player.ticks = 0
 
@@ -138,7 +148,7 @@ def draw_world(world, bgs):
     last_m_tile_x = m_tile_x
     last_m_tile_y = m_tile_y
 
-    if but1 and m_color == MOUSE_OK_COLOR and world[m_tile_y][m_tile_x] != Tiles.AIR:
+    if but1 and m_color == MOUSE_OK_COLOR and world[m_tile_y][m_tile_x].value.dig_level > 0:
         # Check if the targeted block is an unreachable diagonal
         up_tile = world[tile_y - 1][tile_x]
         down_tile = world[tile_y + 1][tile_x]
@@ -146,13 +156,13 @@ def draw_world(world, bgs):
         right_tile = world[tile_y][tile_x + 1]
 
         allow_dig = True
-        if m_tile_x < tile_x and m_tile_y < tile_y and up_tile != Tiles.AIR and left_tile != Tiles.AIR:
+        if m_tile_x < tile_x and m_tile_y < tile_y and up_tile.value.is_solid and left_tile.value.is_solid:
             allow_dig = False  # up and left
-        elif m_tile_x < tile_x and m_tile_y > tile_y and down_tile != Tiles.AIR and left_tile != Tiles.AIR:
+        elif m_tile_x < tile_x and m_tile_y > tile_y and down_tile.value.is_solid and left_tile.value.is_solid:
             allow_dig = False  # down and left
-        elif m_tile_x > tile_x and m_tile_y < tile_y and up_tile != Tiles.AIR and right_tile != Tiles.AIR:
+        elif m_tile_x > tile_x and m_tile_y < tile_y and up_tile.value.is_solid and right_tile.value.is_solid:
             allow_dig = False  # up and right
-        elif m_tile_x > tile_x and m_tile_y > tile_y and down_tile != Tiles.AIR and right_tile != Tiles.AIR:
+        elif m_tile_x > tile_x and m_tile_y > tile_y and down_tile.value.is_solid and right_tile.value.is_solid:
             allow_dig = False  # down and right
 
         block_ticks = world[m_tile_y][m_tile_x].value.dig_ticks
@@ -170,7 +180,8 @@ def draw_world(world, bgs):
             else:
                 # Line from player to mouse crosshair
                 line_color = YELLOW if player.ticks % 60 < 30 else RED
-                pygame.draw.line(screen, line_color, (screen_w2 + PLAYER_W, screen_h2 - 250), (mouse_x, mouse_y), 2)
+                pygame.draw.line(screen, line_color, (player.x + offset_x + (PLAYER_W // 2), player.y + offset_y + (PLAYER_H // 2)), (mouse_x, mouse_y), 2)
+                # pygame.draw.line(screen, line_color, (screen_w2 + PLAYER_W, screen_h2 - 250), (mouse_x, mouse_y), 2)
 
                 dug_h = TILE_H * (block_ticks - player.ticks) / block_ticks  # calculate the percentage dug
                 temp_surf = pygame.Surface((TILE_W - 4, TILE_H - dug_h))
@@ -179,7 +190,7 @@ def draw_world(world, bgs):
                 screen.blit(temp_surf, (m_tile_x * TILE_W + 2 + offset_x, m_tile_y * TILE_H + offset_y))
 
     # Place a block
-    if (but3 and world[m_tile_y][m_tile_x] == Tiles.AIR
+    if (but3 and not world[m_tile_y][m_tile_x].value.is_solid
             and (m_tile_x != tile_x or m_tile_y != tile_y) and abs(tile_x - m_tile_x) < 2 and abs(tile_y - m_tile_y) < 2):
         if len(player.inv_dict.keys()) > 0:
             ks = list(player.inv_dict.keys())
@@ -199,13 +210,13 @@ def draw_world(world, bgs):
     left_tile = world[tile_y][tile_x - 1] if tile_x - 1 >= 0 else Tiles.STONE
     right_tile = world[tile_y][tile_x + 1] if tile_x + 1 < WORLD_W else Tiles.STONE
 
-    min_x = (tile_x - 1) * TILE_W + TILE_W - 3 if left_tile != Tiles.AIR else 0
-    max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile != Tiles.AIR else (WORLD_W - 1) * TILE_W + PLAYER_W
+    min_x = (tile_x - 1) * TILE_W + TILE_W - 3 if left_tile.value.is_solid else 0
+    max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + PLAYER_W
 
     player.x = constrain(player.x, min_x, max_x)
 
     if player.on_ground:
-        while tile_y < WORLD_H and world[tile_y][tile_x] == Tiles.AIR:
+        while tile_y < WORLD_H and not world[tile_y][tile_x].value.is_solid:
             player.on_ground = False
             tile_y += 1
 
@@ -235,7 +246,7 @@ def draw_world(world, bgs):
             player.y = min_y
 
         # Find where player should land
-        while tile_y < WORLD_H and world[tile_y][tile_x] == Tiles.AIR:
+        while tile_y < WORLD_H and not world[tile_y][tile_x].value.is_solid:
             player.on_ground = False
             tile_y += 1
 
@@ -261,9 +272,6 @@ def draw_world(world, bgs):
             emoji = pygame.transform.flip(FONT_EMOJI_MD.render(WALKING[player.emoji_index], True, WHITE), True, False).convert_alpha()
         screen.blit(emoji, (screen.get_width() // 2, screen.get_height() // 4 + 5))
 
-    # Player hitbox
-    # pygame.draw.rect(screen, "#00FF00", player.get_rect(), 1)
-
     """ Border """
     low_border_x = 0
     low_border_y = LEVEL_H * TILE_H
@@ -285,22 +293,29 @@ def draw_world(world, bgs):
             screen.blit(FONT_EMOJI_SM.render(key.value.drop.name, True, WHITE).convert_alpha(), (4, inv_y - 26))
             pygame.draw.rect(screen, "#00FF00", (TILE_W * inv_i + 4, inv_y, TILE_W, TILE_H), 2)
 
-    stats = FONT_EMOJI_SM.render("px: {}, py: {} | tile_x: {}, tile_y: {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
-    screen.blit(stats, (4, 950))
+    """ Debug stats (toggle with F3) """
+    if is_debug_stats:
+        player_rect = player.get_rect()
+        player_rect.x += offset_x
+        player_rect.y += offset_y
+        pygame.draw.rect(screen, "#00FF00", player_rect, 1)  # Player hitbox
 
-    stat2 = FONT_EMOJI_SM.render("m_tile_x: {}, m_tile_y: {}".format(m_tile_x, m_tile_y), True, WHITE).convert_alpha()
-    screen.blit(stat2, (4, 980))
+        stats = FONT_EMOJI_SM.render("px: {}, py: {} | tile_x: {}, tile_y: {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
+        screen.blit(stats, (4, 950))
 
-    stat3 = FONT_EMOJI_SM.render("left: {}, right: {}, min_x: {}, max_x: {}".format(left_tile, right_tile, min_x, max_x), True, WHITE)
-    screen.blit(stat3, (4, 1010))
+        stat2 = FONT_EMOJI_SM.render("m_tile_x: {}, m_tile_y: {}".format(m_tile_x, m_tile_y), True, WHITE).convert_alpha()
+        screen.blit(stat2, (4, 980))
+
+        stat3 = FONT_EMOJI_SM.render("left: {}, right: {}, min_x: {}, max_x: {}".format(left_tile, right_tile, min_x, max_x), True, WHITE)
+        screen.blit(stat3, (4, 1010))
 
 
 if __name__ == '__main__':
-    main_world, main_bg = generate_world(WORLD_W, WORLD_H, TILE_W, TILE_H)
+    main_world, main_bg = generate_world(WORLD_W, WORLD_H)
     player = Player()
 
     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
-    pygame.key.set_repeat(1, FPS)
+    pygame.key.set_repeat(20, FPS)
 
     while is_running:
         draw_world(main_world, main_bg)
@@ -311,6 +326,7 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 is_running = True
             elif event.type == pygame.KEYDOWN:
+                key_ticks = (key_ticks + dt) % 6000
                 keys = pygame.key.get_pressed()
 
                 # if keys[pygame.K_w] or keys[pygame.K_UP]:
@@ -336,6 +352,10 @@ if __name__ == '__main__':
 
                 elif keys[pygame.K_t]:
                     player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H // 2, TORCH_DIST, TORCH_DIST))
+
+                elif keys[pygame.K_F3] and key_ticks > 100:
+                    key_ticks = 0
+                    is_debug_stats = not is_debug_stats
 
                 if keys[pygame.K_SPACE] and player.on_ground and jump_allowed:
                     jump_allowed = False
@@ -364,13 +384,17 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Give tiles/rooms background images (bricks, etc)
-    - Either tiles have a background which requires individual instances of all tiles
-    - OR backgrounds exist on a separate surface behind the tiles
-    
+* Exchange inventory for crafted items
+* Player animations
+* Add offset_x and offset_y to tile images (for trees and urns)
 * Lamps/Torch to expand sight line
 * Fix player can move about 3-5 pixels inside a block while holding left/right
+* Add more trees
 
+COMPLETED:
++ Grass
++ Add Trees and wood drops
++ Give tiles/rooms background images (bricks, etc)
 + Destroying diagonal blocks without line-of-sight
 + Different materials required different time to dig
 + Line from player to crosshair when digging

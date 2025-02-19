@@ -5,7 +5,7 @@ import pygame
 from colors import WHITE
 
 pygame.init()
-screen = pygame.display.set_mode((1920, 1080))
+screen = pygame.display.set_mode((1920 // 2, 1080 // 2))
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 
 
@@ -79,6 +79,12 @@ class RewardUrnDrop(Drop):
     img = FONT_EMOJI_MD.render("🏺", True, WHITE).convert_alpha()
 
 
+class TreeDrop(Drop):
+    name = "Log"
+    value = 10
+    img = FONT_EMOJI_MD.render("🌳", True, WHITE).convert_alpha()
+
+
 class Drops(Enum):
     NONE = NoneDrop()
     CLAY = ClayDrop()
@@ -89,3 +95,4 @@ class Drops(Enum):
     GOLD = GoldDrop()
     DIAMOND = DiamondDrop()
     REWARD_URN = RewardUrnDrop()
+    TREE_DROP = TreeDrop()
