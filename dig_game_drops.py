@@ -37,6 +37,12 @@ class ClayDrop(Drop):
     img = FONT_EMOJI_MD.render("🟤", True, WHITE).convert_alpha()
 
 
+class CoalDrop(Drop):
+    name = "Coal"
+    value = 3
+    img = FONT_EMOJI_MD.render("◼️", True, WHITE).convert_alpha()
+
+
 class CopperDrop(Drop):
     name = "Copper"
     value = 5

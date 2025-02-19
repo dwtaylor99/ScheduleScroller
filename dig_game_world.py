@@ -7,28 +7,21 @@ from dig_game_utils import constrain
 def generate_world(level_width, level_height):
     world = [[Tiles.AIR for _ in range(level_width)] for _ in range(level_height)]
 
-    """
-    Plan:
-    upper levels should be dirt, clay, stone
-    gradually add more valuable ores: copper, iron, silver, gold, diamond
-    
-    split world height into 4 regions
-    """
-
-    level_1 = int(level_height * 0.25)
-    level_2 = int(level_height * 0.25) + level_1
-    level_3 = int(level_height * 0.25) + level_1 + level_2
-    level_4 = int(level_height * 0.25) + level_1 + level_2 + level_3
+    overworld = 5
+    level_1 = int(level_height * 0.25) + overworld
+    level_2 = int(level_height * 0.25) + level_1 + overworld
+    level_3 = int(level_height * 0.25) + level_2 + overworld
+    level_4 = int(level_height * 0.25) + level_3 + overworld
 
     for y in range(level_height):
         for x in range(level_width):
             # rn = random.randrange(100) + y
             rn = random.randrange(100)
 
-            if y == 0:
+            if y < overworld:
                 world[y][x] = Tiles.AIR
 
-            if 1 <= y < level_1:
+            if overworld <= y < level_1:
                 if 0 <= rn < 60:
                     world[y][x] = Tiles.DIRT
                 elif 60 <= rn < 80:
@@ -36,15 +29,15 @@ def generate_world(level_width, level_height):
                 elif 80 <= rn < 90:
                     world[y][x] = Tiles.CLAY
                 elif 90 <= rn < 100:
-                    world[y][x] = Tiles.COPPER
+                    world[y][x] = Tiles.COAL
 
             elif level_1 <= y < level_2:
                 if 0 <= rn < 60:
                     world[y][x] = Tiles.STONE
                 elif 60 <= rn < 80:
-                    world[y][x] = Tiles.CLAY
-                elif 80 <= rn < 90:
                     world[y][x] = Tiles.COPPER
+                elif 80 <= rn < 90:
+                    world[y][x] = Tiles.COAL
                 elif 90 <= rn < 100:
                     world[y][x] = Tiles.IRON
 
@@ -184,3 +177,7 @@ def generate_world1(level_width, level_height):
                 world[room_y + jj][room_x] = Tiles.REWARD_URN
 
     return world
+
+
+if __name__ == '__main__':
+    generate_world(40, 50)

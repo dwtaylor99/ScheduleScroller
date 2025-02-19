@@ -25,15 +25,14 @@ HOLLOW_COLOR = (255, 0, 255, 0)
 
 GRAVITY = 0.4
 JUMP_VEL = -5.0
-WALK_VEL = 4.0
-DIG_TICKS = 1000  # Should be based on player's tool level
+WALK_VEL = 6.0
+# DIG_TICKS = 1000  # Should be based on player's tool level
 
 WORLD_W = 40
-WORLD_H = 40
+WORLD_H = 50
 LEVEL_W = 20
 LEVEL_H = 20
 main_world = [[Tiles.AIR for ix in range(WORLD_W)] for iy in range(WORLD_H)]
-# world = [[Tiles.AIR for ix in range(LEVEL_W)] for iy in range(LEVEL_H)]
 
 jump_allowed = True
 last_m_tile_x = last_m_tile_y = 0
@@ -57,14 +56,15 @@ def draw_world(world):
     tile_y = constrain(tile_y, 0, WORLD_H - 1)
 
     # Draw the world tiles
+    sky_surf = pygame.Surface((WORLD_W * TILE_W, 500))
     world_surf = pygame.Surface((WORLD_W * TILE_W, WORLD_H * TILE_H))
 
     """ Background """
-    # gradient.rect_gradient_h(screen, (100, 140, 210), (64, 64, 64), pygame.Rect(0, 0, screen.get_width(), 2 * TILE_H))
-    # gradient.rect_gradient_h(screen, (64, 64, 64), (0, 0, 0), pygame.Rect(0, TILE_H * 2, LEVEL_W * TILE_W, LEVEL_H * TILE_H - (TILE_H * 2)))
+    gradient.rect_gradient_h(sky_surf, (210, 210, 210), (120, 160, 200), pygame.Rect(0, 0, sky_surf.get_width(), sky_surf.get_height()))
 
-    gradient.rect_gradient_h(world_surf, (64, 64, 64), (0, 0, 0),
-                             pygame.Rect(0, TILE_H * 2, WORLD_W * TILE_W, WORLD_H * TILE_H - (TILE_H * 2)))
+    gradient.rect_gradient_h(world_surf, (120, 160, 200), (60, 110, 175), pygame.Rect(0, 0, world_surf.get_width(), 5 * TILE_H))
+    gradient.rect_gradient_h(world_surf, (60, 110, 175), (32, 32, 32), pygame.Rect(0, 5 * TILE_H, world_surf.get_width(), 2 * TILE_H))
+    gradient.rect_gradient_h(world_surf, (32, 32, 32), (0, 0, 0), pygame.Rect(0, 7 * TILE_H, WORLD_W * TILE_W, WORLD_H * TILE_H - (7 * TILE_H)))
 
     for y in range(WORLD_H):
         yy = y * TILE_H
@@ -84,24 +84,26 @@ def draw_world(world):
     offset_x = -player.x + screen_w2 + (PLAYER_W // 2)
     offset_y = -player.y + (screen_h2 // 2)
 
+    screen.blit(sky_surf, (offset_x, offset_y - sky_surf.get_height()))
     screen.blit(world_surf, (offset_x, offset_y))
 
     """ Circle around player """
-    surf_w = surf_h = 3000
-    surf_w2 = surf_h2 = surf_w // 2
+    # Once player is on tile_y >= 7, darkness happens
+    surf_w = WORLD_W * TILE_W
+    surf_h = WORLD_H * TILE_H
 
-    # The main circle around the player
+    # # The main circle around the player
     temp_surf = pygame.Surface((surf_w, surf_h))
     temp_surf.fill(BLACK)
     temp_surf.set_colorkey((255, 0, 255))
-    pygame.draw.circle(temp_surf, HOLLOW_COLOR, (surf_w2, surf_h2), 100)
-    fog_x = (screen_w - surf_w) // 2
-    fog_y = (screen_h - surf_h) // 2 - 250
+    if tile_y >= 6:
+        pygame.draw.circle(temp_surf, HOLLOW_COLOR, (screen.get_width() // 2 + (PLAYER_W // 2), (tile_y - 7) * TILE_H), 100)
 
     # Additional circles for each of the torches
     for torch in player.torches:
         screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (TORCH_W_SCALED // 2) - 7 + offset_x, torch.y - (TORCH_H_SCALED // 2) + offset_y))
-        pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x - fog_x + offset_x, torch.y - fog_y + offset_y), torch.w)
+        pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x + offset_x - PLAYER_W, torch.y - (tile_y * TILE_H) - TILE_H - offset_y), torch.w)
+        # pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x - fog_x + offset_x, torch.y - fog_y + offset_y), torch.w)
 
         # Torch animation
         torch_ticks += dt
@@ -109,7 +111,7 @@ def draw_world(world):
             torch_anim_step = (torch_anim_step + 1) % len(TORCH_ANIM)
             torch_ticks = 0
 
-    # screen.blit(temp_surf, (fog_x, fog_y))
+    screen.blit(temp_surf, (0, (TILE_H * 7) + offset_y))
 
     """ Mouse Movement """
     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -141,28 +143,44 @@ def draw_world(world):
     last_m_tile_y = m_tile_y
 
     if but1 and m_color == MOUSE_OK_COLOR and world[m_tile_y][m_tile_x] != Tiles.AIR:
-        player.ticks += dt
+        # Check if the targeted block is an unreachable diagonal
+        up_tile = world[tile_y - 1][tile_x]
+        down_tile = world[tile_y + 1][tile_x]
+        left_tile = world[tile_y][tile_x - 1]
+        right_tile = world[tile_y][tile_x + 1]
 
-        # Block breaks
-        if player.ticks >= DIG_TICKS:
-            player.ticks = 0
-            print("Added to inv: {}".format(world[m_tile_y][m_tile_x]))
-            player.add_inv(world[m_tile_y][m_tile_x])
-            world[m_tile_y][m_tile_x] = Tiles.AIR
+        allow_dig = True
+        if m_tile_x < tile_x and m_tile_y < tile_y and up_tile != Tiles.AIR and left_tile != Tiles.AIR:
+            allow_dig = False  # up and left
+        elif m_tile_x < tile_x and m_tile_y > tile_y and down_tile != Tiles.AIR and left_tile != Tiles.AIR:
+            allow_dig = False  # down and left
+        elif m_tile_x > tile_x and m_tile_y < tile_y and up_tile != Tiles.AIR and right_tile != Tiles.AIR:
+            allow_dig = False  # up and right
+        elif m_tile_x > tile_x and m_tile_y > tile_y and down_tile != Tiles.AIR and right_tile != Tiles.AIR:
+            allow_dig = False  # down and right
 
-        # Digging progress
-        else:
-            # Line from player to mouse crosshair
-            if player.ticks % 60 < 30:
-                pygame.draw.line(screen, YELLOW, (screen_w2 + PLAYER_W, screen_h2 - 250), (mouse_x, mouse_y), 2)
+        if allow_dig:
+            # Start digging the block
+            player.ticks += dt
+            block_ticks = world[m_tile_y][m_tile_x].value.dig_ticks
+
+            # Block breaks
+            if player.ticks >= block_ticks:
+                player.ticks = 0
+                player.add_inv(world[m_tile_y][m_tile_x])
+                world[m_tile_y][m_tile_x] = Tiles.AIR
+
+            # Digging progress
             else:
-                pygame.draw.line(screen, RED, (screen_w2 + PLAYER_W, screen_h2 - 250), (mouse_x, mouse_y), 2)
+                # Line from player to mouse crosshair
+                line_color = YELLOW if player.ticks % 60 < 30 else RED
+                pygame.draw.line(screen, line_color, (screen_w2 + PLAYER_W, screen_h2 - 250), (mouse_x, mouse_y), 2)
 
-            dug_h = TILE_H * (DIG_TICKS - player.ticks) / DIG_TICKS  # calculate the percentage dug
-            temp_surf = pygame.Surface((TILE_W - 4, TILE_H - dug_h))
-            temp_surf.set_alpha(128)
-            temp_surf.fill((192, 0, 0))
-            screen.blit(temp_surf, (m_tile_x * TILE_W + 2 + offset_x, m_tile_y * TILE_H + offset_y))
+                dug_h = TILE_H * (block_ticks - player.ticks) / block_ticks  # calculate the percentage dug
+                temp_surf = pygame.Surface((TILE_W - 4, TILE_H - dug_h))
+                temp_surf.set_alpha(128)
+                temp_surf.fill((192, 0, 0))
+                screen.blit(temp_surf, (m_tile_x * TILE_W + 2 + offset_x, m_tile_y * TILE_H + offset_y))
 
     # Place a block
     if (but3 and world[m_tile_y][m_tile_x] == Tiles.AIR
@@ -244,7 +262,7 @@ def draw_world(world):
             emoji = FONT_EMOJI_MD.render(RUNNING[player.emoji_index], True, WHITE).convert_alpha()
         else:
             emoji = pygame.transform.flip(FONT_EMOJI_MD.render(RUNNING[player.emoji_index], True, WHITE), True, False).convert_alpha()
-        screen.blit(emoji, (screen.get_width() // 2, screen.get_height() // 4))
+        screen.blit(emoji, (screen.get_width() // 2, screen.get_height() // 4 + 5))
 
     # Not jumping, walking
     else:
@@ -252,7 +270,7 @@ def draw_world(world):
             emoji = FONT_EMOJI_MD.render(WALKING[player.emoji_index], True, WHITE).convert_alpha()
         else:
             emoji = pygame.transform.flip(FONT_EMOJI_MD.render(WALKING[player.emoji_index], True, WHITE), True, False).convert_alpha()
-        screen.blit(emoji, (screen.get_width() // 2, screen.get_height() // 4))
+        screen.blit(emoji, (screen.get_width() // 2, screen.get_height() // 4 + 5))
 
     # Player hitbox
     # pygame.draw.rect(screen, "#00FF00", player.get_rect(), 1)
@@ -348,9 +366,10 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Different materials required different time to dig
 * Lamps/Torch to expand sight line
 
++ Destroying diagonal blocks without line-of-sight
++ Different materials required different time to dig
 + Line from player to crosshair when digging
 + Larger, scrolling world
 + Combine on_ground and jumping flags 
