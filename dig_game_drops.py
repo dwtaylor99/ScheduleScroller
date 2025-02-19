@@ -28,7 +28,7 @@ class DirtDrop(Drop):
 class StoneDrop(Drop):
     name = "Stone"
     value = 1
-    img = FONT_EMOJI_MD.render("⚫", True, WHITE).convert_alpha()
+    img = FONT_EMOJI_MD.render("⚪", True, WHITE).convert_alpha()
 
 
 class ClayDrop(Drop):
@@ -40,7 +40,7 @@ class ClayDrop(Drop):
 class CoalDrop(Drop):
     name = "Coal"
     value = 3
-    img = FONT_EMOJI_MD.render("◼️", True, WHITE).convert_alpha()
+    img = FONT_EMOJI_MD.render("⚫", True, WHITE).convert_alpha()
 
 
 class CopperDrop(Drop):

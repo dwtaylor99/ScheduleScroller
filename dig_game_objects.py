@@ -29,7 +29,6 @@ class Player:
     vel_x = 0.0
     vel_y = 0.0
     on_ground = True
-    # jumping = False
     ticks = 0
 
     # stats
@@ -38,7 +37,7 @@ class Player:
     inventory: [Tile] = []
     inv_dict = {}
     inv_selected = 0
-    torches = []  # [pygame.Rect(200, 500, 100, 100)]
+    torches = []
 
     def add_inv(self, tile: Tiles):
         if tile in self.inv_dict.keys():

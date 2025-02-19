@@ -17,7 +17,7 @@ dt = 0
 is_running = True
 
 FPS = 60
-FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
+FONT_EMOJI_MD = pygame.font.Font("../fonts/seguiemj.ttf", 32)
 
 MOUSE_OK_COLOR = "#00CF00"
 MOUSE_BAD_COLOR = "#CF0000"

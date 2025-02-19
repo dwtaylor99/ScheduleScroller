@@ -366,6 +366,7 @@ if __name__ == '__main__':
 
 """
 TODO:
+* Give rooms background images (bricks, etc)
 * Lamps/Torch to expand sight line
 
 + Destroying diagonal blocks without line-of-sight
