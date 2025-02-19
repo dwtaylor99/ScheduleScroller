@@ -21,17 +21,12 @@ IMG_SILVER = pygame.transform.smoothscale_by(pygame.image.load("images/game/wall
 IMG_GOLD = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/gold_block.png"), TILE_SCALE).convert_alpha()
 IMG_DIAMOND = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/diamond_block.png"), TILE_SCALE).convert_alpha()
 
+IMG_BLUE_BRICKS = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/blue_wall.png"), TILE_SCALE).convert_alpha()
+IMG_RED_BRICKS = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/red_wall.png"), TILE_SCALE).convert_alpha()
+IMG_GRAY_BRICKS = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/bricks.png"), TILE_SCALE).convert_alpha()
+
 IMG_URN = FONT_EMOJI_MD.render("🏺", True, WHITE)
 IMG_TORCH = FONT_EMOJI_MD.render("🔦", True, WHITE)
-
-# IMG_DIRT = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/brown_dirt.png"), TILE_SCALE).convert_alpha()
-# IMG_STONE = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/gray_wall.png"), TILE_SCALE).convert_alpha()
-# IMG_CLAY = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/red_wall.png"), TILE_SCALE).convert_alpha()
-# IMG_COPPER = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/yellow_wall.png"), TILE_SCALE).convert_alpha()
-# IMG_IRON = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/blue_wall.png"), TILE_SCALE).convert_alpha()
-# IMG_SILVER = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/cobble.png"), TILE_SCALE).convert_alpha()
-# IMG_GOLD = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/yellow_cobble.png"), TILE_SCALE).convert_alpha()
-# IMG_DIAMOND = pygame.transform.smoothscale_by(pygame.image.load("images/game/walls/mixed.png"), TILE_SCALE).convert_alpha()
 
 
 class Tile:
@@ -60,49 +55,49 @@ class Stone(Tile):
 class Clay(Tile):
     img = IMG_CLAY
     drop = ClayDrop()
-    dig_ticks = 1000
+    dig_ticks = 1500
 
 
 class Coal(Tile):
     img = IMG_COAL
     drop = CoalDrop()
     dig_level = 1
-    dig_ticks = 1000
+    dig_ticks = 1500
 
 
 class Copper(Tile):
     img = IMG_COPPER
     drop = CopperDrop()
     dig_level = 1
-    dig_ticks = 1200
+    dig_ticks = 2000
 
 
 class Iron(Tile):
     img = IMG_IRON
     drop = IronDrop()
     dig_level = 2
-    dig_ticks = 1500
+    dig_ticks = 2500
 
 
 class Silver(Tile):
     img = IMG_SILVER
     drop = SilverDrop()
     dig_level = 2
-    dig_ticks = 2000
+    dig_ticks = 2500
 
 
 class Gold(Tile):
     img = IMG_GOLD
     drop = GoldDrop()
     dig_level = 2
-    dig_ticks = 2000
+    dig_ticks = 3000
 
 
 class Diamond(Tile):
     img = IMG_DIAMOND
     drop = DiamondDrop()
     dig_level = 2
-    dig_ticks = 3000
+    dig_ticks = 5000
 
 
 class RewardUrn(Tile):

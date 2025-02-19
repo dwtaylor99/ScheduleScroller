@@ -5,7 +5,7 @@ import pygame
 from colors import WHITE
 
 pygame.init()
-screen = pygame.display.set_mode((1920//2, 1080))
+screen = pygame.display.set_mode((1920, 1080))
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 
 
