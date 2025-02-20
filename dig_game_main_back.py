@@ -1,11 +1,10 @@
 import pygame
-from lxml.objectify import pyannotate
 
 import gradient
 from colors import WHITE, BLACK, YELLOW, RED
 from dig_game_drops import screen
 from dig_game_objects import Facing, Player, PLAYER_W, PLAYER_H, GIRL_RUN_ANIM, GIRL_IDLE_ANIM, \
-    GIRL_JUMP_ANIM, GIRL_JUMP_ANIM_DELAY, GIRL_IDLE_ANIM_DELAY, GIRL_RUN_ANIM_DELAY, TORCH_ANIM_DELAY
+    GIRL_JUMP_ANIM, GIRL_JUMP_ANIM_DELAY, GIRL_IDLE_ANIM_DELAY, GIRL_RUN_ANIM_DELAY
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
 from dig_game_tiles import Tiles, TILE_W, TILE_H, IMG_GRASS, IMG_VOLTAGE, IMG_BUSH_01, IMG_BUSH_02, \
     IMG_BUSH_03, IMG_BUSH_04
@@ -19,7 +18,7 @@ pygame.init()
 clock = pygame.time.Clock()
 dt = 0
 is_running = True
-is_debug_stats = True
+is_debug_stats = False
 
 FPS = 60
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
@@ -35,12 +34,14 @@ GRAVITY = 0.4
 JUMP_VEL = -5.0
 WALK_VEL = 6.0
 
-WORLD_W = 100
+WORLD_W = 50
 WORLD_H = 50
 LEVEL_W = 20
 LEVEL_H = 20
 main_world = [[Tiles.AIR for _ in range(WORLD_W)] for _ in range(WORLD_H)]
 
+DEBOUNCE = 200
+key_ticks = DEBOUNCE
 jump_allowed = True
 last_m_tile_x = last_m_tile_y = 0
 torch_anim_step = torch_ticks = 0
@@ -57,10 +58,8 @@ def draw_world(world, bgs):
     screen_h = screen.get_height()
     screen_w2 = screen_w // 2
     screen_h2 = screen_h // 2
-    screen_player_y = screen_h // 2
-
-    offset_x = -player.x + screen_w2 + (PLAYER_W // 2)
-    offset_y = -player.y + screen_h2
+    # screen_player_x = screen_w2
+    screen_player_y = screen_h // 4
 
     """ Tile the player occupies """
     tile_x = int(player.x + 8) // TILE_W
@@ -68,72 +67,73 @@ def draw_world(world, bgs):
     tile_x = constrain(tile_x, 0, WORLD_W - 1)
     tile_y = constrain(tile_y, 0, WORLD_H - 1)
 
+    # Draw the world tiles
+    sky_surf = pygame.Surface((WORLD_W * TILE_W, 500))
+    world_surf = pygame.Surface((WORLD_W * TILE_W, WORLD_H * TILE_H))
+
     """ Background """
     # Sky
-    pygame.draw.rect(screen, (60, 110, 175), (0, 600 - player.y - screen_h2, screen_w, screen_h2 + 150))
-    # Transition to cave
-    gradient.rect_gradient_h(screen, (60, 110, 175), (16, 16, 16), pygame.Rect(0, 600 - player.y + 150, screen_w, TILE_H))
-    # Cave
-    pygame.draw.rect(screen, (16, 16, 16), (0, 600 - player.y + 150 + TILE_H, screen_w, WORLD_H * TILE_H))
-
-    # How many tiles can we render on screen
-    num_w = (screen_w // TILE_W) // 2
-    num_h = (screen_h // TILE_H) // 2
-    render_tiles_x1 = constrain(tile_x - num_w - 5, 0, WORLD_W - 1)
-    render_tiles_x2 = constrain(tile_x + num_w + 3, 0, WORLD_W - 1)
-    render_tiles_y1 = constrain(tile_y - num_h - 1, 0, WORLD_H - 1)
-    render_tiles_y2 = constrain(tile_y + num_h + 1, 0, WORLD_H - 1)
+    gradient.rect_gradient_h(sky_surf, (210, 210, 210), (120, 160, 200), pygame.Rect(0, 0, sky_surf.get_width(), sky_surf.get_height()))
+    # Cave dark background
+    gradient.rect_gradient_h(world_surf, (120, 160, 200), (60, 110, 175), pygame.Rect(0, 0, world_surf.get_width(), 5 * TILE_H))
+    gradient.rect_gradient_h(world_surf, (60, 110, 175), (32, 32, 32), pygame.Rect(0, 5 * TILE_H, world_surf.get_width(), 2 * TILE_H))
+    gradient.rect_gradient_h(world_surf, (32, 32, 32), (0, 0, 0), pygame.Rect(0, 7 * TILE_H, world_surf.get_width(), WORLD_H * TILE_H - (7 * TILE_H)))
 
     # Render background tiles first
-    for y in range(render_tiles_y1, render_tiles_y2):
+    for y in range(WORLD_H):
         yy = y * TILE_H
-        for x in range(render_tiles_x1, render_tiles_x2):
+        for x in range(WORLD_W):
             xx = x * TILE_W
             if bgs[y][x] is not None:
                 off_y = 0
                 if bgs[y][x] in [IMG_BUSH_01, IMG_BUSH_02, IMG_BUSH_03, IMG_BUSH_04]:
                     off_y = -bgs[y][x].get_height() + TILE_H
-                screen.blit(bgs[y][x], (xx - (player.x - screen_w2) + (PLAYER_W // 2), yy + off_y - (player.y - screen_h2)))
+                world_surf.blit(bgs[y][x], (xx, yy + off_y))
 
-    for y in range(render_tiles_y1, render_tiles_y2):
+    for y in range(WORLD_H):
         yy = y * TILE_H
-        for x in range(render_tiles_x1, render_tiles_x2):
+        for x in range(WORLD_W):
             xx = x * TILE_W
             tile = world[y][x].value
             if tile.img is not None:
-                screen.blit(tile.img, (xx + tile.img_offset_x - (player.x - screen_w2) + (PLAYER_W // 2), yy + tile.img_offset_y - (player.y - screen_h2)))
+                world_surf.blit(tile.img, (xx + tile.img_offset_x, yy + tile.img_offset_y))
                 if y == 5:
-                    screen.blit(IMG_GRASS, (xx - (player.x - screen_w2) + (PLAYER_W // 2), yy - (player.y - screen_h2) - TILE_H + 2))
+                    world_surf.blit(IMG_GRASS, (xx, yy - TILE_H + 2))
 
-    player.y = constrain(player.y + player.vel_y, -100, screen_h)
+    player.y = constrain(player.y + player.vel_y, -100, world_surf.get_height())
+
+    offset_x = -player.x + screen_w2 + (PLAYER_W // 2)
+    offset_y = -player.y + (screen_h2 // 2)
+
+    # Draw the surfaces to the screen
+    screen.blit(sky_surf, (offset_x, offset_y - sky_surf.get_height()))
+    screen.blit(world_surf, (offset_x, offset_y))
 
     """ Circle around player """
-    """
     # Once player is on tile_y >= 7, darkness happens
     surf_w = WORLD_W * TILE_W
     surf_h = WORLD_H * TILE_H
 
-    # The main circle around the player    
+    # The main circle around the player
     temp_surf = pygame.Surface((surf_w, surf_h))
     temp_surf.fill((8, 8, 8))
     temp_surf.set_colorkey((255, 0, 255))
     if tile_y >= 6:
         pygame.draw.circle(temp_surf, HOLLOW_COLOR, (screen.get_width() // 2 + (PLAYER_W // 2), (tile_y - 7) * TILE_H), 100)
-    """
 
     # Additional circles for each of the torches
     for torch in player.torches:
         screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (TORCH_W_SCALED // 2) - (PLAYER_W // 2) + offset_x, torch.y - (TORCH_H_SCALED // 2) + offset_y))
-        # pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x + offset_x - PLAYER_W, torch.y - (screen_player_y + PLAYER_H + 6)), torch.w)
+        pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x + offset_x - PLAYER_W, torch.y - (screen_player_y + PLAYER_H + 6)), torch.w)
 
         # Torch animation
         torch_ticks += dt
-        if torch_ticks >= TORCH_ANIM_DELAY:
+        if torch_ticks >= 100:
             torch_anim_step = (torch_anim_step + 1) % len(TORCH_ANIM)
             torch_ticks = 0
 
-    # if not is_debug_stats:
-    #     screen.blit(temp_surf, (0, (TILE_H * 7) + offset_y))
+    if not is_debug_stats:
+        screen.blit(temp_surf, (0, (TILE_H * 7) + offset_y))
 
     """ Mouse Movement """
     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -247,7 +247,7 @@ def draw_world(world, bgs):
     right_tile = world[tile_y][tile_x + 1] if tile_x + 1 < WORLD_W else Tiles.STONE
 
     min_x = (tile_x - 1) * TILE_W + TILE_W - 3 if left_tile.value.is_solid else 0
-    max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + PLAYER_W - TILE_W
+    max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + PLAYER_W
 
     # player.x = constrain(player.x + player.vel_x, 0, world_surf.get_width() - PLAYER_W)
     player.x = constrain(player.x + player.vel_x, min_x, max_x)
@@ -376,8 +376,8 @@ def draw_world(world, bgs):
         player_rect.y += offset_y
         pygame.draw.rect(screen, "#00FF00", player_rect, 1)  # Player hitbox
 
-        stats = FONT_EMOJI_SM.render("px, py: {}, {} | tile_x, y: {}, {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
-        stat2 = FONT_EMOJI_SM.render("m_tile_x, y: {}, {}".format(m_tile_x, m_tile_y), True, WHITE).convert_alpha()
+        stats = FONT_EMOJI_SM.render("px: {}, py: {} | tile_x: {}, tile_y: {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
+        stat2 = FONT_EMOJI_SM.render("m_tile_x: {}, m_tile_y: {}".format(m_tile_x, m_tile_y), True, WHITE).convert_alpha()
         stat3 = FONT_EMOJI_SM.render("left: {}, right: {}, min_x: {}, max_x: {}".format(left_tile, right_tile, min_x, max_x), True, WHITE)
         screen.blit(stats, (500, screen_h - 80))
         screen.blit(stat2, (500, screen_h - 55))
@@ -400,6 +400,11 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 is_running = True
             elif event.type == pygame.KEYDOWN:
+                debounce = False
+                key_ticks += dt
+                if key_ticks >= DEBOUNCE:
+                    debounce = True
+
                 keys = pygame.key.get_pressed()
 
                 # if keys[pygame.K_w] or keys[pygame.K_UP]:
@@ -423,6 +428,16 @@ if __name__ == '__main__':
                     else:
                         player.vel_x = WALK_VEL
 
+                # These keys require debounce
+                if debounce:
+                    if keys[pygame.K_t]:
+                        key_ticks = 0
+                        player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H // 2, TORCH_DIST, TORCH_DIST))
+
+                    elif keys[pygame.K_F3]:
+                        key_ticks = 0
+                        is_debug_stats = not is_debug_stats
+
                 if keys[pygame.K_SPACE] and player.on_ground and jump_allowed:
                     jump_allowed = False
                     player.vel_y = JUMP_VEL
@@ -435,17 +450,6 @@ if __name__ == '__main__':
                     player.vel_x = 0.0
                     player.anim_ticks = 0
                     player.anim_step = 0
-
-                elif event.key == pygame.K_t:
-                    player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H // 2, TORCH_DIST, TORCH_DIST))
-                    # player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H // 2, TORCH_DIST, TORCH_DIST))
-
-                elif event.key == pygame.K_y:
-                    player.tool_charge = 100
-
-                elif event.key == pygame.K_F3:
-                    is_debug_stats = not is_debug_stats
-
                 if event.key == pygame.K_SPACE:
                     jump_allowed = True
                     player.anim_ticks = 0
@@ -467,9 +471,7 @@ if __name__ == '__main__':
 
 """
 TODO:
-! Allow LARGER worlds by limiting the tiles rendered
-* Use a different animation when digging (right now it's using IDLE_ANIM, try ATTACK)
-
+* Allow LARGER worlds by limiting the tiles rendered
 * Add House UI:
     * Allow house upgrade with significant resources required
     * Allow tool recharge somehow: house can give 15% for free, coal is used to refill fully
@@ -477,9 +479,6 @@ TODO:
     * Exchange inventory for crafted items
     * Craft flashlight to expand sight line
 
-MAYBES:
-* Way to increase tool distance?
-* Way to increase jump height?
 * Should blocks remember the percent dug they are?
 * Wrap world?
 

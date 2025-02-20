@@ -46,7 +46,7 @@ class Facing(Enum):
 
 class Player:
     # position and movement
-    x = 420
+    x = 42*20
     y = 160.0  # start on Tile 5 which allows player a little build height.
     emoji_index = random.randrange(len(WALKING))
     facing = Facing.RIGHT
@@ -85,6 +85,7 @@ class Player:
 
 # Torches
 TORCH_DIST = 100  # Default distance to light up (radius of circle)
+TORCH_ANIM_DELAY = 100
 TORCH_SHEET = pygame.image.load("images/game/torch_sheet.png")
 TORCH_SCALE = 0.05
 TORCH_X = 64
