@@ -26,7 +26,7 @@ def generate_world(level_width, level_height):
 
             # Add trees
             if y == overworld - 1:
-                if 0 <= rn < 50:
+                if 0 <= rn < 50 and x < level_width - 5:
                     background[y][x] = random.choice([IMG_BUSH_01, IMG_BUSH_02, IMG_BUSH_03, IMG_BUSH_04])
                 if 50 <= rn < 75:
                     world[y][x] = random.choice([Tiles.TREE_01, Tiles.TREE_02, Tiles.TREE_03, Tiles.TREE_04])
@@ -72,7 +72,7 @@ def generate_world(level_width, level_height):
                     world[y][x] = Tiles.DIAMOND
 
     # Place a house on level 5 and overwrite whatever is there
-    world[4][random.randrange(level_width)] = Tiles.HOUSE_1
+    world[4][random.randrange(level_width // 4)] = Tiles.HOUSE_1
 
     # Add some caves
     for cave_i in range(random.randint(1, 3)):

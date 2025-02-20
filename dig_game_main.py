@@ -1,11 +1,11 @@
 import pygame
-from lxml.objectify import pyannotate
 
 import gradient
 from colors import WHITE, BLACK, YELLOW, RED
 from dig_game_drops import screen
 from dig_game_objects import Facing, Player, PLAYER_W, PLAYER_H, GIRL_RUN_ANIM, GIRL_IDLE_ANIM, \
-    GIRL_JUMP_ANIM, GIRL_JUMP_ANIM_DELAY, GIRL_IDLE_ANIM_DELAY, GIRL_RUN_ANIM_DELAY, TORCH_ANIM_DELAY
+    GIRL_JUMP_ANIM, GIRL_JUMP_ANIM_DELAY, GIRL_IDLE_ANIM_DELAY, GIRL_RUN_ANIM_DELAY, TORCH_ANIM_DELAY, GIRL_ATTACK_ANIM, \
+    PLAYER_W2
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
 from dig_game_tiles import Tiles, TILE_W, TILE_H, IMG_GRASS, IMG_VOLTAGE, IMG_BUSH_01, IMG_BUSH_02, \
     IMG_BUSH_03, IMG_BUSH_04
@@ -19,7 +19,7 @@ pygame.init()
 clock = pygame.time.Clock()
 dt = 0
 is_running = True
-is_debug_stats = True
+is_debug_stats = False
 
 FPS = 60
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
@@ -59,7 +59,7 @@ def draw_world(world, bgs):
     screen_h2 = screen_h // 2
     screen_player_y = screen_h // 2
 
-    offset_x = -player.x + screen_w2 + (PLAYER_W // 2)
+    offset_x = -player.x + screen_w2 + PLAYER_W2
     offset_y = -player.y + screen_h2
 
     """ Tile the player occupies """
@@ -84,6 +84,9 @@ def draw_world(world, bgs):
     render_tiles_y1 = constrain(tile_y - num_h - 1, 0, WORLD_H - 1)
     render_tiles_y2 = constrain(tile_y + num_h + 1, 0, WORLD_H - 1)
 
+    ps_offset_x = player.x - screen_w2 - PLAYER_W2  # Player/Screen offset-x
+    ps_offset_y = player.y - screen_h2
+
     # Render background tiles first
     for y in range(render_tiles_y1, render_tiles_y2):
         yy = y * TILE_H
@@ -93,7 +96,7 @@ def draw_world(world, bgs):
                 off_y = 0
                 if bgs[y][x] in [IMG_BUSH_01, IMG_BUSH_02, IMG_BUSH_03, IMG_BUSH_04]:
                     off_y = -bgs[y][x].get_height() + TILE_H
-                screen.blit(bgs[y][x], (xx - (player.x - screen_w2) + (PLAYER_W // 2), yy + off_y - (player.y - screen_h2)))
+                screen.blit(bgs[y][x], (xx - ps_offset_x, yy + off_y - ps_offset_y))
 
     for y in range(render_tiles_y1, render_tiles_y2):
         yy = y * TILE_H
@@ -101,30 +104,24 @@ def draw_world(world, bgs):
             xx = x * TILE_W
             tile = world[y][x].value
             if tile.img is not None:
-                screen.blit(tile.img, (xx + tile.img_offset_x - (player.x - screen_w2) + (PLAYER_W // 2), yy + tile.img_offset_y - (player.y - screen_h2)))
+                screen.blit(tile.img, (xx + tile.img_offset_x - ps_offset_x, yy + tile.img_offset_y - ps_offset_y))
                 if y == 5:
-                    screen.blit(IMG_GRASS, (xx - (player.x - screen_w2) + (PLAYER_W // 2), yy - (player.y - screen_h2) - TILE_H + 2))
+                    screen.blit(IMG_GRASS, (xx - ps_offset_x, yy - ps_offset_y - TILE_H + 2))
 
-    player.y = constrain(player.y + player.vel_y, -100, screen_h)
+    player.y = round(constrain(player.y + player.vel_y, -100, screen_h), 3)
 
     """ Circle around player """
-    """
-    # Once player is on tile_y >= 7, darkness happens
-    surf_w = WORLD_W * TILE_W
-    surf_h = WORLD_H * TILE_H
-
-    # The main circle around the player    
-    temp_surf = pygame.Surface((surf_w, surf_h))
+    # The main circle around the player, once player is on tile_y >= 6 (cave darkness)
+    temp_surf = pygame.Surface((WORLD_W * TILE_W, WORLD_H * TILE_H))
     temp_surf.fill((8, 8, 8))
     temp_surf.set_colorkey((255, 0, 255))
     if tile_y >= 6:
-        pygame.draw.circle(temp_surf, HOLLOW_COLOR, (screen.get_width() // 2 + (PLAYER_W // 2), (tile_y - 7) * TILE_H), 100)
-    """
+        pygame.draw.circle(temp_surf, HOLLOW_COLOR, (screen_w2 + PLAYER_W2, (tile_y - 7) * TILE_H), 100)
 
     # Additional circles for each of the torches
     for torch in player.torches:
-        screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (TORCH_W_SCALED // 2) - (PLAYER_W // 2) + offset_x, torch.y - (TORCH_H_SCALED // 2) + offset_y))
-        # pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x + offset_x - PLAYER_W, torch.y - (screen_player_y + PLAYER_H + 6)), torch.w)
+        screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (TORCH_W_SCALED // 2) - PLAYER_W2 + offset_x, torch.y - (TORCH_H_SCALED // 2) + offset_y))
+        pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x - (TORCH_W_SCALED // 2) - PLAYER_W2 + offset_x, torch.y - (TORCH_H_SCALED // 2) - 300), torch.w)
 
         # Torch animation
         torch_ticks += dt
@@ -132,8 +129,8 @@ def draw_world(world, bgs):
             torch_anim_step = (torch_anim_step + 1) % len(TORCH_ANIM)
             torch_ticks = 0
 
-    # if not is_debug_stats:
-    #     screen.blit(temp_surf, (0, (TILE_H * 7) + offset_y))
+    if not is_debug_stats:
+        screen.blit(temp_surf, (0, (TILE_H * 7) + offset_y))
 
     """ Mouse Movement """
     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -194,7 +191,7 @@ def draw_world(world, bgs):
             else:
                 # Line from player to mouse crosshair
                 line_color = YELLOW if player.ticks % 60 < 30 else RED
-                pygame.draw.line(screen, line_color, (player.x + offset_x + (PLAYER_W // 2), player.y + offset_y + (PLAYER_H // 2)), (mouse_x, mouse_y), 2)
+                pygame.draw.line(screen, line_color, (player.x + offset_x + PLAYER_W2, player.y + offset_y + (PLAYER_H // 2)), (mouse_x, mouse_y), 2)
 
                 # Cover the block with a translucent effect to indicate progress
                 dug_h = TILE_H * (block_ticks - player.ticks) / block_ticks  # calculate the percentage dug
@@ -249,7 +246,6 @@ def draw_world(world, bgs):
     min_x = (tile_x - 1) * TILE_W + TILE_W - 3 if left_tile.value.is_solid else 0
     max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + PLAYER_W - TILE_W
 
-    # player.x = constrain(player.x + player.vel_x, 0, world_surf.get_width() - PLAYER_W)
     player.x = constrain(player.x + player.vel_x, min_x, max_x)
 
     if player.on_ground:
@@ -269,6 +265,11 @@ def draw_world(world, bgs):
             player.on_ground = True
             player.vel_y = 0.0
             player.y = target_y
+
+    # Prepare to draw animations
+    player.anim_ticks += dt
+    player_img_offset_x = 10
+    player_img_offset_y = -2
 
     # Jumping
     if not player.on_ground:
@@ -302,7 +303,7 @@ def draw_world(world, bgs):
         sprite = GIRL_JUMP_ANIM[player.anim_step]
         if player.facing == Facing.LEFT:
             sprite = pygame.transform.flip(GIRL_JUMP_ANIM[player.anim_step], True, False)
-        screen.blit(sprite, (screen_w2 - 20, screen_player_y - 8))
+        screen.blit(sprite, (screen_w2 - player_img_offset_x, screen_player_y - player_img_offset_y))
 
         if player.anim_ticks >= GIRL_JUMP_ANIM_DELAY:
             player.anim_ticks = 0
@@ -310,32 +311,48 @@ def draw_world(world, bgs):
 
     # Not jumping, walking
     else:
-        player.anim_ticks += dt
-
-        if int(player.vel_x) == 0:
-            player.anim_step = constrain(player.anim_step, 0, len(GIRL_IDLE_ANIM) - 1)
-            sprite = GIRL_IDLE_ANIM[player.anim_step]
-            if player.facing == Facing.LEFT:
-                sprite = pygame.transform.flip(GIRL_IDLE_ANIM[player.anim_step], True, False)
-            screen.blit(sprite, (screen_w2 - 20, screen_player_y - 8))
-
-            if player.anim_ticks >= GIRL_IDLE_ANIM_DELAY:
-                player.anim_ticks = 0
-                player.anim_step = (player.anim_step + 1) % len(GIRL_IDLE_ANIM)
-        else:
-            player.anim_step = constrain(player.anim_step, 0, len(GIRL_RUN_ANIM) - 1)
-            sprite = GIRL_RUN_ANIM[player.anim_step]
+        if but1:
+            # Digging
+            sprite = GIRL_ATTACK_ANIM[len(GIRL_ATTACK_ANIM) - 2]
             if player.facing == Facing.LEFT:
                 sprite = pygame.transform.flip(sprite, True, False)
-            screen.blit(sprite, (screen_w2 - 20, screen_player_y - 8))
+            screen.blit(sprite, (screen_w2 - player_img_offset_x, screen_player_y - player_img_offset_y))
 
-            delay = GIRL_RUN_ANIM_DELAY
-            if player.vel_x < WALK_VEL:
-                delay = GIRL_RUN_ANIM_DELAY * 2
+            # player.anim_step = constrain(player.anim_step, 0, len(GIRL_ATTACK_ANIM) - 1)
+            # sprite = GIRL_ATTACK_ANIM[player.anim_step]
+            # if player.facing == Facing.LEFT:
+            #     sprite = pygame.transform.flip(GIRL_ATTACK_ANIM[player.anim_step], True, False)
+            # screen.blit(sprite, (screen_w2 - 20, screen_player_y - 8))
+            #
+            # if player.anim_ticks >= GIRL_ATTACK_ANIM_DELAY:
+            #     player.anim_ticks = 0
+            #     player.anim_step = (player.anim_step + 1) % len(GIRL_ATTACK_ANIM)
 
-            if player.anim_ticks >= delay:
-                player.anim_ticks = 0
-                player.anim_step = (player.anim_step + 1) % len(GIRL_RUN_ANIM)
+        else:
+            if int(player.vel_x) == 0:
+                player.anim_step = constrain(player.anim_step, 0, len(GIRL_IDLE_ANIM) - 1)
+                sprite = GIRL_IDLE_ANIM[player.anim_step]
+                if player.facing == Facing.LEFT:
+                    sprite = pygame.transform.flip(sprite, True, False)
+                screen.blit(sprite, (screen_w2 - player_img_offset_x, screen_player_y - player_img_offset_y))
+
+                if player.anim_ticks >= GIRL_IDLE_ANIM_DELAY:
+                    player.anim_ticks = 0
+                    player.anim_step = (player.anim_step + 1) % len(GIRL_IDLE_ANIM)
+            else:
+                player.anim_step = constrain(player.anim_step, 0, len(GIRL_RUN_ANIM) - 1)
+                sprite = GIRL_RUN_ANIM[player.anim_step]
+                if player.facing == Facing.LEFT:
+                    sprite = pygame.transform.flip(sprite, True, False)
+                screen.blit(sprite, (screen_w2 - player_img_offset_x, screen_player_y - player_img_offset_y))
+
+                delay = GIRL_RUN_ANIM_DELAY
+                if player.vel_x < WALK_VEL:
+                    delay = GIRL_RUN_ANIM_DELAY * 2
+
+                if player.anim_ticks >= delay:
+                    player.anim_ticks = 0
+                    player.anim_step = (player.anim_step + 1) % len(GIRL_RUN_ANIM)
 
     """ Render UI """
     # Inventory
@@ -438,7 +455,6 @@ if __name__ == '__main__':
 
                 elif event.key == pygame.K_t:
                     player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H // 2, TORCH_DIST, TORCH_DIST))
-                    # player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H // 2, TORCH_DIST, TORCH_DIST))
 
                 elif event.key == pygame.K_y:
                     player.tool_charge = 100
@@ -467,8 +483,7 @@ if __name__ == '__main__':
 
 """
 TODO:
-! Allow LARGER worlds by limiting the tiles rendered
-* Use a different animation when digging (right now it's using IDLE_ANIM, try ATTACK)
+* Game gets crazy slow at y=27
 
 * Add House UI:
     * Allow house upgrade with significant resources required
@@ -484,6 +499,8 @@ MAYBES:
 * Wrap world?
 
 COMPLETED:
++ Use a different animation when digging (right now it's using IDLE_ANIM, try ATTACK)
++ Allow LARGER worlds by limiting the tiles rendered
 + Limit digging once tool charge reaches 0
 + Fix player can move about 3-5 pixels inside a block while holding left/right
 + Player animations

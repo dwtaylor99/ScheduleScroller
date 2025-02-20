@@ -1,42 +1,42 @@
-import random
 from enum import Enum
 
 import pygame
 
 from dig_game_tiles import Tile, Tiles
 
-STANDING = ["🧍‍♂️", "🧍🏻‍♂️", "🧍🏼‍♂️", "🧍🏽‍♂️", "🧍🏾‍♂️", "🧍🏿‍♂️", "🧍‍♀️", "🧍🏻‍♀️", "🧍🏼‍♀️", "🧍🏽‍♀️", "🧍🏾‍♀️", "🧍🏿‍♀️"]
-WALKING = ["🚶‍♂️", "🚶🏻‍♂️", "🚶🏼‍♂️", "🚶🏽‍♂️", "🚶🏾‍♂️", "🚶🏿‍♂️", "🚶‍♀️", "🚶🏻‍♀️", "🚶🏼‍♀️", "🚶🏽‍♀️", "🚶🏾‍♀️", "🚶🏿‍♀️"]
-RUNNING = ["🏃‍♂️", "🏃🏻‍♂️", "🏃🏼‍♂️", "🏃🏽‍♂️", "🏃🏾‍♂️", "🏃🏿‍♂️", "🏃‍♀️", "🏃🏻‍♀️", "🏃🏼‍♀️", "🏃🏽‍♀️", "🏃🏾‍♀️", "🏃🏿‍♀️"]
-
+GIRL_SCALE = 0.7
 GIRL_W = 75
 GIRL_H = 60
-GIRL_SPRITE_SHEET = pygame.image.load("images/game/tiles/girl_sheet_2.png").convert_alpha()
+GIRL_SPRITE_SHEET1 = pygame.image.load("images/game/tiles/girl_sheet_1.png").convert_alpha()
+GIRL_SPRITE_SHEET2 = pygame.image.load("images/game/tiles/girl_sheet_2.png").convert_alpha()
 
 GIRL_IDLE_ANIM = []
 GIRL_JUMP_ANIM = []
 for i in range(4):
-    GIRL_SPRITE_SHEET.set_clip((i * GIRL_W + 174, 160, GIRL_W, GIRL_H))
-    GIRL_IDLE_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET.subsurface(GIRL_SPRITE_SHEET.get_clip()), 0.9).convert_alpha())
+    GIRL_SPRITE_SHEET2.set_clip((i * GIRL_W + 174, 160, GIRL_W, GIRL_H))
+    GIRL_IDLE_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET2.subsurface(GIRL_SPRITE_SHEET2.get_clip()), GIRL_SCALE).convert_alpha())
 
-    GIRL_SPRITE_SHEET.set_clip((i * GIRL_W + 174, 230, GIRL_W, GIRL_H))
-    GIRL_JUMP_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET.subsurface(GIRL_SPRITE_SHEET.get_clip()), 0.9).convert_alpha())
-
-# for i in range(2, 0, -1):
-#     GIRL_SPRITE_SHEET.set_clip((i * GIRL_W + 174, 160, GIRL_W, GIRL_H))
-#     GIRL_IDLE_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET.subsurface(GIRL_SPRITE_SHEET.get_clip()), 0.9).convert_alpha())
+    GIRL_SPRITE_SHEET2.set_clip((i * GIRL_W + 174, 230, GIRL_W, GIRL_H))
+    GIRL_JUMP_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET2.subsurface(GIRL_SPRITE_SHEET2.get_clip()), GIRL_SCALE).convert_alpha())
 
 GIRL_RUN_ANIM = []
 for i in range(6):
-    GIRL_SPRITE_SHEET.set_clip((i * GIRL_W + 174, 385, GIRL_W, GIRL_H))
-    GIRL_RUN_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET.subsurface(GIRL_SPRITE_SHEET.get_clip()), 0.9).convert_alpha())
+    GIRL_SPRITE_SHEET2.set_clip((i * GIRL_W + 174, 385, GIRL_W, GIRL_H))
+    GIRL_RUN_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET2.subsurface(GIRL_SPRITE_SHEET2.get_clip()), GIRL_SCALE).convert_alpha())
+
+GIRL_ATTACK_ANIM = []
+for i in range(7):
+    GIRL_SPRITE_SHEET1.set_clip((i * GIRL_W + 174, 160, GIRL_W, GIRL_H))
+    GIRL_ATTACK_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET1.subsurface(GIRL_SPRITE_SHEET1.get_clip()), GIRL_SCALE).convert_alpha())
 
 GIRL_IDLE_ANIM_DELAY = 200
 GIRL_JUMP_ANIM_DELAY = 200
 GIRL_RUN_ANIM_DELAY = 100
+GIRL_ATTACK_ANIM_DELAY = 100
 
 PLAYER_W = 14
 PLAYER_H = 36
+PLAYER_W2 = PLAYER_W // 2
 
 
 class Facing(Enum):
@@ -46,9 +46,9 @@ class Facing(Enum):
 
 class Player:
     # position and movement
-    x = 42*20
+    x = 42 * 14
     y = 160.0  # start on Tile 5 which allows player a little build height.
-    emoji_index = random.randrange(len(WALKING))
+    # emoji_index = random.randrange(len(WALKING))
     facing = Facing.RIGHT
     vel_x = 0.0
     vel_y = 0.0
