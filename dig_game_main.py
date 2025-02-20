@@ -3,10 +3,12 @@ import pygame
 import gradient
 from colors import WHITE, BLACK, YELLOW, RED
 from dig_game_drops import screen
-from dig_game_objects import Facing, RUNNING, WALKING, Player, PLAYER_W, PLAYER_H
+from dig_game_objects import Facing, Player, PLAYER_W, PLAYER_H, GIRL_RUN_ANIM, GIRL_IDLE_ANIM, \
+    GIRL_JUMP_ANIM, GIRL_JUMP_ANIM_DELAY, GIRL_IDLE_ANIM_DELAY, GIRL_RUN_ANIM_DELAY
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
-from dig_game_tiles import Tiles, TILE_W, TILE_H, Tree01, RewardUrn, IMG_GRASS, IMG_VOLTAGE, IMG_BUSH_01, IMG_BUSH_02, \
+from dig_game_tiles import Tiles, TILE_W, TILE_H, IMG_GRASS, IMG_VOLTAGE, IMG_BUSH_01, IMG_BUSH_02, \
     IMG_BUSH_03, IMG_BUSH_04
+from dig_game_ui import build_ui
 from dig_game_utils import constrain
 from dig_game_world import generate_world
 from fonts import FONT_EMOJI_SM
@@ -25,7 +27,7 @@ MOUSE_OK_COLOR = "#00CF00"
 MOUSE_BAD_COLOR = "#CF0000"
 HOLLOW_COLOR = (255, 0, 255, 0)
 CHARGE_GOOD_COLOR = (0, 150, 0)
-CHARGE_WARN_COLOR = (100, 100, 0)
+CHARGE_WARN_COLOR = (175, 135, 40)
 CHARGE_BAD_COLOR = (150, 0, 0)
 
 GRAVITY = 0.4
@@ -50,7 +52,7 @@ ui_surf = pygame.Surface((screen.get_width(), TILE_H * 2))
 def draw_world(world, bgs):
     global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks
 
-    screen.fill(BLACK)
+    screen.fill((8, 8, 8))
 
     screen_w = screen.get_width()
     screen_h = screen.get_height()
@@ -90,7 +92,6 @@ def draw_world(world, bgs):
                 if y == 5:
                     world_surf.blit(IMG_GRASS, (xx, yy - TILE_H + 2))
 
-    player.x = constrain(player.x + player.vel_x, 0, world_surf.get_width() - PLAYER_W)
     player.y = constrain(player.y + player.vel_y, -100, world_surf.get_height())
 
     offset_x = -player.x + screen_w2 + (PLAYER_W // 2)
@@ -107,7 +108,7 @@ def draw_world(world, bgs):
 
     # The main circle around the player
     temp_surf = pygame.Surface((surf_w, surf_h))
-    temp_surf.fill(BLACK)
+    temp_surf.fill((8, 8, 8))
     temp_surf.set_colorkey((255, 0, 255))
     if tile_y >= 6:
         pygame.draw.circle(temp_surf, HOLLOW_COLOR, (screen.get_width() // 2 + (PLAYER_W // 2), (tile_y - 7) * TILE_H), 100)
@@ -227,7 +228,10 @@ def draw_world(world, bgs):
 
     # Right-clicked the house, open house UI
     elif but3 and world[m_tile_y][m_tile_x] in [Tiles.HOUSE_1, Tiles.HOUSE_2, Tiles.HOUSE_3, Tiles.HOUSE_4]:
-        print("House clicked!")
+        ui_w = int(screen_w * 0.6)
+        ui_h = int(screen_h * 0.6)
+        ui = build_ui(ui_w, ui_h)
+        screen.blit(ui, ((screen_w - ui_w) // 2, (screen_h - ui_h) // 2))
 
     """ Player Movement """
     # Limit left/right movement
@@ -237,7 +241,8 @@ def draw_world(world, bgs):
     min_x = (tile_x - 1) * TILE_W + TILE_W - 3 if left_tile.value.is_solid else 0
     max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + PLAYER_W
 
-    player.x = constrain(player.x, min_x, max_x)
+    # player.x = constrain(player.x + player.vel_x, 0, world_surf.get_width() - PLAYER_W)
+    player.x = constrain(player.x + player.vel_x, min_x, max_x)
 
     if player.on_ground:
         while tile_y < WORLD_H and not world[tile_y][tile_x].value.is_solid:
@@ -283,26 +288,46 @@ def draw_world(world, bgs):
             player.vel_y = 0.0
             player.y = target_y
 
+        # Draw jumping animation
+        player.anim_ticks += dt
+        player.anim_step = constrain(player.anim_step, 0, len(GIRL_JUMP_ANIM) - 1)
+        sprite = GIRL_JUMP_ANIM[player.anim_step]
         if player.facing == Facing.LEFT:
-            emoji = FONT_EMOJI_MD.render(RUNNING[player.emoji_index], True, WHITE).convert_alpha()
-        else:
-            emoji = pygame.transform.flip(FONT_EMOJI_MD.render(RUNNING[player.emoji_index], True, WHITE), True, False).convert_alpha()
-        screen.blit(emoji, (screen.get_width() // 2, screen.get_height() // 4 + 5))
+            sprite = pygame.transform.flip(GIRL_JUMP_ANIM[player.anim_step], True, False)
+        screen.blit(sprite, (screen_w2 - 20, screen_h // 4 - 8))
+
+        if player.anim_ticks >= GIRL_JUMP_ANIM_DELAY:
+            player.anim_ticks = 0
+            player.anim_step = (player.anim_step + 1) % len(GIRL_JUMP_ANIM)
 
     # Not jumping, walking
     else:
-        if player.facing == Facing.LEFT:
-            emoji = FONT_EMOJI_MD.render(WALKING[player.emoji_index], True, WHITE).convert_alpha()
-        else:
-            emoji = pygame.transform.flip(FONT_EMOJI_MD.render(WALKING[player.emoji_index], True, WHITE), True, False).convert_alpha()
-        screen.blit(emoji, (screen.get_width() // 2, screen.get_height() // 4 + 5))
+        player.anim_ticks += dt
 
-    """ Border """
-    # low_border_x = 0
-    # low_border_y = LEVEL_H * TILE_H
-    # low_border_w = screen.get_width()
-    # low_border_h = TILE_H // 2
-    # pygame.draw.rect(screen, (64, 64, 64), (low_border_x, low_border_y, low_border_w, low_border_h))
+        if int(player.vel_x) == 0:
+            player.anim_step = constrain(player.anim_step, 0, len(GIRL_IDLE_ANIM) - 1)
+            sprite = GIRL_IDLE_ANIM[player.anim_step]
+            if player.facing == Facing.LEFT:
+                sprite = pygame.transform.flip(GIRL_IDLE_ANIM[player.anim_step], True, False)
+            screen.blit(sprite, (screen_w2 - 20, screen_h // 4 - 8))
+
+            if player.anim_ticks >= GIRL_IDLE_ANIM_DELAY:
+                player.anim_ticks = 0
+                player.anim_step = (player.anim_step + 1) % len(GIRL_IDLE_ANIM)
+        else:
+            player.anim_step = constrain(player.anim_step, 0, len(GIRL_RUN_ANIM) - 1)
+            sprite = GIRL_RUN_ANIM[player.anim_step]
+            if player.facing == Facing.LEFT:
+                sprite = pygame.transform.flip(sprite, True, False)
+            screen.blit(sprite, (screen_w2 - 20, screen_h // 4 - 8))
+
+            delay = GIRL_RUN_ANIM_DELAY
+            if player.vel_x < WALK_VEL:
+                delay = GIRL_RUN_ANIM_DELAY * 2
+
+            if player.anim_ticks >= delay:
+                player.anim_ticks = 0
+                player.anim_step = (player.anim_step + 1) % len(GIRL_RUN_ANIM)
 
     """ Render UI """
     # Inventory
@@ -408,13 +433,19 @@ if __name__ == '__main__':
                 if keys[pygame.K_SPACE] and player.on_ground and jump_allowed:
                     jump_allowed = False
                     player.vel_y = JUMP_VEL
+                    player.anim_ticks = 0
+                    player.anim_step = 0
                     player.on_ground = False
 
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d, pygame.K_LEFT, pygame.K_RIGHT]:
                     player.vel_x = 0.0
+                    player.anim_ticks = 0
+                    player.anim_step = 0
                 if event.key == pygame.K_SPACE:
                     jump_allowed = True
+                    player.anim_ticks = 0
+                    player.anim_step = 0
 
             elif event.type == pygame.MOUSEWHEEL:
                 if event.y > 0:
@@ -432,16 +463,17 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Allow house upgrade with signifant resources required
-* Allow tool recharge somehow
-* Ability to construct single-use batteries (copper + iron?)
+* Add House UI:
+    * Allow house upgrade with significant resources required
+    * Allow tool recharge somehow: house can give 15% for free, coal is used to refill fully
+    * Ability to construct single-use batteries (copper + iron?) for longer use of tool
+    * Exchange inventory for crafted items
+    * Craft flashlight to expand sight line
 * Should blocks remember the percent dug they are?
-* Exchange inventory for crafted items
-* Player animations
-* Lamps/Torch to expand sight line
-* Fix player can move about 3-5 pixels inside a block while holding left/right
 
 COMPLETED:
++ Fix player can move about 3-5 pixels inside a block while holding left/right
++ Player animations
 + Background bushes for aesthetics
 + Fix bush heights so they don't extend underground
 + Extract 'ui_surf' out of draw_world() method

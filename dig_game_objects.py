@@ -9,6 +9,32 @@ STANDING = ["🧍‍♂️", "🧍🏻‍♂️", "🧍🏼‍♂️", "🧍🏽
 WALKING = ["🚶‍♂️", "🚶🏻‍♂️", "🚶🏼‍♂️", "🚶🏽‍♂️", "🚶🏾‍♂️", "🚶🏿‍♂️", "🚶‍♀️", "🚶🏻‍♀️", "🚶🏼‍♀️", "🚶🏽‍♀️", "🚶🏾‍♀️", "🚶🏿‍♀️"]
 RUNNING = ["🏃‍♂️", "🏃🏻‍♂️", "🏃🏼‍♂️", "🏃🏽‍♂️", "🏃🏾‍♂️", "🏃🏿‍♂️", "🏃‍♀️", "🏃🏻‍♀️", "🏃🏼‍♀️", "🏃🏽‍♀️", "🏃🏾‍♀️", "🏃🏿‍♀️"]
 
+GIRL_W = 75
+GIRL_H = 60
+GIRL_SPRITE_SHEET = pygame.image.load("images/game/tiles/girl_sheet_2.png").convert_alpha()
+
+GIRL_IDLE_ANIM = []
+GIRL_JUMP_ANIM = []
+for i in range(4):
+    GIRL_SPRITE_SHEET.set_clip((i * GIRL_W + 174, 160, GIRL_W, GIRL_H))
+    GIRL_IDLE_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET.subsurface(GIRL_SPRITE_SHEET.get_clip()), 0.9).convert_alpha())
+
+    GIRL_SPRITE_SHEET.set_clip((i * GIRL_W + 174, 230, GIRL_W, GIRL_H))
+    GIRL_JUMP_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET.subsurface(GIRL_SPRITE_SHEET.get_clip()), 0.9).convert_alpha())
+
+# for i in range(2, 0, -1):
+#     GIRL_SPRITE_SHEET.set_clip((i * GIRL_W + 174, 160, GIRL_W, GIRL_H))
+#     GIRL_IDLE_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET.subsurface(GIRL_SPRITE_SHEET.get_clip()), 0.9).convert_alpha())
+
+GIRL_RUN_ANIM = []
+for i in range(6):
+    GIRL_SPRITE_SHEET.set_clip((i * GIRL_W + 174, 385, GIRL_W, GIRL_H))
+    GIRL_RUN_ANIM.append(pygame.transform.smoothscale_by(GIRL_SPRITE_SHEET.subsurface(GIRL_SPRITE_SHEET.get_clip()), 0.9).convert_alpha())
+
+GIRL_IDLE_ANIM_DELAY = 200
+GIRL_JUMP_ANIM_DELAY = 200
+GIRL_RUN_ANIM_DELAY = 100
+
 PLAYER_W = 14
 PLAYER_H = 36
 
@@ -28,6 +54,8 @@ class Player:
     vel_y = 0.0
     on_ground = True
     ticks = 0
+    anim_step = 0
+    anim_ticks = 0
 
     # stats
     view_dist = 100
@@ -53,7 +81,6 @@ class Player:
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y + 6, PLAYER_W, PLAYER_H)
-        # return pygame.Rect(self.x + 8, self.y + 6, PLAYER_W, PLAYER_H)
 
 
 # Torches
