@@ -9,7 +9,7 @@ from dig_game_objects import Facing, Player, PLAYER_W, PLAYER_H, GIRL_RUN_ANIM, 
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
 from dig_game_tiles import Tiles, TILE_W, TILE_H, IMG_GRASS, IMG_VOLTAGE, IMG_BUSH_01, IMG_BUSH_02, \
     IMG_BUSH_03, IMG_BUSH_04
-from dig_game_ui import build_ui
+from dig_game_ui import build_ui, house_ui_open
 from dig_game_utils import constrain
 from dig_game_world import generate_world
 from fonts import FONT_EMOJI_SM
@@ -45,18 +45,26 @@ jump_allowed = True
 last_m_tile_x = last_m_tile_y = 0
 torch_anim_step = torch_ticks = 0
 
+# Convenience variables
+screen_w = screen.get_width()
+screen_h = screen.get_height()
+screen_w2 = screen_w // 2
+screen_h2 = screen_h // 2
+
+house_ui_w = int(screen_w * 0.6)
+house_ui_h = int(screen_h * 0.6)
+house_ui_x = (screen_w - house_ui_w) // 2
+house_ui_y = (screen_h - house_ui_h) // 2
+
+house_ui_surf = pygame.Surface((house_ui_w, house_ui_h))
 ui_surf = pygame.Surface((screen.get_width(), TILE_H * 2))
 
 
 def draw_world(world, bgs):
-    global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks
+    global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks, house_ui_surf, house_ui_open
 
     screen.fill((8, 8, 8))
 
-    screen_w = screen.get_width()
-    screen_h = screen.get_height()
-    screen_w2 = screen_w // 2
-    screen_h2 = screen_h // 2
     screen_player_y = screen_h // 2
 
     offset_x = -player.x + screen_w2 + PLAYER_W2
@@ -139,8 +147,6 @@ def draw_world(world, bgs):
     # Convert the mouse position to tile coordinates
     m_tile_x = int(constrain((mouse_x - offset_x) // TILE_W, -1, WORLD_W))
     m_tile_y = int(constrain((mouse_y - offset_y) // TILE_H, -1, WORLD_H))
-    # m_tile_x = int(constrain((mouse_x - offset_x) // TILE_W, 0, WORLD_W - 1))
-    # m_tile_y = int(constrain((mouse_y - offset_y) // TILE_H, 0, WORLD_H - 1))
 
     # Is the targeted block close enough to the player to dig it?
     m_color = MOUSE_BAD_COLOR
@@ -234,11 +240,13 @@ def draw_world(world, bgs):
                     player.torches = new_torch_list
 
     # Right-clicked the house, open house UI
+    if house_ui_open:
+        screen.blit(house_ui_surf, (house_ui_x, house_ui_y))
     elif but3 and world[m_tile_y][m_tile_x] in [Tiles.HOUSE_1, Tiles.HOUSE_2, Tiles.HOUSE_3, Tiles.HOUSE_4]:
-        ui_w = int(screen_w * 0.6)
-        ui_h = int(screen_h * 0.6)
-        ui = build_ui(ui_w, ui_h)
-        screen.blit(ui, ((screen_w - ui_w) // 2, (screen_h - ui_h) // 2))
+        if not house_ui_open:
+            house_ui_open = True
+            house_ui_surf = build_ui(house_ui_w, house_ui_h)
+            screen.blit(house_ui_surf, (house_ui_x, house_ui_y))
 
     """ Player Movement """
     # Limit left/right movement
@@ -313,48 +321,39 @@ def draw_world(world, bgs):
 
     # Not jumping, walking
     else:
-        if but1:
-            # Digging
-            sprite = GIRL_ATTACK_ANIM[len(GIRL_ATTACK_ANIM) - 2]
-            if player.facing == Facing.LEFT:
-                sprite = pygame.transform.flip(sprite, True, False)
-            screen.blit(sprite, (screen_w2 - player_img_offset_x, screen_player_y - player_img_offset_y))
-
-            # player.anim_step = constrain(player.anim_step, 0, len(GIRL_ATTACK_ANIM) - 1)
-            # sprite = GIRL_ATTACK_ANIM[player.anim_step]
-            # if player.facing == Facing.LEFT:
-            #     sprite = pygame.transform.flip(GIRL_ATTACK_ANIM[player.anim_step], True, False)
-            # screen.blit(sprite, (screen_w2 - 20, screen_player_y - 8))
-            #
-            # if player.anim_ticks >= GIRL_ATTACK_ANIM_DELAY:
-            #     player.anim_ticks = 0
-            #     player.anim_step = (player.anim_step + 1) % len(GIRL_ATTACK_ANIM)
-
-        else:
-            if int(player.vel_x) == 0:
-                player.anim_step = constrain(player.anim_step, 0, len(GIRL_IDLE_ANIM) - 1)
-                sprite = GIRL_IDLE_ANIM[player.anim_step]
+        if not house_ui_open:
+            if but1:
+                # Digging
+                sprite = GIRL_ATTACK_ANIM[len(GIRL_ATTACK_ANIM) - 1]
                 if player.facing == Facing.LEFT:
                     sprite = pygame.transform.flip(sprite, True, False)
                 screen.blit(sprite, (screen_w2 - player_img_offset_x, screen_player_y - player_img_offset_y))
 
-                if player.anim_ticks >= GIRL_IDLE_ANIM_DELAY:
-                    player.anim_ticks = 0
-                    player.anim_step = (player.anim_step + 1) % len(GIRL_IDLE_ANIM)
             else:
-                player.anim_step = constrain(player.anim_step, 0, len(GIRL_RUN_ANIM) - 1)
-                sprite = GIRL_RUN_ANIM[player.anim_step]
-                if player.facing == Facing.LEFT:
-                    sprite = pygame.transform.flip(sprite, True, False)
-                screen.blit(sprite, (screen_w2 - player_img_offset_x, screen_player_y - player_img_offset_y))
+                if int(player.vel_x) == 0:
+                    player.anim_step = constrain(player.anim_step, 0, len(GIRL_IDLE_ANIM) - 1)
+                    sprite = GIRL_IDLE_ANIM[player.anim_step]
+                    if player.facing == Facing.LEFT:
+                        sprite = pygame.transform.flip(sprite, True, False)
+                    screen.blit(sprite, (screen_w2 - player_img_offset_x, screen_player_y - player_img_offset_y))
 
-                delay = GIRL_RUN_ANIM_DELAY
-                if player.vel_x < WALK_VEL:
-                    delay = GIRL_RUN_ANIM_DELAY * 2
+                    if player.anim_ticks >= GIRL_IDLE_ANIM_DELAY:
+                        player.anim_ticks = 0
+                        player.anim_step = (player.anim_step + 1) % len(GIRL_IDLE_ANIM)
+                else:
+                    player.anim_step = constrain(player.anim_step, 0, len(GIRL_RUN_ANIM) - 1)
+                    sprite = GIRL_RUN_ANIM[player.anim_step]
+                    if player.facing == Facing.LEFT:
+                        sprite = pygame.transform.flip(sprite, True, False)
+                    screen.blit(sprite, (screen_w2 - player_img_offset_x, screen_player_y - player_img_offset_y))
 
-                if player.anim_ticks >= delay:
-                    player.anim_ticks = 0
-                    player.anim_step = (player.anim_step + 1) % len(GIRL_RUN_ANIM)
+                    delay = GIRL_RUN_ANIM_DELAY
+                    if player.vel_x < WALK_VEL:
+                        delay = GIRL_RUN_ANIM_DELAY * 2
+
+                    if player.anim_ticks >= delay:
+                        player.anim_ticks = 0
+                        player.anim_step = (player.anim_step + 1) % len(GIRL_RUN_ANIM)
 
     """ Render UI """
     # Inventory
@@ -454,6 +453,11 @@ if __name__ == '__main__':
                     player.vel_x = 0.0
                     player.anim_ticks = 0
                     player.anim_step = 0
+
+                elif event.key == pygame.K_ESCAPE:
+                    # Close the House UI if it's open
+                    if house_ui_open:
+                        house_ui_open = False
 
                 elif event.key == pygame.K_t:
                     player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H2, TORCH_DIST, TORCH_DIST))
