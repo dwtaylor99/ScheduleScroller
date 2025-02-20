@@ -5,7 +5,7 @@ from colors import WHITE, BLACK, YELLOW, RED
 from dig_game_drops import screen
 from dig_game_objects import Facing, Player, PLAYER_W, PLAYER_H, GIRL_RUN_ANIM, GIRL_IDLE_ANIM, \
     GIRL_JUMP_ANIM, GIRL_JUMP_ANIM_DELAY, GIRL_IDLE_ANIM_DELAY, GIRL_RUN_ANIM_DELAY, TORCH_ANIM_DELAY, GIRL_ATTACK_ANIM, \
-    PLAYER_W2
+    PLAYER_W2, PLAYER_H2
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
 from dig_game_tiles import Tiles, TILE_W, TILE_H, IMG_GRASS, IMG_VOLTAGE, IMG_BUSH_01, IMG_BUSH_02, \
     IMG_BUSH_03, IMG_BUSH_04
@@ -35,7 +35,7 @@ GRAVITY = 0.4
 JUMP_VEL = -5.0
 WALK_VEL = 6.0
 
-WORLD_W = 100
+WORLD_W = 50
 WORLD_H = 50
 LEVEL_W = 20
 LEVEL_H = 20
@@ -79,10 +79,10 @@ def draw_world(world, bgs):
     # How many tiles can we render on screen
     num_w = (screen_w // TILE_W) // 2
     num_h = (screen_h // TILE_H) // 2
-    render_tiles_x1 = constrain(tile_x - num_w - 5, 0, WORLD_W - 1)
-    render_tiles_x2 = constrain(tile_x + num_w + 3, 0, WORLD_W - 1)
-    render_tiles_y1 = constrain(tile_y - num_h - 1, 0, WORLD_H - 1)
-    render_tiles_y2 = constrain(tile_y + num_h + 1, 0, WORLD_H - 1)
+    render_tiles_x1 = constrain(tile_x - num_w - 5, 0, WORLD_W)
+    render_tiles_x2 = constrain(tile_x + num_w + 3, 0, WORLD_W)
+    render_tiles_y1 = constrain(tile_y - num_h - 1, 0, WORLD_H)
+    render_tiles_y2 = constrain(tile_y + num_h + 1, 0, WORLD_H)
 
     ps_offset_x = player.x - screen_w2 - PLAYER_W2  # Player/Screen offset-x
     ps_offset_y = player.y - screen_h2
@@ -108,7 +108,7 @@ def draw_world(world, bgs):
                 if y == 5:
                     screen.blit(IMG_GRASS, (xx - ps_offset_x, yy - ps_offset_y - TILE_H + 2))
 
-    player.y = round(constrain(player.y + player.vel_y, -100, screen_h), 3)
+    player.y = round(constrain(player.y + player.vel_y, -100, WORLD_H * TILE_H), 3)
 
     """ Circle around player """
     # The main circle around the player, once player is on tile_y >= 6 (cave darkness)
@@ -137,8 +137,10 @@ def draw_world(world, bgs):
     but1, but2, but3 = pygame.mouse.get_pressed()
 
     # Convert the mouse position to tile coordinates
-    m_tile_x = int(constrain((mouse_x - offset_x) // TILE_W, 0, WORLD_W - 1))
-    m_tile_y = int(constrain((mouse_y - offset_y) // TILE_H, 0, WORLD_H - 1))
+    m_tile_x = int(constrain((mouse_x - offset_x) // TILE_W, -1, WORLD_W))
+    m_tile_y = int(constrain((mouse_y - offset_y) // TILE_H, -1, WORLD_H))
+    # m_tile_x = int(constrain((mouse_x - offset_x) // TILE_W, 0, WORLD_W - 1))
+    # m_tile_y = int(constrain((mouse_y - offset_y) // TILE_H, 0, WORLD_H - 1))
 
     # Is the targeted block close enough to the player to dig it?
     m_color = MOUSE_BAD_COLOR
@@ -158,13 +160,13 @@ def draw_world(world, bgs):
     last_m_tile_x = m_tile_x
     last_m_tile_y = m_tile_y
 
-    if but1 and m_color == MOUSE_OK_COLOR and world[m_tile_y][m_tile_x].value.dig_level > 0:
+    if (but1 and m_color == MOUSE_OK_COLOR and -1 < m_tile_x < WORLD_W and -1 < m_tile_y < WORLD_H
+            and world[m_tile_y][m_tile_x].value.dig_level > 0):
         # Check if the targeted block is an unreachable diagonal
-        # TODO: Add checks for out-of-bounds indexes
-        up_tile = world[tile_y - 1][tile_x]
-        down_tile = world[tile_y + 1][tile_x]
-        left_tile = world[tile_y][tile_x - 1]
-        right_tile = world[tile_y][tile_x + 1]
+        up_tile = world[tile_y - 1][tile_x] if tile_y - 1 > -1 else Tiles.STONE
+        down_tile = world[tile_y + 1][tile_x] if tile_y + 1 < WORLD_H else Tiles.STONE
+        left_tile = world[tile_y][tile_x - 1] if tile_x - 1 > -1 else Tiles.STONE
+        right_tile = world[tile_y][tile_x + 1] if tile_x + 1 < WORLD_W else Tiles.STONE
 
         allow_dig = player.tool_charge > 0
         if m_tile_x < tile_x and m_tile_y < tile_y and up_tile.value.is_solid and left_tile.value.is_solid:
@@ -191,7 +193,7 @@ def draw_world(world, bgs):
             else:
                 # Line from player to mouse crosshair
                 line_color = YELLOW if player.ticks % 60 < 30 else RED
-                pygame.draw.line(screen, line_color, (player.x + offset_x + PLAYER_W2, player.y + offset_y + (PLAYER_H // 2)), (mouse_x, mouse_y), 2)
+                pygame.draw.line(screen, line_color, (player.x + offset_x + PLAYER_W2, player.y + offset_y + PLAYER_H2), (mouse_x, mouse_y), 2)
 
                 # Cover the block with a translucent effect to indicate progress
                 dug_h = TILE_H * (block_ticks - player.ticks) / block_ticks  # calculate the percentage dug
@@ -244,7 +246,7 @@ def draw_world(world, bgs):
     right_tile = world[tile_y][tile_x + 1] if tile_x + 1 < WORLD_W else Tiles.STONE
 
     min_x = (tile_x - 1) * TILE_W + TILE_W - 3 if left_tile.value.is_solid else 0
-    max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + PLAYER_W - TILE_W
+    max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + PLAYER_W
 
     player.x = constrain(player.x + player.vel_x, min_x, max_x)
 
@@ -454,7 +456,7 @@ if __name__ == '__main__':
                     player.anim_step = 0
 
                 elif event.key == pygame.K_t:
-                    player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H // 2, TORCH_DIST, TORCH_DIST))
+                    player.torches.append(pygame.Rect(player.x + PLAYER_W, player.y + PLAYER_H2, TORCH_DIST, TORCH_DIST))
 
                 elif event.key == pygame.K_y:
                     player.tool_charge = 100
@@ -483,8 +485,6 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Game gets crazy slow at y=27
-
 * Add House UI:
     * Allow house upgrade with significant resources required
     * Allow tool recharge somehow: house can give 15% for free, coal is used to refill fully
@@ -499,6 +499,9 @@ MAYBES:
 * Wrap world?
 
 COMPLETED:
++ Game allows digging at y > max depth
++ Game gets crazy slow at y=27
++ Fix game allows digging at x < 0
 + Use a different animation when digging (right now it's using IDLE_ANIM, try ATTACK)
 + Allow LARGER worlds by limiting the tiles rendered
 + Limit digging once tool charge reaches 0
