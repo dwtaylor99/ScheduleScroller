@@ -2,7 +2,7 @@ from enum import Enum
 
 import pygame
 
-from dig_game_tiles import Tile, Tiles
+from dig_game_tiles import Tile, Tiles, Diamond
 
 GIRL_SCALE = 0.7
 GIRL_W = 75
@@ -61,10 +61,11 @@ class Player:
     # stats
     view_dist = 100
     house_index = 0
-    inventory: [Tile] = []
-    inv_dict = {}
+    # inventory: [Tile] = []  # Unused
+    inv_dict = {}  # { Tiles.X: int }
     inv_selected = 0
     torches = []
+    tool_dist = 2  # tiles
     tool_level = 1
     tool_charge = 100
 

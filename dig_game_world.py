@@ -11,9 +11,8 @@ def generate_world(level_width, level_height):
 
     overworld = 5
     level_1 = int(level_height * 0.25) + overworld
-    level_2 = int(level_height * 0.25) + level_1 + overworld
-    level_3 = int(level_height * 0.25) + level_2 + overworld
-    level_4 = int(level_height * 0.25) + level_3 + overworld
+    level_2 = int(level_height * 0.25) + level_1
+    level_3 = int(level_height * 0.25) + level_2
 
     for y in range(level_height):
         for x in range(level_width):
@@ -61,7 +60,7 @@ def generate_world(level_width, level_height):
                 elif 90 <= rn < 100:
                     world[y][x] = Tiles.GOLD
 
-            elif level_3 <= y < level_4:
+            elif level_3 <= y < level_height:
                 if 0 <= rn < 60:
                     world[y][x] = Tiles.STONE
                 elif 60 <= rn < 80:
@@ -75,7 +74,7 @@ def generate_world(level_width, level_height):
     world[4][random.randrange(level_width // 4)] = Tiles.HOUSE_1
 
     # Add some caves
-    for cave_i in range(random.randint(1, 3)):
+    for cave_i in range(random.randint(1, 8)):
         cave_len = random.randint(10, 20)  # how long is the cave?
         cave_x = random.randint(3, 10)  # where to start the cave, x position
         cave_y = random.randint(7, 14)  # where to start the cave, y position
@@ -103,7 +102,7 @@ def generate_world(level_width, level_height):
 
         room_bg = random.choice([IMG_BLUE_BRICKS, IMG_RED_BRICKS, IMG_GRAY_BRICKS])
         room_tile = Tiles.AIR
-        room_reward = Tiles.REWARD_URN
+        room_reward = random.choice([Tiles.REWARD_URN, Tiles.REWARD_CHALICE])
 
         for jj in range(room_size):
             for ii in range(room_size):

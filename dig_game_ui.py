@@ -1,6 +1,7 @@
 import pygame
 
 from colors import WHITE, BLACK
+from dig_game_colors import HOLLOW_COLOR
 from dig_game_drops import Drops
 from fonts import FONT_EMOJI_MD
 
@@ -30,7 +31,9 @@ def button(house_ui, x, y, w, h, text):
 
 def build_ui(ui_w, ui_h, player):
     house_ui = pygame.Surface((ui_w, ui_h))
-    house_ui.fill(UI_BG_COLOR)
+    house_ui.fill(HOLLOW_COLOR)
+    house_ui.set_colorkey(HOLLOW_COLOR)
+    pygame.draw.rect(house_ui, UI_BG_COLOR, (0, 0, ui_w, ui_h), 0, 10)
 
     button(house_ui, 20, 20, 100, 30, "Upgrade")
     if player.house_index < 2:

@@ -2,6 +2,8 @@ import pygame
 
 import gradient
 from colors import WHITE, BLACK, YELLOW, RED
+from dig_game_colors import HOLLOW_COLOR, MOUSE_BAD_COLOR, MOUSE_OK_COLOR, CHARGE_GOOD_COLOR, CHARGE_BAD_COLOR, \
+    CHARGE_WARN_COLOR, UI_BG_COLOR
 from dig_game_drops import screen
 from dig_game_objects import Facing, Player, PLAYER_W, PLAYER_H, GIRL_RUN_ANIM, GIRL_IDLE_ANIM, \
     GIRL_JUMP_ANIM, GIRL_JUMP_ANIM_DELAY, GIRL_IDLE_ANIM_DELAY, GIRL_RUN_ANIM_DELAY, TORCH_ANIM_DELAY, GIRL_ATTACK_ANIM, \
@@ -24,19 +26,12 @@ is_debug_stats = False
 FPS = 60
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 
-MOUSE_OK_COLOR = "#00CF00"
-MOUSE_BAD_COLOR = "#CF0000"
-HOLLOW_COLOR = (255, 0, 255, 0)
-CHARGE_GOOD_COLOR = (0, 150, 0)
-CHARGE_WARN_COLOR = (175, 135, 40)
-CHARGE_BAD_COLOR = (150, 0, 0)
-
 GRAVITY = 0.4
 # JUMP_VEL = -5.0
 JUMP_VEL = -6.0
 WALK_VEL = 6.0
 
-WORLD_W = 50
+WORLD_W = 1000
 WORLD_H = 50
 LEVEL_W = 20
 LEVEL_H = 20
@@ -45,6 +40,7 @@ main_world = [[Tiles.AIR for _ in range(WORLD_W)] for _ in range(WORLD_H)]
 jump_allowed = True
 last_m_tile_x = last_m_tile_y = 0
 torch_anim_step = torch_ticks = 0
+tree_ticks = 0
 
 # Convenience variables
 screen_w = screen.get_width()
@@ -62,7 +58,7 @@ ui_surf = pygame.Surface((screen.get_width(), TILE_H * 2))
 
 
 def draw_world(world, bgs):
-    global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks, house_ui_surf, house_ui_open
+    global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks, house_ui_surf, house_ui_open, tree_ticks
 
     screen.fill((8, 8, 8))
 
@@ -93,6 +89,23 @@ def draw_world(world, bgs):
     render_tiles_y1 = constrain(tile_y - num_h - 1, 0, WORLD_H)
     render_tiles_y2 = constrain(tile_y + num_h + 1, 0, WORLD_H)
 
+    # Should we grow a new tree?
+    """
+    tree_ticks += dt
+    if tree_ticks > 10000 and random.randrange(100) < 10:
+        tree_ticks = 0
+        # Select a random off-screen x-pos
+        sanity = 0
+        tree_x = random.randrange(WORLD_W)
+        while render_tiles_x1 < tree_x < render_tiles_x2 or world[4][tree_x] != Tiles.AIR and sanity < 10:
+            tree_x = random.randrange(WORLD_W)
+            sanity += 1
+        if sanity == 10:
+            print("Could not grow a tree")
+        else:
+            print("Grew a new tree at x={}".format(tree_x))
+            world[4][tree_x] = random.choice([Tiles.TREE_01, Tiles.TREE_02, Tiles.TREE_03, Tiles.TREE_04])
+    """
     ps_offset_x = player.x - screen_w2 - PLAYER_W2  # Player/Screen offset-x
     ps_offset_y = player.y - screen_h2
 
@@ -119,13 +132,12 @@ def draw_world(world, bgs):
 
     """ Circle around player """
     # The main circle around the player, once player is on tile_y >= 6 (cave darkness)
-    temp_surf = pygame.Surface((WORLD_W * TILE_W, WORLD_H * TILE_H))
+    temp_surf = pygame.Surface((screen_w, WORLD_H * TILE_H - (7 * TILE_H)))
     temp_surf.fill((8, 8, 8))
     temp_surf.set_colorkey((255, 0, 255))
     if tile_y >= 6:
         pygame.draw.circle(temp_surf, HOLLOW_COLOR, (screen_w2 + PLAYER_W2, (tile_y - 7) * TILE_H), 100)
 
-    # Additional circles for each of the torches
     for torch in player.torches:
         screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (TORCH_W_SCALED // 2) - PLAYER_W2 + offset_x, torch.y - (TORCH_H_SCALED // 2) + offset_y))
         pygame.draw.circle(temp_surf, HOLLOW_COLOR, (torch.x - (TORCH_W_SCALED // 2) - PLAYER_W2 + offset_x, torch.y - (TORCH_H_SCALED // 2) - 300), torch.w)
@@ -149,7 +161,7 @@ def draw_world(world, bgs):
 
     # Is the targeted block close enough to the player to dig it?
     m_color = MOUSE_BAD_COLOR
-    if abs(tile_x - m_tile_x) < 2 and abs(tile_y - m_tile_y) < 2:
+    if abs(tile_x - m_tile_x) < player.tool_dist and abs(tile_y - m_tile_y) < player.tool_dist:
         m_color = MOUSE_OK_COLOR
 
     # Highlight mouse tile
@@ -213,7 +225,8 @@ def draw_world(world, bgs):
     # Place a block
     if (but3 and world[m_tile_y][m_tile_x] == Tiles.AIR
             and world[m_tile_y][m_tile_x] not in [Tiles.HOUSE_1, Tiles.HOUSE_2, Tiles.HOUSE_3, Tiles.HOUSE_4]
-            and (m_tile_x != tile_x or m_tile_y != tile_y) and abs(tile_x - m_tile_x) < 2 and abs(tile_y - m_tile_y) < 2):
+            and (m_tile_x != tile_x or m_tile_y != tile_y)
+            and abs(tile_x - m_tile_x) < player.tool_dist and abs(tile_y - m_tile_y) < player.tool_dist):
 
         if len(player.inv_dict.keys()) > 0:
             ks = list(player.inv_dict.keys())
@@ -253,7 +266,8 @@ def draw_world(world, bgs):
     left_tile = world[tile_y][tile_x - 1] if tile_x - 1 >= 0 else Tiles.STONE
     right_tile = world[tile_y][tile_x + 1] if tile_x + 1 < WORLD_W else Tiles.STONE
 
-    min_x = (tile_x - 1) * TILE_W + TILE_W - 3 if left_tile.value.is_solid else 0
+    # min_x = (tile_x - 1) * TILE_W + TILE_W - 3 if left_tile.value.is_solid else 0
+    min_x = (tile_x - 1) * TILE_W + TILE_W if left_tile.value.is_solid else 0
     max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + PLAYER_W
 
     # Calculate the player's new X and Y coords
@@ -362,14 +376,16 @@ def draw_world(world, bgs):
     """ Render UI """
     # Inventory
     FONT_EMOJI_SM.set_bold(True)
-    ui_surf.fill((32, 32, 32))
+    ui_surf.fill(UI_BG_COLOR)
     ui_surf_w = ui_surf.get_width()
     ui_surf_h = ui_surf.get_height()
     ui_y = screen_h - TILE_H * 2
 
     for inv_i, key in enumerate(player.inv_dict.keys()):
-        inv_x = TILE_W * inv_i + 3
+        inv_x = TILE_W * inv_i + 5
+        # Item image
         ui_surf.blit(key.value.drop.value.img, (inv_x, 32))
+        # Item name
         ui_surf.blit(FONT_EMOJI_SM.render(str(player.inv_dict[key]), True, BLACK).convert_alpha(), (inv_x + 3, 33))
         ui_surf.blit(FONT_EMOJI_SM.render(str(player.inv_dict[key]), True, WHITE).convert_alpha(), (inv_x + 2, 32))
 
@@ -383,10 +399,12 @@ def draw_world(world, bgs):
         charge_color = CHARGE_BAD_COLOR
     elif player.tool_charge < 50:
         charge_color = CHARGE_WARN_COLOR
-    pygame.draw.rect(ui_surf, charge_color, (ui_surf_w - 80, 4, 70, ui_surf_h - 8), 0, 10)
-    ui_surf.blit(FONT_EMOJI_SM.render("{}%".format(int(player.tool_charge)), True, BLACK).convert_alpha(), (ui_surf_w - 64, 10))
-    ui_surf.blit(FONT_EMOJI_SM.render("{}%".format(int(player.tool_charge)), True, WHITE).convert_alpha(), (ui_surf_w - 65, 9))
-    ui_surf.blit(IMG_VOLTAGE, (ui_surf.get_width() - 65, 32))
+    pygame.draw.rect(ui_surf, charge_color, (ui_surf_w - 110, 4, 100, ui_surf_h - 8), 0, 10)
+    txt_charge = FONT_EMOJI_MD.render("{}%".format(int(player.tool_charge)), True, BLACK).convert_alpha()
+    txt_charge_x = ui_surf_w - 55 - (txt_charge.get_width() // 2)
+    ui_surf.blit(txt_charge, (txt_charge_x + 1, 10))
+    ui_surf.blit(FONT_EMOJI_MD.render("{}%".format(int(player.tool_charge)), True, WHITE).convert_alpha(), (txt_charge_x, 9))
+    ui_surf.blit(IMG_VOLTAGE, (ui_surf.get_width() - 80, 40))
 
     FONT_EMOJI_SM.set_bold(False)
     screen.blit(ui_surf, (0, ui_y))
@@ -469,24 +487,24 @@ if __name__ == '__main__':
                 elif event.key == pygame.K_y:
                     player.tool_charge = 100
 
+                elif event.key == pygame.K_u:
+                    player.tool_dist += 1
+
                 elif event.key == pygame.K_F3:
                     is_debug_stats = not is_debug_stats
 
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE and not jump_allowed:
                     jump_allowed = True
-                    player.vel_y = -player.vel_y
+                    player.vel_y = 0
                     player.anim_ticks = 0
                     player.anim_step = 0
 
             elif event.type == pygame.MOUSEWHEEL:
                 if event.y > 0:
                     player.inv_selected -= 1
-                    if player.inv_selected < 0:
-                        player.inv_selected = 0
                 elif event.y < 0:
                     player.inv_selected += 1
-                    if player.inv_selected > len(player.inv_dict.keys()) - 1:
-                        player.inv_selected = len(player.inv_dict.keys()) - 1
+                player.inv_selected = constrain(player.inv_selected, 0, len(player.inv_dict.keys()) - 1)
 
         dt = clock.tick(FPS)
 
@@ -494,21 +512,19 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Add House UI:
-    * Allow house upgrade with significant resources required
-    * Allow tool recharge somehow: house can give 15% for free, coal is used to refill fully
-    * Ability to construct single-use batteries (copper + iron?) for longer use of tool
-    * Exchange inventory for crafted items
-    * Craft flashlight to expand sight line
+* Fix detection of line-of-sight when digging and large distances
+* Place ores in veins instead of randomly
+* Add House UI
 * Randomly grow trees
 
 MAYBES:
-* Way to increase tool distance?
 * Way to increase jump height?
 * Should blocks remember the percent dug they are?
 * Wrap world?
 
 COMPLETED:
++ Cave darkness is VERY slow on large maps. Try making a smaller Surface and only render immediately around player
++ Spamming jump makes player "fly"
 + Torches are not deleted when a block is place on them
 + Jump height based on time the space bar is held
 + Game allows digging at y > max depth

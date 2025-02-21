@@ -38,7 +38,9 @@ IMG_BUSH_02 = pygame.image.load("images/game/tiles/bush_02.png").convert_alpha()
 IMG_BUSH_03 = pygame.image.load("images/game/tiles/bush_03.png").convert_alpha()
 IMG_BUSH_04 = pygame.image.load("images/game/tiles/bush_04.png").convert_alpha()
 
-IMG_URN = FONT_EMOJI_MD.render("🏺", True, WHITE)
+IMG_URN = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/amphora.png").convert_alpha(), 0.15)
+IMG_CHALICE = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/golden_chalice.png").convert_alpha(), 0.15)
+
 IMG_TORCH = FONT_EMOJI_MD.render("🔦", True, WHITE)
 IMG_VOLTAGE = FONT_EMOJI_MD.render("⚡", True, WHITE)
 IMG_BATTERY = FONT_EMOJI_MD.render("🔋", True, WHITE)
@@ -130,10 +132,19 @@ class Diamond(Tile):
 
 class RewardUrn(Tile):
     img = IMG_URN
-    img_offset_x = 5
+    img_offset_x = 3
     img_offset_y = 5
     is_solid = False
     drop = Drops.REWARD_URN
+    dig_ticks = 1000
+
+
+class RewardChalice(Tile):
+    img = IMG_CHALICE
+    img_offset_x = 5
+    img_offset_y = 5
+    is_solid = False
+    drop = Drops.REWARD_CHALICE
     dig_ticks = 1000
 
 
@@ -230,6 +241,7 @@ class Tiles(Enum):
     GOLD = Gold()
     DIAMOND = Diamond()
     REWARD_URN = RewardUrn()
+    REWARD_CHALICE = RewardChalice()
     TREE_01 = Tree01()
     TREE_02 = Tree02()
     TREE_03 = Tree03()
