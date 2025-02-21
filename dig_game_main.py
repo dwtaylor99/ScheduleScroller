@@ -32,7 +32,8 @@ CHARGE_WARN_COLOR = (175, 135, 40)
 CHARGE_BAD_COLOR = (150, 0, 0)
 
 GRAVITY = 0.4
-JUMP_VEL = -5.0
+# JUMP_VEL = -5.0
+JUMP_VEL = -6.0
 WALK_VEL = 6.0
 
 WORLD_W = 50
@@ -115,8 +116,6 @@ def draw_world(world, bgs):
                 screen.blit(tile.img, (xx + tile.img_offset_x - ps_offset_x, yy + tile.img_offset_y - ps_offset_y))
                 if y == 5:
                     screen.blit(IMG_GRASS, (xx - ps_offset_x, yy - ps_offset_y - TILE_H + 2))
-
-    player.y = round(constrain(player.y + player.vel_y, -100, WORLD_H * TILE_H), 3)
 
     """ Circle around player """
     # The main circle around the player, once player is on tile_y >= 6 (cave darkness)
@@ -233,19 +232,20 @@ def draw_world(world, bgs):
                 if len(player.torches) > 0:
                     new_torch_list = []
                     for torch in player.torches:
-                        t_tile_x = torch.x // TILE_W
-                        t_tile_y = torch.y // TILE_H
+                        t_tile_x = (torch.x - PLAYER_W) // TILE_W
+                        t_tile_y = (torch.y - PLAYER_H2) // TILE_H
+                        # print("x, y: {}, {} | tx, ty: {}, {}".format(torch.x, torch.y, t_tile_x, tile_y))
                         if m_tile_x != t_tile_x or m_tile_y != t_tile_y:
                             new_torch_list.append(torch)
                     player.torches = new_torch_list
 
-    # Right-clicked the house, open house UI
+    """ House UI """
     if house_ui_open:
         screen.blit(house_ui_surf, (house_ui_x, house_ui_y))
     elif but3 and world[m_tile_y][m_tile_x] in [Tiles.HOUSE_1, Tiles.HOUSE_2, Tiles.HOUSE_3, Tiles.HOUSE_4]:
         if not house_ui_open:
             house_ui_open = True
-            house_ui_surf = build_ui(house_ui_w, house_ui_h)
+            house_ui_surf = build_ui(house_ui_w, house_ui_h, player)
             screen.blit(house_ui_surf, (house_ui_x, house_ui_y))
 
     """ Player Movement """
@@ -256,7 +256,9 @@ def draw_world(world, bgs):
     min_x = (tile_x - 1) * TILE_W + TILE_W - 3 if left_tile.value.is_solid else 0
     max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + PLAYER_W
 
+    # Calculate the player's new X and Y coords
     player.x = constrain(player.x + player.vel_x, min_x, max_x)
+    player.y = constrain(player.y + player.vel_y, -100, WORLD_H * TILE_H)
 
     if player.on_ground:
         while tile_y < WORLD_H and not world[tile_y][tile_x].value.is_solid:
@@ -284,7 +286,6 @@ def draw_world(world, bgs):
     # Jumping
     if not player.on_ground:
         player.vel_y += GRAVITY
-        player.y += player.vel_y
 
         # Check for a max jump height if there is a tile above the player
         min_y = -100
@@ -355,6 +356,9 @@ def draw_world(world, bgs):
                         player.anim_ticks = 0
                         player.anim_step = (player.anim_step + 1) % len(GIRL_RUN_ANIM)
 
+    player.x = round(player.x, 3)
+    player.y = round(player.y, 3)
+
     """ Render UI """
     # Inventory
     FONT_EMOJI_SM.set_bold(True)
@@ -397,9 +401,9 @@ def draw_world(world, bgs):
         stats = FONT_EMOJI_SM.render("px, py: {}, {} | tile_x, y: {}, {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
         stat2 = FONT_EMOJI_SM.render("m_tile_x, y: {}, {}".format(m_tile_x, m_tile_y), True, WHITE).convert_alpha()
         stat3 = FONT_EMOJI_SM.render("left: {}, right: {}, min_x: {}, max_x: {}".format(left_tile, right_tile, min_x, max_x), True, WHITE)
-        screen.blit(stats, (500, screen_h - 80))
-        screen.blit(stat2, (500, screen_h - 55))
-        screen.blit(stat3, (500, screen_h - 25))
+        screen.blit(stats, (400, screen_h - 80))
+        screen.blit(stat2, (400, screen_h - 55))
+        screen.blit(stat3, (400, screen_h - 25))
 
 
 if __name__ == '__main__':
@@ -470,6 +474,7 @@ if __name__ == '__main__':
 
                 if event.key == pygame.K_SPACE:
                     jump_allowed = True
+                    player.vel_y = -player.vel_y
                     player.anim_ticks = 0
                     player.anim_step = 0
 
@@ -495,6 +500,7 @@ TODO:
     * Ability to construct single-use batteries (copper + iron?) for longer use of tool
     * Exchange inventory for crafted items
     * Craft flashlight to expand sight line
+* Randomly grow trees
 
 MAYBES:
 * Way to increase tool distance?
@@ -503,6 +509,8 @@ MAYBES:
 * Wrap world?
 
 COMPLETED:
++ Torches are not deleted when a block is place on them
++ Jump height based on time the space bar is held
 + Game allows digging at y > max depth
 + Game gets crazy slow at y=27
 + Fix game allows digging at x < 0
