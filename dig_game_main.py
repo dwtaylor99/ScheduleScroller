@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 import gradient
@@ -90,22 +92,21 @@ def draw_world(world, bgs):
     render_tiles_y2 = constrain(tile_y + num_h + 1, 0, WORLD_H)
 
     # Should we grow a new tree?
-    """
     tree_ticks += dt
-    if tree_ticks > 10000 and random.randrange(100) < 10:
+    if tree_ticks > 20000 and random.randrange(100) < 5:
         tree_ticks = 0
         # Select a random off-screen x-pos
         sanity = 0
         tree_x = random.randrange(WORLD_W)
-        while render_tiles_x1 < tree_x < render_tiles_x2 or world[4][tree_x] != Tiles.AIR and sanity < 10:
+        while render_tiles_x1 < tree_x < render_tiles_x2 or world[4][tree_x] != Tiles.AIR and sanity < 20:
             tree_x = random.randrange(WORLD_W)
             sanity += 1
-        if sanity == 10:
+        if sanity == 20:
             print("Could not grow a tree")
         else:
             print("Grew a new tree at x={}".format(tree_x))
             world[4][tree_x] = random.choice([Tiles.TREE_01, Tiles.TREE_02, Tiles.TREE_03, Tiles.TREE_04])
-    """
+
     ps_offset_x = player.x - screen_w2 - PLAYER_W2  # Player/Screen offset-x
     ps_offset_y = player.y - screen_h2
 

@@ -12,7 +12,7 @@ TILE_W = TILE_H = 42
 TILE_SCALE = 0.3
 
 IMG_GRASS_DIRT = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/grass_dirt_block.png"), TILE_SCALE).convert_alpha()
-IMG_DIRT = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/brown_dirt.png"), TILE_SCALE).convert_alpha()
+IMG_DIRT = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/dirt_block.png"), TILE_SCALE).convert_alpha()
 IMG_STONE = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/stone_block.png"), TILE_SCALE).convert_alpha()
 IMG_CLAY = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/clay_block.png"), TILE_SCALE).convert_alpha()
 IMG_COAL = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/coal_block.png"), TILE_SCALE).convert_alpha()
