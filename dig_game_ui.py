@@ -14,8 +14,6 @@ TXT_HOUSE_UP2 = FONT_EMOJI_MD.render("🏠️ ➡️ 🏡", True, WHITE).convert
 TXT_HOUSE_UP3 = FONT_EMOJI_MD.render("🏡 ➡️ 🏛️", True, WHITE).convert_alpha()
 TXT_TIMES = FONT_EMOJI_MD.render("✖️", True, WHITE)
 
-house_ui_open = False
-
 line_height = 30
 
 

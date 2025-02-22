@@ -1,19 +1,21 @@
 import random
+from itertools import cycle
 
 import pygame
 
 import gradient
-from colors import WHITE, BLACK, YELLOW, RED
+from dig_game_colors import WHITE, BLACK, YELLOW, RED, CYAN
 from dig_game_colors import HOLLOW_COLOR, MOUSE_BAD_COLOR, MOUSE_OK_COLOR, CHARGE_GOOD_COLOR, CHARGE_BAD_COLOR, \
     CHARGE_WARN_COLOR, UI_BG_COLOR
 from dig_game_drops import screen
-from dig_game_objects import Facing, Player, PLAYER_W, PLAYER_H, GIRL_RUN_ANIM, GIRL_IDLE_ANIM, \
+from dig_game_objects import Facing, Player, PLAYER_W, GIRL_RUN_ANIM, GIRL_IDLE_ANIM, \
     GIRL_JUMP_ANIM, GIRL_JUMP_ANIM_DELAY, GIRL_IDLE_ANIM_DELAY, GIRL_RUN_ANIM_DELAY, TORCH_ANIM_DELAY, GIRL_ATTACK_ANIM, \
-    PLAYER_W2, PLAYER_H2
+    PLAYER_W2, PLAYER_H2, OGRE_IDLE_ANIM, IMG_OGRE_SHEET, OGRE_WALK_ANIM, OGRE_ATTACK_ANIM, OGRE_HURT_ANIM, \
+    OGRE_DEATH_ANIM, EnemyAction, Ogre
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
 from dig_game_tiles import Tiles, TILE_W, TILE_H, IMG_GRASS, IMG_VOLTAGE, IMG_BUSH_01, IMG_BUSH_02, \
     IMG_BUSH_03, IMG_BUSH_04
-from dig_game_ui import build_ui, house_ui_open
+from dig_game_ui import build_ui
 from dig_game_utils import constrain
 from dig_game_world import generate_world
 from fonts import FONT_EMOJI_SM
@@ -29,15 +31,17 @@ FPS = 60
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 
 GRAVITY = 0.4
-# JUMP_VEL = -5.0
 JUMP_VEL = -6.0
 WALK_VEL = 5.0
 
-WORLD_W = 300
+WORLD_W = 50
 WORLD_H = 50
 LEVEL_W = 20
 LEVEL_H = 20
 main_world = [[Tiles.AIR for _ in range(WORLD_W)] for _ in range(WORLD_H)]
+
+BEAM_COLORS = cycle([RED, YELLOW, CYAN])
+beam_color = next(BEAM_COLORS)
 
 jump_allowed = True
 last_m_tile_x = last_m_tile_y = 0
@@ -50,6 +54,7 @@ screen_h = screen.get_height()
 screen_w2 = screen_w // 2
 screen_h2 = screen_h // 2
 
+house_ui_open = False
 house_ui_w = int(screen_w * 0.6)
 house_ui_h = int(screen_h * 0.6)
 house_ui_x = (screen_w - house_ui_w) // 2
@@ -58,9 +63,13 @@ house_ui_y = (screen_h - house_ui_h) // 2
 house_ui_surf = pygame.Surface((house_ui_w, house_ui_h))
 ui_surf = pygame.Surface((screen.get_width(), TILE_H * 2))
 
+enemies = []
+
 
 def draw_world(world, bgs):
-    global last_m_tile_x, last_m_tile_y, torch_anim_step, torch_ticks, house_ui_surf, house_ui_open, tree_ticks
+    global last_m_tile_x, last_m_tile_y
+    global house_ui_surf, house_ui_open
+    global torch_anim_step, torch_ticks, tree_ticks, beam_color
 
     screen.fill((8, 8, 8))
 
@@ -211,8 +220,11 @@ def draw_world(world, bgs):
             # Digging progress
             else:
                 # Line from player to mouse crosshair
-                line_color = YELLOW if player.ticks % 60 < 30 else RED
-                pygame.draw.line(screen, line_color, (player.x + offset_x + PLAYER_W2, player.y + offset_y + PLAYER_H2), (mouse_x, mouse_y), 2)
+                player.beam_ticks += dt
+                if player.beam_ticks > 30:
+                    player.beam_ticks = 0
+                    beam_color = next(BEAM_COLORS)
+                pygame.draw.line(screen, beam_color, (player.x + offset_x + PLAYER_W2, player.y + offset_y + PLAYER_H2), (mouse_x, mouse_y), 2)
 
                 # Cover the block with a translucent effect to indicate progress
                 dug_h = TILE_H * (block_ticks - player.ticks) / block_ticks  # calculate the percentage dug
@@ -226,9 +238,7 @@ def draw_world(world, bgs):
 
     # Place a block
     if (but3 and world[m_tile_y][m_tile_x] == Tiles.AIR
-            and world[m_tile_y][m_tile_x] not in [Tiles.HOUSE_1, Tiles.HOUSE_2, Tiles.HOUSE_3, Tiles.HOUSE_4]
-            and (m_tile_x != tile_x or m_tile_y != tile_y)
-            and abs(tile_x - m_tile_x) < player.tool_dist and abs(tile_y - m_tile_y) < player.tool_dist):
+            and (0 < abs(tile_x - m_tile_x) < player.tool_dist or 0 < abs(tile_y - m_tile_y) < player.tool_dist)):
 
         if len(player.inv_dict.keys()) > 0:
             ks = list(player.inv_dict.keys())
@@ -256,11 +266,11 @@ def draw_world(world, bgs):
     """ House UI """
     if house_ui_open:
         screen.blit(house_ui_surf, (house_ui_x, house_ui_y))
-    elif but3 and world[m_tile_y][m_tile_x] in [Tiles.HOUSE_1, Tiles.HOUSE_2, Tiles.HOUSE_3, Tiles.HOUSE_4]:
-        if not house_ui_open:
-            house_ui_open = True
-            house_ui_surf = build_ui(house_ui_w, house_ui_h, player)
-            screen.blit(house_ui_surf, (house_ui_x, house_ui_y))
+    elif (but3 and world[m_tile_y][m_tile_x] in [Tiles.HOUSE_1, Tiles.HOUSE_2, Tiles.HOUSE_3, Tiles.HOUSE_4]
+          and not house_ui_open):
+        house_ui_open = True
+        house_ui_surf = build_ui(house_ui_w, house_ui_h, player)
+        screen.blit(house_ui_surf, (house_ui_x, house_ui_y))
 
     """ Player Movement """
     # Limit left/right movement
@@ -383,6 +393,29 @@ def draw_world(world, bgs):
     player.x = round(player.x, 3)
     player.y = round(player.y, 3)
 
+    """ Enemies """
+
+    for enemy in enemies:
+        enemy.ticks += dt
+        anim_list = []
+        anim_delay = 200
+
+        if enemy.action == EnemyAction.IDLE:
+            anim_list = enemy.idle_anim
+            anim_delay = 150
+        elif enemy.action == EnemyAction.WALK:
+            anim_list = enemy.walk_anim
+            anim_delay = 200
+
+        if enemy.ticks >= anim_delay:
+            enemy.ticks = 0
+            enemy.anim_step = (enemy.anim_step + 1) % len(anim_list)
+
+        frame = anim_list[enemy.anim_step]
+        if enemy.facing == Facing.RIGHT:
+            frame = pygame.transform.flip(frame, True, False)
+        screen.blit(frame, (enemy.x + offset_x, enemy.y + offset_y))
+
     """ Render UI """
     # Inventory
     FONT_EMOJI_SM.set_bold(True)
@@ -427,7 +460,7 @@ def draw_world(world, bgs):
         pygame.draw.rect(screen, "#00FF00", player_rect, 1)  # Player hitbox
 
         stats = FONT_EMOJI_SM.render("px, py: {}, {} | tile_x, y: {}, {}".format(player.x, player.y, tile_x, tile_y), True, WHITE).convert_alpha()
-        stat2 = FONT_EMOJI_SM.render("m_tile_x, y: {}, {}".format(m_tile_x, m_tile_y), True, WHITE).convert_alpha()
+        stat2 = FONT_EMOJI_SM.render("m_tile_x, y: {}, {} @ {}".format(m_tile_x, m_tile_y, world[m_tile_y][m_tile_x]), True, WHITE).convert_alpha()
         stat3 = FONT_EMOJI_SM.render("left: {}, right: {}, min_x: {}, max_x: {}".format(left_tile, right_tile, min_x, max_x), True, WHITE)
         screen.blit(stats, (400, screen_h - 80))
         screen.blit(stat2, (400, screen_h - 55))
@@ -440,6 +473,8 @@ if __name__ == '__main__':
 
     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
     pygame.key.set_repeat(20, FPS)
+
+    enemies.append(Ogre(200, 300))
 
     while is_running:
         draw_world(main_world, main_bg)
@@ -500,7 +535,7 @@ if __name__ == '__main__':
                 elif event.key == pygame.K_u:
                     player.tool_dist += 1
 
-                elif event.key == pygame.K_F3:
+                elif event.key == pygame.K_F3 or event.key == pygame.K_F4:
                     is_debug_stats = not is_debug_stats
 
                 if event.key == pygame.K_SPACE and not jump_allowed:
@@ -522,14 +557,15 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Ore vein frequency needs to be based on level size
+* Enemies
 * Fix placing blocks when jumping
+* Ore vein frequency needs to be based on level size
 * Add House UI
 * Add Attack/Run animation
 
 MAYBES:
 * Way to increase jump height?
-* Should blocks remember the percent dug they are?
+* Should blocks remember the percent dug they are? This will increase memory requirement. Maybe just remember last 20 or so.
 * Wrap world?
 * Fix detection of line-of-sight when digging large distances
 

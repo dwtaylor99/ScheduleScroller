@@ -65,47 +65,50 @@ def generate_world(level_width, level_height):
             if level_1 <= y < level_height:
                 world[y][x] = Tiles.STONE
 
+    ore_density = int(level_width * level_height * 0.005)
+    print(ore_density)
+
     # Add veins of dirt
     # Add veins of clay
 
     # Add veins of coal
-    for _ in range(random.randrange(10)):
+    for _ in range(random.randrange(ore_density)):
         x = random.randrange(level_width)
         y = random.randrange(level_1, level_2)
         add_vein(world, Tiles.COAL, x, y, random.randrange(4, 20))
 
     # Add veins of copper
-    for _ in range(random.randrange(8)):
+    for _ in range(random.randrange(ore_density)):
         x = random.randrange(level_width)
         y = random.randrange(level_1, level_2)
         add_vein(world, Tiles.COPPER, x, y, random.randrange(4, 20))
 
     # Add veins of iron
-    for _ in range(random.randrange(8)):
+    for _ in range(random.randrange(ore_density)):
         x = random.randrange(level_width)
         y = random.randrange(level_2, level_3)
         add_vein(world, Tiles.IRON, x, y, random.randrange(6, 20))
 
     # Add veins of silver
-    for _ in range(random.randrange(8)):
+    for _ in range(random.randrange(ore_density)):
         x = random.randrange(level_width)
         y = random.randrange(level_2, level_3)
         add_vein(world, Tiles.SILVER, x, y, random.randrange(6, 20))
 
     # Add veins of gold
-    for _ in range(random.randrange(8)):
+    for _ in range(random.randrange(ore_density)):
         x = random.randrange(level_width)
         y = random.randrange(level_3, level_height)
         add_vein(world, Tiles.GOLD, x, y, random.randrange(3, 20))
 
     # Add veins of diamond
-    for _ in range(random.randrange(8)):
+    for _ in range(random.randrange(ore_density)):
         x = random.randrange(level_width)
         y = random.randrange(level_3, level_height)
         add_vein(world, Tiles.DIAMOND, x, y, random.randrange(1, 10))
 
-    # Place a house on level 5 and overwrite whatever is there
-    world[4][random.randrange(level_width // 4)] = Tiles.HOUSE_1
+    # Place a house on the left side of level 5 and overwrite whatever is there
+    world[4][random.randrange(2, min(level_width // 4, 50))] = Tiles.HOUSE_1
 
     # Add some caves
     for cave_i in range(random.randint(1, 8)):

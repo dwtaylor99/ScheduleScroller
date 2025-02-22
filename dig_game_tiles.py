@@ -87,7 +87,7 @@ class Stone(Tile):
 class Clay(Tile):
     img = IMG_CLAY
     drop = Drops.CLAY
-    dig_ticks = 1500
+    dig_ticks = 800
 
 
 class Coal(Tile):
@@ -127,7 +127,7 @@ class Diamond(Tile):
     img = IMG_DIAMOND
     drop = Drops.DIAMOND
     dig_level = 2
-    dig_ticks = 5000
+    dig_ticks = 4000
 
 
 class RewardUrn(Tile):
@@ -191,7 +191,7 @@ class Tree04(Tile):
 class House1(Tile):
     img = IMG_HOUSE_01
     img_offset_x = -40
-    img_offset_y = TILE_H - img.get_height()
+    img_offset_y = TILE_H - img.get_height() + 2
     is_solid = False
     drop = Drops.HOUSE_1
     dig_level = 1

@@ -55,18 +55,20 @@ class Player:
     vel_y = 0.0
     on_ground = True
     ticks = 0
+    beam_ticks = 0
     anim_step = 0
     anim_ticks = 0
 
     # stats
-    view_dist = 100
-    house_index = 0
-    # inventory: [Tile] = []  # Unused
+    # { Tiles.X: int }
     inv_dict = {
         Tiles.STONE: 10
-    }  # { Tiles.X: int }
+    }
+    view_dist = 100  # when underground
+    house_index = 0
     inv_selected = 0
     torches = []
+
     tool_dist = 2  # tiles
     tool_level = 1
     tool_charge = 100
@@ -90,7 +92,7 @@ class Player:
 # Torches
 TORCH_DIST = 100  # Default distance to light up (radius of circle)
 TORCH_ANIM_DELAY = 100
-TORCH_SHEET = pygame.image.load("images/game/torch_sheet.png")
+TORCH_SHEET = pygame.image.load("images/game/torch_sheet.png").convert_alpha()
 TORCH_SCALE = 0.05
 TORCH_X = 64
 TORCH_Y = 115
@@ -103,3 +105,68 @@ TORCH_ANIM = []
 for i in range(7):
     TORCH_SHEET.set_clip((TORCH_X + (TORCH_W * i), TORCH_Y, TORCH_W, TORCH_H))
     TORCH_ANIM.append(pygame.transform.smoothscale_by(TORCH_SHEET.subsurface(TORCH_SHEET.get_clip()), TORCH_SCALE).convert_alpha())
+
+
+# Enemy 1
+IMG_OGRE_SHEET = pygame.image.load("images/game/tiles/enemy_01.png").convert_alpha()
+OGRE_W = 83
+OGRE_H = 75
+OGRE_IDLE_ANIM = []
+OGRE_WALK_ANIM = []
+OGRE_ATTACK_ANIM = []
+OGRE_HURT_ANIM = []
+OGRE_DEATH_ANIM = []
+for i in range(4):
+    if i < 4:
+        IMG_OGRE_SHEET.set_clip((i * OGRE_W + 170, 12, OGRE_W, OGRE_H))
+        OGRE_IDLE_ANIM.append(pygame.transform.smoothscale_by(IMG_OGRE_SHEET.subsurface(IMG_OGRE_SHEET.get_clip()), 0.7).convert_alpha())
+
+        IMG_OGRE_SHEET.set_clip((i * OGRE_W + 170, 194, OGRE_W, OGRE_H))
+        OGRE_ATTACK_ANIM.append(pygame.transform.smoothscale_by(IMG_OGRE_SHEET.subsurface(IMG_OGRE_SHEET.get_clip()), 0.7).convert_alpha())
+
+        IMG_OGRE_SHEET.set_clip((i * OGRE_W + 170, 285, OGRE_W, OGRE_H))
+        OGRE_HURT_ANIM.append(pygame.transform.smoothscale_by(IMG_OGRE_SHEET.subsurface(IMG_OGRE_SHEET.get_clip()), 0.7).convert_alpha())
+
+        IMG_OGRE_SHEET.set_clip((i * OGRE_W + 170, 376, OGRE_W, OGRE_H))
+        OGRE_DEATH_ANIM.append(pygame.transform.smoothscale_by(IMG_OGRE_SHEET.subsurface(IMG_OGRE_SHEET.get_clip()), 0.7).convert_alpha())
+
+    IMG_OGRE_SHEET.set_clip((i * OGRE_W + 170, 104, OGRE_W, OGRE_H))
+    OGRE_WALK_ANIM.append(pygame.transform.smoothscale_by(IMG_OGRE_SHEET.subsurface(IMG_OGRE_SHEET.get_clip()), 0.7).convert_alpha())
+
+
+class EnemyAction(Enum):
+    IDLE = 0
+    WALK = 1
+    ATTACK = 2
+    HURT = 3
+    DEATH = 4
+
+
+class Enemy:
+    x: float = 0.0
+    y: float = 0.0
+    facing: Facing = Facing.LEFT
+    action: EnemyAction = EnemyAction.IDLE
+    health: int = 1
+    damage: int = 1
+    ticks: int = 0
+    anim_step: int = 0
+    idle_anim = []
+    walk_anim = []
+    attack_ahim = []
+    hurt_anim = []
+    death_anim = []
+
+
+class Ogre(Enemy):
+    heath = 10
+    damage = 2
+    idle_anim = OGRE_IDLE_ANIM
+    walk_anim = OGRE_WALK_ANIM
+    attack_anim = OGRE_ATTACK_ANIM
+    hurt_anim = OGRE_HURT_ANIM
+    death_anim = OGRE_DEATH_ANIM
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
