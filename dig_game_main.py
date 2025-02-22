@@ -397,15 +397,8 @@ def draw_world(world, bgs):
 
     for enemy in enemies:
         enemy.ticks += dt
-        anim_list = []
-        anim_delay = 200
-
-        if enemy.action == EnemyAction.IDLE:
-            anim_list = enemy.idle_anim
-            anim_delay = 150
-        elif enemy.action == EnemyAction.WALK:
-            anim_list = enemy.walk_anim
-            anim_delay = 200
+        anim_list = enemy.get_anim()
+        anim_delay = enemy.get_delay()
 
         if enemy.ticks >= anim_delay:
             enemy.ticks = 0
@@ -414,7 +407,7 @@ def draw_world(world, bgs):
         frame = anim_list[enemy.anim_step]
         if enemy.facing == Facing.RIGHT:
             frame = pygame.transform.flip(frame, True, False)
-        screen.blit(frame, (enemy.x + offset_x, enemy.y + offset_y))
+        screen.blit(frame, (enemy.x + enemy.offset_x + offset_x, enemy.y + enemy.offset_y + offset_y))
 
     """ Render UI """
     # Inventory
@@ -474,7 +467,7 @@ if __name__ == '__main__':
     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
     pygame.key.set_repeat(20, FPS)
 
-    enemies.append(Ogre(200, 300))
+    enemies.append(Ogre(TILE_W * 20, TILE_H * 4))
 
     while is_running:
         draw_world(main_world, main_bg)

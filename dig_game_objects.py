@@ -145,6 +145,8 @@ class EnemyAction(Enum):
 class Enemy:
     x: float = 0.0
     y: float = 0.0
+    offset_x: float = 0.0
+    offset_y: float = 0.0
     facing: Facing = Facing.LEFT
     action: EnemyAction = EnemyAction.IDLE
     health: int = 1
@@ -153,12 +155,22 @@ class Enemy:
     anim_step: int = 0
     idle_anim = []
     walk_anim = []
-    attack_ahim = []
+    attack_anim = []
     hurt_anim = []
     death_anim = []
 
+    def get_anim(self):
+        return self.idle_anim
+
+    def get_delay(self):
+        if self.action == EnemyAction.IDLE:
+            return 0
+        return 0
+
 
 class Ogre(Enemy):
+    offset_x: float = -12.0
+    offset_y: float = -12.0
     heath = 10
     damage = 2
     idle_anim = OGRE_IDLE_ANIM
@@ -170,3 +182,29 @@ class Ogre(Enemy):
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+    def get_anim(self):
+        if self.action == EnemyAction.IDLE:
+            return self.idle_anim
+        elif self.action == EnemyAction.WALK:
+            return self.walk_anim
+        elif self.action == EnemyAction.ATTACK:
+            return self.attack_anim
+        elif self.action == EnemyAction.HURT:
+            return self.hurt_anim
+        elif self.action == EnemyAction.DEATH:
+            return self.death_anim
+        return []
+
+    def get_delay(self):
+        if self.action == EnemyAction.IDLE:
+            return 150
+        elif self.action == EnemyAction.WALK:
+            return 200
+        elif self.action == EnemyAction.ATTACK:
+            return 100
+        elif self.action == EnemyAction.HURT:
+            return 150
+        elif self.action == EnemyAction.DEATH:
+            return 150
+        return 0
