@@ -522,6 +522,7 @@ if __name__ == '__main__':
 
 """
 TODO:
+* Ore vein frequency needs to be based on level size
 * Fix placing blocks when jumping
 * Add House UI
 * Add Attack/Run animation
@@ -530,7 +531,7 @@ MAYBES:
 * Way to increase jump height?
 * Should blocks remember the percent dug they are?
 * Wrap world?
-* Fix detection of line-of-sight when digging and large distances
+* Fix detection of line-of-sight when digging large distances
 
 COMPLETED:
 + Place ores in veins instead of randomly
