@@ -33,7 +33,7 @@ GRAVITY = 0.4
 JUMP_VEL = -6.0
 WALK_VEL = 5.0
 
-WORLD_W = 1000
+WORLD_W = 300
 WORLD_H = 50
 LEVEL_W = 20
 LEVEL_H = 20
@@ -222,7 +222,7 @@ def draw_world(world, bgs):
                 screen.blit(temp_surf, (m_tile_x * TILE_W + 2 + offset_x, m_tile_y * TILE_H + offset_y))
 
                 # Reduce the tool charge by the time spent digging
-                player.tool_charge -= dug_h / ((player.tool_level + 2) * 100)
+                player.tool_charge -= dug_h / ((player.tool_level + 1) * 1000)
 
     # Place a block
     if (but3 and world[m_tile_y][m_tile_x] == Tiles.AIR
@@ -523,17 +523,18 @@ if __name__ == '__main__':
 """
 TODO:
 * Fix placing blocks when jumping
-* Place ores in veins instead of randomly
 * Add House UI
-* Fix detection of line-of-sight when digging and large distances
-* Randomly grow trees
+* Add Attack/Run animation
 
 MAYBES:
 * Way to increase jump height?
 * Should blocks remember the percent dug they are?
 * Wrap world?
+* Fix detection of line-of-sight when digging and large distances
 
 COMPLETED:
++ Place ores in veins instead of randomly
++ Randomly grow trees
 + Cave darkness is VERY slow on large maps. Try making a smaller Surface and only render immediately around player
 + Spamming jump makes player "fly"
 + Torches are not deleted when a block is place on them
