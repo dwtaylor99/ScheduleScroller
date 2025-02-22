@@ -31,7 +31,7 @@ FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 GRAVITY = 0.4
 # JUMP_VEL = -5.0
 JUMP_VEL = -6.0
-WALK_VEL = 6.0
+WALK_VEL = 5.0
 
 WORLD_W = 1000
 WORLD_H = 50
@@ -70,10 +70,8 @@ def draw_world(world, bgs):
     offset_y = -player.y + screen_h2
 
     """ Tile the player occupies """
-    tile_x = int(player.x + 8) // TILE_W
-    tile_y = int(player.y + 2 + PLAYER_H) // TILE_H
-    tile_x = constrain(tile_x, 0, WORLD_W - 1)
-    tile_y = constrain(tile_y, 0, WORLD_H - 1)
+    tile_x = constrain(int(player.x) // TILE_W, 0, WORLD_W - 1)
+    tile_y = constrain(int(player.y) // TILE_H, 0, WORLD_H - 1)
 
     """ Background """
     # Sky
@@ -93,15 +91,16 @@ def draw_world(world, bgs):
 
     # Should we grow a new tree?
     tree_ticks += dt
-    if tree_ticks > 20000 and random.randrange(100) < 5:
+    if tree_ticks > 60000 and random.randrange(100) < 5:
         tree_ticks = 0
         # Select a random off-screen x-pos
+        sanity_max = 20
         sanity = 0
         tree_x = random.randrange(WORLD_W)
-        while render_tiles_x1 < tree_x < render_tiles_x2 or world[4][tree_x] != Tiles.AIR and sanity < 20:
+        while render_tiles_x1 < tree_x < render_tiles_x2 or world[4][tree_x] != Tiles.AIR and sanity < sanity_max:
             tree_x = random.randrange(WORLD_W)
             sanity += 1
-        if sanity == 20:
+        if sanity == sanity_max:
             print("Could not grow a tree")
         else:
             print("Grew a new tree at x={}".format(tree_x))
@@ -180,13 +179,15 @@ def draw_world(world, bgs):
 
     if (but1 and m_color == MOUSE_OK_COLOR and -1 < m_tile_x < WORLD_W and -1 < m_tile_y < WORLD_H
             and world[m_tile_y][m_tile_x].value.dig_level > 0):
+
+        allow_dig = player.tool_charge > 0
+
         # Check if the targeted block is an unreachable diagonal
         up_tile = world[tile_y - 1][tile_x] if tile_y - 1 > -1 else Tiles.STONE
         down_tile = world[tile_y + 1][tile_x] if tile_y + 1 < WORLD_H else Tiles.STONE
         left_tile = world[tile_y][tile_x - 1] if tile_x - 1 > -1 else Tiles.STONE
         right_tile = world[tile_y][tile_x + 1] if tile_x + 1 < WORLD_W else Tiles.STONE
 
-        allow_dig = player.tool_charge > 0
         if m_tile_x < tile_x and m_tile_y < tile_y and up_tile.value.is_solid and left_tile.value.is_solid:
             allow_dig = False  # up and left
         elif m_tile_x < tile_x and m_tile_y > tile_y and down_tile.value.is_solid and left_tile.value.is_solid:
@@ -248,7 +249,6 @@ def draw_world(world, bgs):
                     for torch in player.torches:
                         t_tile_x = (torch.x - PLAYER_W) // TILE_W
                         t_tile_y = (torch.y - PLAYER_H2) // TILE_H
-                        # print("x, y: {}, {} | tx, ty: {}, {}".format(torch.x, torch.y, t_tile_x, tile_y))
                         if m_tile_x != t_tile_x or m_tile_y != t_tile_y:
                             new_torch_list.append(torch)
                     player.torches = new_torch_list
@@ -276,11 +276,16 @@ def draw_world(world, bgs):
     player.y = constrain(player.y + player.vel_y, -100, WORLD_H * TILE_H)
 
     if player.on_ground:
-        while tile_y < WORLD_H and not world[tile_y][tile_x].value.is_solid:
+        target_y = tile_y
+        while target_y < WORLD_H and not world[target_y][tile_x].value.is_solid:
             player.on_ground = False
-            tile_y += 1
+            target_y += 1
+        target_y = constrain((target_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
 
-        target_y = constrain((tile_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
+        # while tile_y < WORLD_H and not world[tile_y][tile_x].value.is_solid:
+        #     player.on_ground = False
+        #     tile_y += 1
+        # target_y = constrain((tile_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
 
         # Is player falling?
         if not player.on_ground:
@@ -304,18 +309,22 @@ def draw_world(world, bgs):
 
         # Check for a max jump height if there is a tile above the player
         min_y = -100
-        # if tile_y > 0 and world[tile_y - 1][tile_x] != Tiles.AIR:
         if tile_y > 0 and world[tile_y - 1][tile_x].value.is_solid:
             min_y = tile_y * TILE_H
         if player.y <= min_y:
             player.y = min_y
 
         # Find where player should land
-        while tile_y < WORLD_H and not world[tile_y][tile_x].value.is_solid:
+        target_y = tile_y
+        while target_y < WORLD_H and not world[target_y][tile_x].value.is_solid:
             player.on_ground = False
-            tile_y += 1
+            target_y += 1
+        target_y = constrain((target_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
 
-        target_y = constrain((tile_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
+        # while tile_y < WORLD_H and not world[tile_y][tile_x].value.is_solid:
+        #     player.on_ground = False
+        #     tile_y += 1
+        # target_y = constrain((tile_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
 
         # Stop jumping, player has landed
         if player.y >= target_y:
@@ -513,9 +522,10 @@ if __name__ == '__main__':
 
 """
 TODO:
-* Fix detection of line-of-sight when digging and large distances
+* Fix placing blocks when jumping
 * Place ores in veins instead of randomly
 * Add House UI
+* Fix detection of line-of-sight when digging and large distances
 * Randomly grow trees
 
 MAYBES:

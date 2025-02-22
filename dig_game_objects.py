@@ -62,7 +62,9 @@ class Player:
     view_dist = 100
     house_index = 0
     # inventory: [Tile] = []  # Unused
-    inv_dict = {}  # { Tiles.X: int }
+    inv_dict = {
+        Tiles.STONE: 10
+    }  # { Tiles.X: int }
     inv_selected = 0
     torches = []
     tool_dist = 2  # tiles

@@ -17,7 +17,7 @@ IMG_IRON_DROP = pygame.transform.smoothscale_by(pygame.image.load("images/game/t
 IMG_SILVER_DROP = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/silver_drop.png").convert_alpha(), 0.3)
 IMG_GOLD_DROP = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/gold_drop.png").convert_alpha(), 0.3)
 IMG_DIAMOND_DROP = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/diamond_drop.png").convert_alpha(), 0.32)
-IMG_LOG_DROP = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/log_drop.png").convert_alpha(), 0.3)
+IMG_LOG_DROP = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/log_drop.png").convert_alpha(), 0.42)
 IMG_URN_DROP = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/amphora.png").convert_alpha(), 0.3)
 IMG_CHALICE_DROP = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/golden_chalice.png").convert_alpha(), 0.3)
 
