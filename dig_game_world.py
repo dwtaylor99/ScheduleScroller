@@ -151,8 +151,6 @@ def generate_world(level_width, level_height):
                 world[room_y + jj][room_x] = room_reward
                 background[room_y + jj][room_x] = room_bg
 
-    world[0][0] = Tiles.DIAMOND
-
     return world, background
 
 

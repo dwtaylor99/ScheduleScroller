@@ -145,8 +145,18 @@ class EnemyAction(Enum):
 class Enemy:
     x: float = 0.0
     y: float = 0.0
-    offset_x: float = 0.0
-    offset_y: float = 0.0
+    w: int = 10
+    h: int = 10
+    w2: int = w // 2
+    h2: int = h // 2
+    off_x: float = 0.0
+    off_y: float = 0.0
+    hit_box_off_x: int = 0
+    hit_box_off_y: int = 0
+    vel_x: float = 0.0
+    vel_y: float = 0.0
+    on_ground = True
+    is_attacking = False
     facing: Facing = Facing.LEFT
     action: EnemyAction = EnemyAction.IDLE
     health: int = 1
@@ -167,10 +177,19 @@ class Enemy:
             return 0
         return 0
 
+    def get_rect(self, offset_x, offset_y):
+        return pygame.Rect(self.x, self.y, 1, 1)
+
 
 class Ogre(Enemy):
-    offset_x: float = -12.0
-    offset_y: float = -12.0
+    w = 20
+    h = 40
+    w2 = w // 2
+    h2 = h // 2
+    off_x: float = 0.0
+    off_y: float = -12.0
+    hit_box_off_x: int = 25
+    hit_box_off_y: int = 10
     heath = 10
     damage = 2
     idle_anim = OGRE_IDLE_ANIM
@@ -200,11 +219,14 @@ class Ogre(Enemy):
         if self.action == EnemyAction.IDLE:
             return 150
         elif self.action == EnemyAction.WALK:
-            return 200
+            return 150
         elif self.action == EnemyAction.ATTACK:
-            return 100
+            return 150
         elif self.action == EnemyAction.HURT:
             return 150
         elif self.action == EnemyAction.DEATH:
             return 150
         return 0
+
+    def get_rect(self, offset_x, offset_y):
+        return pygame.Rect(int(self.x + self.hit_box_off_x + offset_x), int(self.y + self.hit_box_off_y + offset_y), self.w, self.h)

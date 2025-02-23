@@ -11,7 +11,7 @@ from dig_game_drops import screen
 from dig_game_objects import Facing, Player, PLAYER_W, GIRL_RUN_ANIM, GIRL_IDLE_ANIM, \
     GIRL_JUMP_ANIM, GIRL_JUMP_ANIM_DELAY, GIRL_IDLE_ANIM_DELAY, GIRL_RUN_ANIM_DELAY, TORCH_ANIM_DELAY, GIRL_ATTACK_ANIM, \
     PLAYER_W2, PLAYER_H2, OGRE_IDLE_ANIM, IMG_OGRE_SHEET, OGRE_WALK_ANIM, OGRE_ATTACK_ANIM, OGRE_HURT_ANIM, \
-    OGRE_DEATH_ANIM, EnemyAction, Ogre
+    OGRE_DEATH_ANIM, EnemyAction, Ogre, PLAYER_H
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
 from dig_game_tiles import Tiles, TILE_W, TILE_H, IMG_GRASS, IMG_VOLTAGE, IMG_BUSH_01, IMG_BUSH_02, \
     IMG_BUSH_03, IMG_BUSH_04
@@ -30,7 +30,7 @@ is_debug_stats = False
 FPS = 60
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 32)
 
-GRAVITY = 0.4
+GRAVITY = 0.5
 JUMP_VEL = -6.0
 WALK_VEL = 5.0
 
@@ -79,8 +79,8 @@ def draw_world(world, bgs):
     offset_y = -player.y + screen_h2
 
     """ Tile the player occupies """
-    tile_x = constrain(int(player.x) // TILE_W, 0, WORLD_W - 1)
-    tile_y = constrain(int(player.y) // TILE_H, 0, WORLD_H - 1)
+    tile_x = constrain(int(player.x + PLAYER_W2) // TILE_W, 0, WORLD_W - 1)
+    tile_y = constrain(int(player.y + PLAYER_H) // TILE_H, 0, WORLD_H - 1)
 
     """ Background """
     # Sky
@@ -277,9 +277,9 @@ def draw_world(world, bgs):
     left_tile = world[tile_y][tile_x - 1] if tile_x - 1 >= 0 else Tiles.STONE
     right_tile = world[tile_y][tile_x + 1] if tile_x + 1 < WORLD_W else Tiles.STONE
 
-    # min_x = (tile_x - 1) * TILE_W + TILE_W - 3 if left_tile.value.is_solid else 0
     min_x = (tile_x - 1) * TILE_W + TILE_W if left_tile.value.is_solid else 0
     max_x = (tile_x + 1) * TILE_W - PLAYER_W if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + PLAYER_W
+    # print(min_x, max_x)
 
     # Calculate the player's new X and Y coords
     player.x = constrain(player.x + player.vel_x, min_x, max_x)
@@ -291,11 +291,6 @@ def draw_world(world, bgs):
             player.on_ground = False
             target_y += 1
         target_y = constrain((target_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
-
-        # while tile_y < WORLD_H and not world[tile_y][tile_x].value.is_solid:
-        #     player.on_ground = False
-        #     tile_y += 1
-        # target_y = constrain((tile_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
 
         # Is player falling?
         if not player.on_ground:
@@ -330,11 +325,6 @@ def draw_world(world, bgs):
             player.on_ground = False
             target_y += 1
         target_y = constrain((target_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
-
-        # while tile_y < WORLD_H and not world[tile_y][tile_x].value.is_solid:
-        #     player.on_ground = False
-        #     tile_y += 1
-        # target_y = constrain((tile_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
 
         # Stop jumping, player has landed
         if player.y >= target_y:
@@ -394,8 +384,96 @@ def draw_world(world, bgs):
     player.y = round(player.y, 3)
 
     """ Enemies """
-
+    # Remember: when .action changes, reset the anim_step to zero
     for enemy in enemies:
+        enemy.x += enemy.vel_x
+        enemy.y += enemy.vel_y
+        e_tile_x = int(enemy.x + enemy.off_x + enemy.w2) // TILE_W
+        e_tile_y = int(enemy.y + enemy.off_y + enemy.h) // TILE_H
+
+        # Check distance to player. If less than 200, walk towards player
+        dist_x = abs(player.x - enemy.x)
+        dist_y = abs(player.y - enemy.y)
+        if 5 < dist_x < 40 and 5 < dist_y < 40 and enemy.action != EnemyAction.ATTACK:
+            enemy.action = EnemyAction.ATTACK
+            enemy.vel_x = 0.0
+            enemy.anim_step = 0
+
+        elif dist_x < 200 and dist_y < 200 and enemy.action != EnemyAction.WALK:
+            enemy.action = EnemyAction.WALK
+            enemy.vel_x = 2.0
+            enemy.anim_step = 0
+
+        elif dist_x >= 200 and enemy.action != EnemyAction.IDLE:
+            enemy.action = EnemyAction.IDLE
+            enemy.vel_x = 0.0
+            enemy.anim_step = 0
+
+        # TODO: Fix enemy spazzing out when near the player
+
+        # Change enemy direction towards player
+        if (player.x < enemy.x and enemy.vel_x > 0.0) or (player.x > enemy.x and enemy.vel_x < 0.0):
+            enemy.vel_x = -enemy.vel_x
+            # if dist_x > 5:
+            #     enemy.vel_x = -enemy.vel_x
+        if player.x < enemy.x:
+            enemy.facing = Facing.LEFT
+        else:
+            enemy.facing = Facing.RIGHT
+
+        """ Enemy Movement """
+        # Limit left/right movement
+        left_tile = world[e_tile_y][e_tile_x - 1] if e_tile_x - 1 >= 0 else Tiles.STONE
+        right_tile = world[e_tile_y][e_tile_x + 1] if e_tile_x + 1 < WORLD_W else Tiles.STONE
+        min_x = (e_tile_x - 1) * TILE_W + TILE_W if left_tile.value.is_solid else 0
+        max_x = (e_tile_x + 1) * TILE_W - enemy.h if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + enemy.w
+        if e_tile_y > 3:
+            print(e_tile_x, e_tile_y, min_x, max_x, left_tile, right_tile)
+
+        # Calculate the enemy's new X and Y coords
+        enemy.x = constrain(enemy.x + enemy.vel_x, min_x, max_x)
+        enemy.y = constrain(enemy.y + enemy.vel_y, -100, WORLD_H * TILE_H)
+
+        if enemy.on_ground:
+            target_y = e_tile_y
+            while target_y < WORLD_H and not world[target_y][e_tile_x].value.is_solid:
+                enemy.on_ground = False
+                target_y += 1
+            target_y = constrain((target_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
+
+            # Is player falling?
+            if not enemy.on_ground:
+                enemy.vel_y += GRAVITY
+                enemy.y += enemy.vel_y
+
+            # Stop falling
+            if enemy.y >= target_y:
+                enemy.on_ground = True
+                enemy.vel_y = 0.0
+                enemy.y = target_y
+        else:
+            enemy.vel_y += GRAVITY
+
+            # Check for a max jump height if there is a tile above the player
+            min_y = -100
+            if e_tile_y > 0 and world[e_tile_y - 1][e_tile_x].value.is_solid:
+                min_y = e_tile_y * TILE_H
+            if enemy.y <= min_y:
+                enemy.y = min_y
+
+            # Find where player should land
+            target_y = e_tile_y
+            while target_y < WORLD_H and not world[target_y][e_tile_x].value.is_solid:
+                enemy.on_ground = False
+                target_y += 1
+            target_y = constrain((target_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
+
+            # Stop jumping, player has landed
+            if enemy.y >= target_y:
+                enemy.on_ground = True
+                enemy.vel_y = 0.0
+                enemy.y = target_y
+
         enemy.ticks += dt
         anim_list = enemy.get_anim()
         anim_delay = enemy.get_delay()
@@ -407,7 +485,8 @@ def draw_world(world, bgs):
         frame = anim_list[enemy.anim_step]
         if enemy.facing == Facing.RIGHT:
             frame = pygame.transform.flip(frame, True, False)
-        screen.blit(frame, (enemy.x + enemy.offset_x + offset_x, enemy.y + enemy.offset_y + offset_y))
+        screen.blit(frame, (enemy.x + enemy.off_x + offset_x, enemy.y + enemy.off_y + offset_y))
+        pygame.draw.rect(screen, (0, 200, 200), enemy.get_rect(enemy.off_x + offset_x, enemy.off_y + offset_y), 1)
 
     """ Render UI """
     # Inventory
