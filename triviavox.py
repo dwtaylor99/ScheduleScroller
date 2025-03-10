@@ -11,6 +11,7 @@ from os.path import isfile, join
 import pygame.image
 from aiohttp import ClientConnectorError
 from twitchio import Message, Channel, AuthenticationError, Unauthorized
+from twitchio.chatter import WhisperChatter
 from twitchio.ext import commands, routines
 
 import botads
@@ -218,7 +219,7 @@ class TriviaVox(commands.Bot):
             return
 
         username = message.author.name  # "WhisperUser" doesn't have a display name attribute
-        if message.author.display_name:
+        if type(message.author) is not WhisperChatter:
             username = message.author.display_name
 
         # Check if this is a command to display a quote
