@@ -3,18 +3,26 @@ import pygame
 from colors import WHITE, BLACK
 from dig_game_colors import HOLLOW_COLOR
 from dig_game_drops import Drops
-from fonts import FONT_EMOJI_MD
+from dig_game_tiles import Tiles
+from fonts import FONT_EMOJI_MD, FONT_EMOJI_MD2
 
 UI_BG_COLOR = (37, 57, 113)
 
 TXT_UPGRADE_HOUSE = FONT_EMOJI_MD.render("Upgrade House:", True, WHITE).convert_alpha()
 TXT_UPGRADE = FONT_EMOJI_MD.render("Upgrade", True, WHITE).convert_alpha()
-TXT_HOUSE_UP1 = FONT_EMOJI_MD.render("🏚️ ➡️ 🏠️", True, WHITE).convert_alpha()
-TXT_HOUSE_UP2 = FONT_EMOJI_MD.render("🏠️ ➡️ 🏡", True, WHITE).convert_alpha()
-TXT_HOUSE_UP3 = FONT_EMOJI_MD.render("🏡 ➡️ 🏛️", True, WHITE).convert_alpha()
+TXT_HOUSE_UP1 = FONT_EMOJI_MD2.render("🏚️ ➡️ 🏠️", True, WHITE).convert_alpha()
+TXT_HOUSE_UP2 = FONT_EMOJI_MD2.render("🏠️ ➡️ 🏡", True, WHITE).convert_alpha()
+TXT_HOUSE_UP3 = FONT_EMOJI_MD2.render("🏡 ➡️ 🏛️", True, WHITE).convert_alpha()
 TXT_TIMES = FONT_EMOJI_MD.render("✖️", True, WHITE)
 
-line_height = 30
+house_upgrade_1 = {
+    Tiles.TREE_01: 10,
+    Tiles.STONE: 30,
+    Tiles.CLAY: 20,
+    Tiles.COPPER: 15
+}
+
+line_height = 48
 
 
 def button(house_ui, x, y, w, h, text):
@@ -28,18 +36,29 @@ def button(house_ui, x, y, w, h, text):
 
 
 def build_ui(ui_w, ui_h, player):
+    # Background
     house_ui = pygame.Surface((ui_w, ui_h))
     house_ui.fill(HOLLOW_COLOR)
     house_ui.set_colorkey(HOLLOW_COLOR)
     pygame.draw.rect(house_ui, UI_BG_COLOR, (0, 0, ui_w, ui_h), 0, 10)
 
-    button(house_ui, 20, 20, 100, 30, "Upgrade")
+    # House Upgrade
     if player.house_index < 2:
-        # house_ui.blit(TXT_UPGRADE, (20, 20))
         if player.house_index == 0:
-            house_ui.blit(TXT_HOUSE_UP1, (200, 18))
-            house_ui.blit(Drops.STONE.value.img, (30, 20 + line_height + 4))
-            house_ui.blit(TXT_TIMES, (70, 20 + line_height + 12))
+            house_ui.blit(TXT_HOUSE_UP1, (20, 18))
+
+            for i, key in enumerate(house_upgrade_1.keys()):
+                res_amt = house_upgrade_1[key]
+                drop = key.value.drop
+
+                house_ui.blit(drop.value.img, (30, i * line_height + 80))
+                house_ui.blit(TXT_TIMES, (70, i * line_height + 90))
+                res_color = (200, 40, 40)
+                if key in player.inv_dict.keys() and player.inv_dict[key] >= res_amt:
+                    res_color = (40, 200, 40)
+                house_ui.blit(FONT_EMOJI_MD2.render(str(res_amt), True, res_color).convert_alpha(), (100,  i * line_height + 86))
+
+        button(house_ui, 20, (line_height * 5) + 44, 100, 30, "Upgrade")
 
     return house_ui
 

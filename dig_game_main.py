@@ -14,7 +14,7 @@ from dig_game_objects import Facing, Player, PLAYER_W, GIRL_RUN_ANIM, GIRL_IDLE_
     OGRE_DEATH_ANIM, EnemyAction, Ogre, PLAYER_H
 from dig_game_objects import TORCH_ANIM, TORCH_W_SCALED, TORCH_H_SCALED, TORCH_DIST
 from dig_game_tiles import Tiles, TILE_W, TILE_H, IMG_GRASS, IMG_VOLTAGE, IMG_BUSH_01, IMG_BUSH_02, \
-    IMG_BUSH_03, IMG_BUSH_04
+    IMG_BUSH_03, IMG_BUSH_04, IMG_LANTERN
 from dig_game_ui import build_ui
 from dig_game_utils import constrain
 from dig_game_world import generate_world
@@ -145,7 +145,8 @@ def draw_world(world, bgs):
     temp_surf.fill((8, 8, 8))
     temp_surf.set_colorkey((255, 0, 255))
     if tile_y >= 6:
-        pygame.draw.circle(temp_surf, HOLLOW_COLOR, (screen_w2 + PLAYER_W2, (tile_y - 7) * TILE_H), 100)
+        pygame.draw.circle(temp_surf, HOLLOW_COLOR, (screen_w2 + PLAYER_W2, (tile_y - 7) * TILE_H),
+                           100 * (2 if player.is_lantern else 1))
 
     for torch in player.torches:
         screen.blit(TORCH_ANIM[torch_anim_step], (torch.x - (TORCH_W_SCALED // 2) - PLAYER_W2 + offset_x, torch.y - (TORCH_H_SCALED // 2) + offset_y))
@@ -413,9 +414,8 @@ def draw_world(world, bgs):
 
         # Change enemy direction towards player
         if (player.x < enemy.x and enemy.vel_x > 0.0) or (player.x > enemy.x and enemy.vel_x < 0.0):
-            enemy.vel_x = -enemy.vel_x
-            # if dist_x > 5:
-            #     enemy.vel_x = -enemy.vel_x
+            if dist_x > 5:
+                enemy.vel_x = -enemy.vel_x
         if player.x < enemy.x:
             enemy.facing = Facing.LEFT
         else:
@@ -427,12 +427,20 @@ def draw_world(world, bgs):
         right_tile = world[e_tile_y][e_tile_x + 1] if e_tile_x + 1 < WORLD_W else Tiles.STONE
         min_x = (e_tile_x - 1) * TILE_W + TILE_W if left_tile.value.is_solid else 0
         max_x = (e_tile_x + 1) * TILE_W - enemy.h if right_tile.value.is_solid else (WORLD_W - 1) * TILE_W + enemy.w
-        if e_tile_y > 3:
+        if e_tile_y > 4:
             print(e_tile_x, e_tile_y, min_x, max_x, left_tile, right_tile)
 
         # Calculate the enemy's new X and Y coords
         enemy.x = constrain(enemy.x + enemy.vel_x, min_x, max_x)
         enemy.y = constrain(enemy.y + enemy.vel_y, -100, WORLD_H * TILE_H)
+
+        if but1 and enemy.get_rect(offset_x, offset_y).collidepoint(mouse_x, mouse_y) and (abs(player.x - enemy.x) < 2 * TILE_W or abs(player.y - enemy.y) < 2 * TILE_H):
+            enemy.action = EnemyAction.HURT
+            enemy.anim_step = 0
+            enemy.health -= 1
+            if enemy.health <= 0:
+                enemy.action = EnemyAction.DEATH
+                enemy.anim_step = 0
 
         if enemy.on_ground:
             target_y = e_tile_y
@@ -441,7 +449,7 @@ def draw_world(world, bgs):
                 target_y += 1
             target_y = constrain((target_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
 
-            # Is player falling?
+            # Is enemy falling?
             if not enemy.on_ground:
                 enemy.vel_y += GRAVITY
                 enemy.y += enemy.vel_y
@@ -454,21 +462,21 @@ def draw_world(world, bgs):
         else:
             enemy.vel_y += GRAVITY
 
-            # Check for a max jump height if there is a tile above the player
-            min_y = -100
-            if e_tile_y > 0 and world[e_tile_y - 1][e_tile_x].value.is_solid:
-                min_y = e_tile_y * TILE_H
-            if enemy.y <= min_y:
-                enemy.y = min_y
+            # # Check for a max jump height if there is a tile above the enemy
+            # min_y = -100
+            # if e_tile_y > 0 and world[e_tile_y - 1][e_tile_x].value.is_solid:
+            #     min_y = e_tile_y * TILE_H
+            # if enemy.y <= min_y:
+            #     enemy.y = min_y
 
-            # Find where player should land
+            # Find where enemy should land
             target_y = e_tile_y
             while target_y < WORLD_H and not world[target_y][e_tile_x].value.is_solid:
                 enemy.on_ground = False
                 target_y += 1
             target_y = constrain((target_y - 1) * TILE_H, 0, WORLD_H * TILE_H)
 
-            # Stop jumping, player has landed
+            # Stop jumping, enemy has landed
             if enemy.y >= target_y:
                 enemy.on_ground = True
                 enemy.vel_y = 0.0
@@ -507,6 +515,10 @@ def draw_world(world, bgs):
         if player.inv_selected == inv_i:
             pygame.draw.rect(ui_surf, "#00FF00", (TILE_W * inv_i + 4, 30, TILE_W, TILE_H), 2)
             ui_surf.blit(FONT_EMOJI_SM.render(key.value.drop.value.name, True, WHITE).convert_alpha(), (4, 4))
+
+    # Lantern
+    if player.is_lantern:
+        ui_surf.blit(IMG_LANTERN, (ui_surf_w - 180, 10))
 
     # Charge Level
     charge_color = CHARGE_GOOD_COLOR
@@ -555,7 +567,7 @@ if __name__ == '__main__':
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                is_running = True
+                is_running = False
             elif event.type == pygame.KEYDOWN:
                 keys = pygame.key.get_pressed()
 
@@ -606,6 +618,9 @@ if __name__ == '__main__':
 
                 elif event.key == pygame.K_u:
                     player.tool_dist += 1
+
+                elif event.key == pygame.K_l:
+                    player.is_lantern = not player.is_lantern
 
                 elif event.key == pygame.K_F3 or event.key == pygame.K_F4:
                     is_debug_stats = not is_debug_stats

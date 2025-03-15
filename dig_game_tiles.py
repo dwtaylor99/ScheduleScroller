@@ -40,8 +40,8 @@ IMG_BUSH_04 = pygame.image.load("images/game/tiles/bush_04.png").convert_alpha()
 
 IMG_URN = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/amphora.png").convert_alpha(), 0.15)
 IMG_CHALICE = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/golden_chalice.png").convert_alpha(), 0.15)
+IMG_LANTERN = pygame.transform.smoothscale_by(pygame.image.load("images/game/tiles/lantern.png").convert_alpha(), 0.5)
 
-IMG_TORCH = FONT_EMOJI_MD.render("🔦", True, WHITE)
 IMG_VOLTAGE = FONT_EMOJI_MD.render("⚡", True, WHITE)
 IMG_BATTERY = FONT_EMOJI_MD.render("🔋", True, WHITE)
 IMG_HOUSE_01 = FONT_EMOJI_XL.render("🏚️", True, WHITE)

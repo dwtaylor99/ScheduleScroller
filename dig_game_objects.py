@@ -59,14 +59,17 @@ class Player:
     anim_step = 0
     anim_ticks = 0
 
-    # stats
-    # { Tiles.X: int }
+    # stats / inventory
     inv_dict = {
-        Tiles.STONE: 10
+        Tiles.TREE_01: 50,
+        Tiles.STONE: 50,
+        Tiles.CLAY: 15,
+        Tiles.COPPER: 20
     }
     view_dist = 100  # when underground
     house_index = 0
     inv_selected = 0
+    is_lantern = False
     torches = []
 
     tool_dist = 2  # tiles
@@ -190,7 +193,7 @@ class Ogre(Enemy):
     off_y: float = -12.0
     hit_box_off_x: int = 25
     hit_box_off_y: int = 10
-    heath = 10
+    health = 10
     damage = 2
     idle_anim = OGRE_IDLE_ANIM
     walk_anim = OGRE_WALK_ANIM
