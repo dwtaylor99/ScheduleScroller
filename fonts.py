@@ -23,6 +23,7 @@ FONT_MST3K_XL = pygame.font.Font("fonts/SimianText_Orangutan.otf", 52)
 # Font used to render emoji
 FONT_EMOJI_SM = pygame.font.Font("fonts/seguiemj.ttf", 18)
 FONT_EMOJI_MD = pygame.font.Font("fonts/seguiemj.ttf", 22)
+FONT_EMOJI_MD2 = pygame.font.Font("fonts/seguiemj.ttf", 36)
 FONT_EMOJI_LG = pygame.font.Font("fonts/seguiemj.ttf", 44)
 FONT_EMOJI_XL = pygame.font.Font("fonts/seguiemj.ttf", 96)
 

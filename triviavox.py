@@ -11,8 +11,8 @@ from os.path import isfile, join
 import pygame.image
 from aiohttp import ClientConnectorError
 from twitchio import Message, Channel, AuthenticationError, Unauthorized
-from twitchio.chatter import WhisperChatter
 from twitchio.ext import commands, routines
+from sty import fg, rs, ef
 
 import botads
 import botemoji
@@ -137,8 +137,8 @@ class TriviaVox(commands.Bot):
         except ClientConnectorError:
             print("ERROR: Could not reach the stream to test if live. is_live=" + str(self.is_live))
 
-    async def bot_print(self, txt):
-        print(txt)
+    async def bot_print(self, txt, color=fg.white):
+        print(color + txt + rs.fg)
         if not IS_DEBUG and self.channel is not None:
             try:
                 await self.channel.send(txt)
@@ -290,7 +290,7 @@ class TriviaVox(commands.Bot):
     async def event_raw_usernotice(self, channel: Channel, tags: dict):
         msg_id = tags['msg-id'].strip().lower()
         if msg_id in ["sub", "resub", "subgift", "submysterygift", "giftpaidupgrade", "rewardgift", "anongiftpaidupgrade"]:
-            await self.bot_print("Thank you for supporting the channel, {}!".format(tags["display-name"]))
+            await self.bot_print("Thank you for supporting the channel, {}!".format(tags["display-name"]), fg.blue)
 
     @routines.routine(minutes=5)
     async def auto_trivia(self):
@@ -338,7 +338,7 @@ class TriviaVox(commands.Bot):
             # self.trivia_winners.clear()
             # self.game_end_time = time.time() + 60
 
-            await self.bot_print("/me Trivia Time! Q: {}".format(self.trivia_question.question))
+            await self.bot_print("/me Trivia Time! Q: {}".format(self.trivia_question.question), fg.li_yellow)
 
         elif self.game_type == GameType.EMOJI:
             self.trivia_question = random.choice(self.emoji_questions)
@@ -366,7 +366,7 @@ class TriviaVox(commands.Bot):
             # self.trivia_winners.clear()
             # self.game_end_time = time.time() + 60
 
-            await self.bot_print("/me Emoji Time! Q: {}".format(self.trivia_question.question))
+            await self.bot_print("/me Emoji Time! Q: {}".format(self.trivia_question.question), fg.li_yellow)
 
         elif self.game_type == GameType.STINGER:
             stinger_file = choose_stinger()
@@ -387,7 +387,7 @@ class TriviaVox(commands.Bot):
             # self.trivia_winners.clear()
             # self.game_end_time = time.time() + 60
 
-            await self.bot_print("/me Name the stinger seen on screen.")
+            await self.bot_print("/me Name the stinger seen on screen.", fg.yellow)
             self.stinger_img = load_scaled_image(STINGER_PATH + stinger_file)
 
         elif self.game_type == GameType.CHARACTER:
@@ -406,7 +406,7 @@ class TriviaVox(commands.Bot):
             # self.trivia_winners.clear()
             # self.game_end_time = time.time() + 60
 
-            await self.bot_print("/me Name the character seen on screen.")
+            await self.bot_print("/me Name the character seen on screen.", fg.yellow)
             self.character_img = load_scaled_image(CHARACTER_PATH + character.img_file)
 
         elif self.game_type == GameType.SCRAMBLE:
@@ -427,7 +427,7 @@ class TriviaVox(commands.Bot):
 
         self.trivia_winners.clear()
         self.game_end_time = time.time() + 60
-        print(self.trivia_question.answers)
+        print(fg.li_blue + str(self.trivia_question.answers) + rs.fg)
 
     @routines.routine(seconds=15)
     async def auto_update_time_until(self):
@@ -747,6 +747,7 @@ if __name__ == '__main__':
 
 """
 TODO:
+Add color to console output (sty)
 Check the date around midnight to see if special colors apply (Valentine's Day, St Patrick's Day, etc)
 
 Troublesome emoji:
