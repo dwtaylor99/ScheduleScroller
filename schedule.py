@@ -465,7 +465,7 @@ IMAGE_NAMES = {
     "MST3K Shorts: Doing Things for Ourselves in School": "ourselves_in_school.png",
 
     "Moon Zero Two Riffalong": "moon_zero_two_riffalong.png",
-
+    "ComicCon Panel": "ComicCon.png",
     "Poopie!": "Poopie1.png",
     "Poopie! II": "Poopie2.png",
     "Poopie Parade of Values": "PoopieParadeOfValues.png",

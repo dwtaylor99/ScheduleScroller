@@ -11,6 +11,7 @@ from os.path import isfile, join
 import pygame.image
 from aiohttp import ClientConnectorError
 from twitchio import Message, Channel, AuthenticationError, Unauthorized
+from twitchio.chatter import WhisperChatter
 from twitchio.ext import commands, routines
 from sty import fg, rs, ef
 
