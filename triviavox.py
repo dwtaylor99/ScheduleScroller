@@ -428,7 +428,7 @@ class TriviaVox(commands.Bot):
 
         self.trivia_winners.clear()
         self.game_end_time = time.time() + 60
-        print(fg.li_blue + str(self.trivia_question.answers) + rs.fg)
+        print(fg.cyan + str(self.trivia_question.answers) + rs.fg)
 
     @routines.routine(seconds=15)
     async def auto_update_time_until(self):
