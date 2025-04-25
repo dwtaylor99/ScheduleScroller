@@ -296,6 +296,7 @@ class TriviaVox(commands.Bot):
     @routines.routine(minutes=5)
     async def auto_trivia(self):
         """Run a trivia question every few minutes."""
+        """
         await self.check_if_live()
         ts = int(datetime.now().timestamp())
 
@@ -308,6 +309,7 @@ class TriviaVox(commands.Bot):
                 print("Manually setting next ad time to " + str(self.next_ad_at))
 
             botads.save_ads_time(self.next_ad_at)
+        """
 
         """
         This ad detection stopped working so I am disabling it.
