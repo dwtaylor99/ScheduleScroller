@@ -131,7 +131,11 @@ def find_index_of_movie_in_schedule(time_movie_list) -> int:
     """Find the index of the currently playing title in the schedule."""
 
     # If the first month is Dec, we may need to increase the year during the loop
-    first_month_in_file = time_movie_list[0].split()[1]
+    try:
+        first_month_in_file = time_movie_list[0].split()[1]
+    except IndexError:
+        # On error, just use the current month
+        first_month_in_file = datetime.strftime(datetime.now(), "%b")
 
     count = 0
     index = 0
@@ -1234,4 +1238,7 @@ if __name__ == '__main__':
 
     out = get_schedule(US_EAST, 25)
     print(out)
+    print()
+
+    print(datetime.strftime(datetime.now(), "%b"))
     print()
