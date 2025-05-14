@@ -508,7 +508,38 @@ IMAGE_NAMES = {
     "The Space Children (Host Segments)": "906.png",
     "Soultaker (Host Segments)": "1001.png",
     "Squirm (Host Segments)": "1012.png",
-    "Diabolik (Host Segments)": "1013.png"
+    "Diabolik (Host Segments)": "1013.png",
+
+    "MST Hour 301": "MST_Hour.png",
+    "MST Hour 302": "MST_Hour.png",
+    "MST Hour 303": "MST_Hour.png",
+    "MST Hour 306": "MST_Hour.png",
+    "MST Hour 307": "MST_Hour.png",
+    "MST Hour 309": "MST_Hour.png",
+    "MST Hour 310": "MST_Hour.png",
+    "MST Hour 311": "MST_Hour.png",
+    "MST Hour 312": "MST_Hour.png",
+    "MST Hour 313": "MST_Hour.png",
+    "MST Hour 317": "MST_Hour.png",
+    "MST Hour 319": "MST_Hour.png",
+    "MST Hour 320": "MST_Hour.png",
+    "MST Hour 321": "MST_Hour.png",
+    "MST Hour 401": "MST_Hour.png",
+    "MST Hour 402": "MST_Hour.png",
+    "MST Hour 404": "MST_Hour.png",
+    "MST Hour 408": "MST_Hour.png",
+    "MST Hour 410": "MST_Hour.png",
+    "MST Hour 411": "MST_Hour.png",
+    "MST Hour 414": "MST_Hour.png",
+    "MST Hour 415": "MST_Hour.png",
+    "MST Hour 417": "MST_Hour.png",
+    "MST Hour 418": "MST_Hour.png",
+    "MST Hour 420": "MST_Hour.png",
+    "MST Hour 422": "MST_Hour.png",
+    "MST Hour 424": "MST_Hour.png",
+    "MST Hour 504": "MST_Hour.png",
+    "MST Hour 505": "MST_Hour.png",
+    "MST Hour 507": "MST_Hour.png"
 }
 """
     "Reptilicus": "",
@@ -548,7 +579,12 @@ def print_schedule(movies_times: [str], index: int, num_results: int, tz_desc: s
 
     # num_results = 20 #  botutils.constrain(num_results, 1, 500)
 
-    first_month_in_file = movies_times[0].split()[1]
+    # first_month_in_file = movies_times[0].split()[1]
+    try:
+        first_month_in_file = movies_times[0].split()[1]
+    except IndexError:
+        # On error, just use the current month
+        first_month_in_file = datetime.strftime(datetime.now(), "%b")
 
     schedule = []
 
